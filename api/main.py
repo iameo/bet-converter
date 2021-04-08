@@ -19,6 +19,8 @@ import re
 
 from typing import List
 from pydantic import BaseModel
+from enum import Enum
+
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -38,6 +40,11 @@ def get_db():
 
 
 
+class BetSources(str, Enum):
+    betway = 'betway'
+    bet9ja = 'bet9ja'
+    sportybet = 'sportybet'
+
 
 ############################ROUTES##########################################
 
@@ -52,7 +59,7 @@ def create_slip(
 ):
     _slip = crud.get_slip(db, code=_code.code)
     if _slip:
-        raise HTTPException(status_code=400, detail="code exists!")
+        raise HTTPException(status_code=400, detail="booking code exists!")
     return crud.create_slip(db=db, _code=_code)
 
 
@@ -62,6 +69,22 @@ def get_slip_by_code(booking_code: str, db: Session = Depends(get_db)):
     if slip is None:
         raise HTTPException(status_code=404, detail="booking slip not found!")
     return slip
+
+
+@app.get("/slips/convert/{booking_code}", response_model=schema.BookingSlipOut)
+def get_converted_slip(source: BetSources, destination: BetSources, booking_code: str, db: Session = Depends(get_db)):
+    # check slip is valid, goto source, extract, "store", go to dest, input, book, return booking code
+    pass
+
+
+
+@app.get("/slips/", response_model=List[schema.BookingSlipOut])
+def get_slips(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    slips = crud.get_slips(db, skip=skip, limit=limit)
+    print(slips)
+    if slips is None:
+        raise HTTPException(status_code=404, detail="No slip at this time!")
+    return slips
 
 
 @app.get("/matches/{team}", response_model=List[schema.MatchDetail])

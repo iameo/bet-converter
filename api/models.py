@@ -1,6 +1,9 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, PickleType, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, PickleType, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.mutable import MutableList
+from sqlalchemy.sql import func
+
+from datetime import datetime
 # from sqlalchemy import pickleType
 
 from .database import Base
@@ -11,8 +14,6 @@ class MatchDetail(Base):
     id = Column(Integer, primary_key=True, index=True)
     team = Column(String, index=True)
     time = Column(String, index=True)
-
-    # postits = relationship("PostIT", back_populates="anon")
 
     def __repr__(self):
         return self.team
@@ -25,6 +26,7 @@ class BookingSlip(Base):
     source = Column(String, index=True)
     match = Column(PickleType, default=[])
     code = Column(String, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     def __repr__(self):
         return '<Bet Code: ' + self.code + '>'

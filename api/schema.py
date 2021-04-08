@@ -1,6 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel
 
+from datetime import datetime
 
 
 # class MatchDetailBase(BaseModel):
@@ -32,18 +33,20 @@ class BookingSlipBase(BaseModel):
     code: Optional[str] = None
     match: Optional[List] = []
 
+
 class BookingSlipCreate(BookingSlipBase):
     pass
 
 
 class BookingSlip(BookingSlipBase):
     id: int
+    created_at: Optional[datetime] = None
 
     class Config:
         orm_mode = True
 
 class BookingSlipOut(BookingSlipBase):
-    pass
+    created_at: Optional[datetime] = None
 
     class Config:
         orm_mode = True
