@@ -3,3 +3,10 @@ database.py
 
 *.db
 api/__pycache__
+
+env
+.env/
+env/*
+
+.vscode/
+vscode/*
