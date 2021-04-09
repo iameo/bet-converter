@@ -10,7 +10,7 @@ from selenium.common.exceptions import ElementNotInteractableException, NoSuchEl
 
 from typing import List
 
-chrome_path = 'C:\\Users\\okwud\\Downloads\\Compressed\\chromedriver_win32\\chromedriver.exe'
+chrome_path = 'driver\\chromedriver.exe'
 
 
 class MatchExtractor(object):
@@ -61,9 +61,9 @@ class Bet9ja(MatchExtractor):
         except Exception as e:
             print(">>>>>", str(e))
         
-        self.matches = []
+        # self.matches = []
 
-        match = match.split("\n")
+        match = match.split("\n") 
         access = [1,2,5,6]
         map_access = map(match.__getitem__, access)
         accessed_data = list(map_access)
