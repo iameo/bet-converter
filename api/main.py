@@ -109,7 +109,7 @@ def fetch_team(team: str):
     options.add_argument('--no-sandbox')
 
     # comment out in local production - fix to this is already on local, I shall push soon
-    # options.binary_location = GOOGLE_CHROME_PATH
+    options.binary_location = GOOGLE_CHROME_PATH
 
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
     global driver
