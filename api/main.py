@@ -29,7 +29,7 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI(title="BET CONVERTER")
 
 
-chrome_path = 'C:\\Users\\okwud\\Downloads\\Compressed\\chromedriver_win32\\chromedriver.exe'
+chrome_path = 'driver\\chromedriver.exe'
 
 
 #db
@@ -95,9 +95,10 @@ def get_slips(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
 
 
 @app.get("/matches/{team}", response_model=List[schema.MatchDetail])
-async def fetch_team(team: str):
+def fetch_team(team: str):
     options = webdriver.ChromeOptions()
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
+    global driver
     driver = webdriver.Chrome(options=options, executable_path=chrome_path)
     driver.get("https://web.bet9ja.com/Sport/Default.aspx")
     driver.implicitly_wait(1)
@@ -139,8 +140,18 @@ async def fetch_team(team: str):
         match_time = str(col[1].text)
         match = re.findall(r"\(.*?\)", match_team)
         if not match and "simulated" not in match_team.lower() and "-zoom" not in match_team.lower() \
-            and "cyber live" not in match_team.lower():
+            and "cyber live" not in match_team.lower() and "first goal" not in match_team.lower() and "match stats" not in match_team.lower() and "team to score " not in match_team.lower():
             matches.append({"source": page_title, "team": match_team, "time": match_time})
             # return {"Team": match_team, "Time": match_time}
         
     return matches
+
+
+
+@app.post("/matches/")
+def create_match_selection(team: str = None):
+    get_team = fetch_team(team)
+    print(">>>>>>>>>>", get_team)
+    elem = driver.find_element_by_xpath('//*[@id="h_w_PC_PC_gridSottoEventi"]/tbody/tr[4]/td[1]/a').click()
+    return {"elem":get_team}
+# //*[@id="s_w_PC_PC_gridSottoEventi"]/tbody/tr[4]/td[1]/a
