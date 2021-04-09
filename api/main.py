@@ -46,9 +46,9 @@ def get_db():
 
 ############################ROUTES##########################################
 
-@app.get("/b/")
+@app.get("/")
 def index():
-    return [{"Hello": "There"}]
+    return [{"Hello": "There", "visit": "https://betconv.herokuapp.com/docs"}]
 
 @app.get("/sources/")
 def supported_sources():
