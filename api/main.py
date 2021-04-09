@@ -50,6 +50,10 @@ def get_db():
 def index():
     return [{"Hello": "There"}]
 
+@app.get("/sources/")
+def supported_sources():
+    return [{"supported sources": BetSources.list()}]
+
 
 @app.post("/slips/", response_model=schema.BookingSlip)
 def create_slip(
