@@ -21,6 +21,9 @@ class MatchExtractor(object):
     def extractor(self) -> List[str]:
         pass
 
+    def injector(self) -> str:
+        pass
+
 
 class Bet9ja(MatchExtractor):
     def extractor(self):
@@ -58,11 +61,28 @@ class Bet9ja(MatchExtractor):
         except Exception as e:
             print(">>>>>", str(e))
         
-        matches = []
-        for match_game in str(match).split('\n'):
-            if '-' in match_game: #teamA - teamB
-                matches.append(match_game)
-        return matches
+        self.matches = []
+
+        match = match.split("\n")
+        access = [1,2,5,6]
+        map_access = map(match.__getitem__, access)
+        accessed_data = list(map_access)
+        return accessed_data
+
+        # for match_game in str(match).split('\n'):
+
+        #     if '-' in item or ' ' in item: #teamA - teamB or/and '1 1X2'(I shall improve on this)
+        #         matches.append(match_game)
+        # return self.matches
+
+
+
+    # def injector(self, matches):
+    #     self.matches = matches
+    #     for match in self.matches:
+            #search
+            #select match and odd
+
 
 
 
