@@ -138,7 +138,8 @@ async def fetch_team(team: str):
         match_team = str(col[0].text)
         match_time = str(col[1].text)
         match = re.findall(r"\(.*?\)", match_team)
-        if not match and "simulated" not in match_team.lower() and "-zoom" not in match_team.lower():
+        if not match and "simulated" not in match_team.lower() and "-zoom" not in match_team.lower() \
+            and "cyber live" not in match_team.lower():
             matches.append({"source": page_title, "team": match_team, "time": match_time})
             # return {"Team": match_team, "Time": match_time}
         
