@@ -9,17 +9,19 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import ElementNotInteractableException
+from selenium.common.exceptions import ElementNotInteractableException, NoSuchElementException
 
 from . import crud, models, schema
 from .database import engine, SessionLocal
+from .betsource import BetSources
+from .worker import Bet9ja
 
 import re
 
 
 from typing import List
 from pydantic import BaseModel
-from enum import Enum
+
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -40,10 +42,6 @@ def get_db():
 
 
 
-class BetSources(str, Enum):
-    betway = 'betway'
-    bet9ja = 'bet9ja'
-    sportybet = 'sportybet'
 
 
 ############################ROUTES##########################################
@@ -71,10 +69,15 @@ def get_slip_by_code(booking_code: str, db: Session = Depends(get_db)):
     return slip
 
 
-@app.get("/slips/convert/{booking_code}", response_model=schema.BookingSlipOut)
-def get_converted_slip(source: BetSources, destination: BetSources, booking_code: str, db: Session = Depends(get_db)):
-    # check slip is valid, goto source, extract, "store", go to dest, input, book, return booking code
-    pass
+@app.get("/slips/convert/{booking_code}") #incomplete!!!!
+async def get_converted_slip(source: BetSources, destination: BetSources, booking_code: str, db: Session = Depends(get_db)):
+    # check slip is valid against source, goto source, extract, "store", go to dest, input, book, return booking code
+    if source == BetSources.bet9ja:
+        matches = Bet9ja(source=source, booking_code=booking_code)
+        matches_extract = matches.extractor()
+        return {"source": matches.source, "booking code": matches.booking_code, "matches": matches_extract}
+        # for match in matches:
+        #     fetch_team(match)
 
 
 
@@ -121,7 +124,7 @@ async def fetch_team(team: str):
 
     try:
         rows = driver.find_element_by_xpath('//*[@id="h_w_PC_PC_gridSottoEventi"]').find_elements(By.TAG_NAME, "tr")[1:]
-    except ElementNotInteractableException:
+    except NoSuchElementException:
         rows = driver.find_element_by_xpath('//*[@id="s_w_PC_PC_gridSottoEventi"]').find_elements(By.TAG_NAME, "tr")[1:] #**barffs**
 
     matches = []
