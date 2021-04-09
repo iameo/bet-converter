@@ -32,7 +32,9 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI(title="BET CONVERTER")
 
 
-chrome_path = 'driver\\chromedriver.exe'
+
+GOOGLE_CHROME_PATH = '/app/.apt/usr/bin/google_chrome'
+CHROMEDRIVER_PATH = 'driver\\chromedriver.exe' or '/app/.chromedriver/bin/chromedriver'
 
 
 #db
@@ -100,9 +102,18 @@ def get_slips(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
 @app.get("/matches/{team}", response_model=List[schema.MatchDetail])
 def fetch_team(team: str):
     options = webdriver.ChromeOptions()
+
+    options.add_argument("--headless")
+    options.add_argument('--disable-gpu')
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument('--no-sandbox')
+
+    # comment out in local production - fix to this is already on local, I shall push soon
+    # options.binary_location = GOOGLE_CHROME_PATH
+
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
     global driver
-    driver = webdriver.Chrome(options=options, executable_path=chrome_path)
+    driver = webdriver.Chrome(chrome_options=options, executable_path=CHROMEDRIVER_PATH)
     driver.get("https://web.bet9ja.com/Sport/Default.aspx")
     driver.implicitly_wait(1)
     try:
