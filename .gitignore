@@ -6,6 +6,7 @@ api/__pycache__
 env
 .env/
 env/*
+.env
 
 .vscode/
 vscode/*
