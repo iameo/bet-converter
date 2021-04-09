@@ -6,3 +6,7 @@ class BetSources(str, Enum):
     sportybet = 'sportybet'
     bet365 = 'bet365'
 
+    @classmethod
+    def list(cls):
+        return list(map(lambda c: c.value, cls))
+
