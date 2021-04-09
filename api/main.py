@@ -1,10 +1,13 @@
 from fastapi import Depends, FastAPI, HTTPException
-from sqlalchemy.orm import Session
+from fastapi.responses import RedirectResponse
+
+
 
 import requests
 from selenium.webdriver.support import ui
 
 from selenium import webdriver
+from sqlalchemy.orm import Session
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
@@ -48,7 +51,7 @@ def get_db():
 
 @app.get("/")
 def index():
-    return [{"Hello": "There", "visit": "https://betconv.herokuapp.com/docs"}]
+    return RedirectResponse("/docs")
 
 @app.get("/sources/")
 def supported_sources():
