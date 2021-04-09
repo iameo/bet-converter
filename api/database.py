@@ -3,10 +3,15 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 
-SQLAlCHEMY_DATABASE_URL = 'sqlite:///./er.db'
+import os
+from os.path import join, dirname
+from dotenv import load_dotenv
+
+dotenv_path = join(dirname(__file__), ".env")
+load_dotenv(dotenv_path)
 
 engine = create_engine(
-    SQLAlCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    os.getenv('SQLAlCHEMY_DATABASE_URL', "sqlite:///./xxxxxx.db"), connect_args={"check_same_thread": False}
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
