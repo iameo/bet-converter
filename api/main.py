@@ -1,6 +1,7 @@
+import os
+
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
-
 
 
 import requests
@@ -25,16 +26,17 @@ import re
 from typing import List
 from pydantic import BaseModel
 
+import os
+from os.path import join, dirname
+from dotenv import load_dotenv
 
+dotenv_path = join(dirname(__file__), ".env")
+load_dotenv(dotenv_path)
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="BET CONVERTER")
 
-
-
-GOOGLE_CHROME_PATH = '/app/.apt/usr/bin/google_chrome'
-CHROMEDRIVER_PATH = 'driver\\chromedriver.exe' or '/app/.chromedriver/bin/chromedriver'
 
 
 #db
@@ -109,11 +111,11 @@ def fetch_team(team: str):
     options.add_argument('--no-sandbox')
 
     # comment out in local production - fix to this is already on local, I shall push soon
-    options.binary_location = GOOGLE_CHROME_PATH
+    options.binary_location = os.getenv("GOOGLE_CHROME_PATH")
 
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
     global driver
-    driver = webdriver.Chrome(chrome_options=options, executable_path=CHROMEDRIVER_PATH)
+    driver = webdriver.Chrome(chrome_options=options, executable_path=os.getenv("CHROMEDRIVER_PATH_LOCAL", "/app/.chromedriver/bin/chromedriver"))
     driver.get("https://web.bet9ja.com/Sport/Default.aspx")
     driver.implicitly_wait(1)
     try:
