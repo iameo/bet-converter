@@ -17,7 +17,7 @@ from selenium.common.exceptions import ElementNotInteractableException, NoSuchEl
 
 from .. import crud, models, schema
 from ..database import engine, SessionLocal
-from ..betsource import BetSources, link_bet9ja, link_sportybet
+from ..betsource import BetSources, link_bet9ja, link_sportybet, link_1xbet
 from ..worker import Bet9ja, SportyBet
 
 import re
