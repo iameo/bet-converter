@@ -17,8 +17,8 @@ from selenium.common.exceptions import ElementNotInteractableException, NoSuchEl
 
 from .. import crud, models, schema
 from ..database import engine, SessionLocal
-from ..betsource import BetSources, link_bet9ja, link_sportybet
-from ..worker import Bet9ja, SportyBet
+from ..betsource import BetSources, link_bet9ja, link_sportybet, link_1xbet
+from ..worker import Bet9ja, SportyBet, X1Bet
 
 import re
 
@@ -76,6 +76,10 @@ async def get_converted_slip(source: BetSources, destination: BetSources, bookin
         return {"source": matches.source, "booking code": matches.booking_code, "matches": matches_extract}
     elif source == BetSources.sportybet:
         matches = SportyBet(source=source, booking_code=booking_code, site=link_sportybet)
+        matches_extract = matches.extractor()
+        return {"source": matches.source, "booking code": matches.booking_code, "matches": matches_extract}
+    elif source == BetSources.xbet:
+        matches = X1Bet(source=source, booking_code=booking_code, site=link_1xbet)
         matches_extract = matches.extractor()
         return {"source": matches.source, "booking code": matches.booking_code, "matches": matches_extract}
         # for match in matches:
