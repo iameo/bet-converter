@@ -30,14 +30,3 @@ class BookingSlip(Base):
 
     def __repr__(self):
         return '<Bet Code: ' + self.code + '>'
-
-
-# class PostIT(Base):
-#     __tablename__ = "postits"
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     title =  Column(String, index=True)
-#     message = Column(String, index=True)
-#     anon_id = Column(Integer, ForeignKey("anonusers.id"))
-    
-#     anon = relationship("AnonUser", back_populates="postits")
