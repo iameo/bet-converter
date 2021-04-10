@@ -14,6 +14,8 @@ env/*
 vscode/*
 
 
+api/views/__pycache__/*.pyc
+
 # Byte-compiled / optimized / DLL files
 *.py[cod]
 *.pyc
