@@ -20,8 +20,9 @@ class MatchDetailBase(BaseModel):
 
 
 class MatchDetail(MatchDetailBase):
+    league: str
     team: str
-    time: str
+    datetime: str
 
 
 
