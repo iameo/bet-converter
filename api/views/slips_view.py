@@ -88,7 +88,7 @@ async def get_converted_slip(source: BetSources, destination: BetSources, bookin
 
 
 @slip_view.get("/slips/all/", response_model=List[schema.BookingSlipOut])
-def get_slips(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+async def get_slips(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     slips = crud.get_slips(db, skip=skip, limit=limit)
     print(slips)
     if slips is None:
