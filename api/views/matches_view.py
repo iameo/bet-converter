@@ -43,7 +43,7 @@ match_view = APIRouter()
 
 
 @match_view.get("/matches/{team}", response_model=List[schema.MatchDetail])
-def fetch_team(team: str, source: BetSources):
+async def fetch_team(team: str, source: BetSources):
     if source == BetSources.bet9ja:
     # options = webdriver.ChromeOptions()
 
@@ -58,6 +58,39 @@ def fetch_team(team: str, source: BetSources):
     if source == BetSources.msport:
         games_by_team = MSport(source="msport", site=link_msport).games_extractor(team)
         return games_by_team
+
+    if source == BetSources.betway:
+        return  [{
+                    "source": "betway",
+                    "datetime": "n/a",
+                    "league": "n/a",
+                    "team": "n/a"
+                }]
+
+    if source == BetSources.sportybet:
+        return  [{
+                    "source": "sportybet",
+                    "datetime": "n/a",
+                    "league": "n/a",
+                    "team": "n/a"
+                }]
+
+    if source == BetSources.bet365:
+        return  [{
+                    "source": "bet365",
+                    "datetime": "n/a",
+                    "league": "n/a",
+                    "team": "n/a"
+                }]
+
+    if source == BetSources.xbet:
+        return  [{
+                    "source": "1xbet",
+                    "datetime": "n/a",
+                    "league": "n/a",
+                    "team": "n/a"
+                }]
+                            
     # comment out in local production - fix to this is already on local, I shall push soon
     # options.binary_location = os.getenv("GOOGLE_CHROME_PATH")
 
