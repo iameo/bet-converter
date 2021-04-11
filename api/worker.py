@@ -16,27 +16,36 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer
 from nltk.corpus import stopwords
 
+import re
+
+import time
+from abc import ABC, abstractmethod
+
 stopwords = stopwords.words('english')
 
 chrome_path = 'driver\\chromedriver.exe'
 
 
-class MatchExtractor(object):
+class MatchExtractor(ABC):
     def __init__(self, source: str = None, site: str = None, booking_code: str = None) -> None:
         self.source = source
         self.site = site
         self.booking_code = booking_code
 
-    def connect(self):
+    def connect(self, wait_time=1):
         options = webdriver.ChromeOptions()
         options.add_experimental_option('excludeSwitches', ['enable-logging'])
         driver = webdriver.Chrome(options=options, executable_path=chrome_path)
         driver.get(self.site)
-        driver.implicitly_wait(1)
+        driver.implicitly_wait(wait_time)
         return driver
 
+    @abstractmethod
+    def games_extractor(self, team) -> List[str]:
+        pass
 
-    def extractor(self) -> List[str]:
+    @abstractmethod
+    def slip_extractor(self) -> List[str]:
         pass
 
     def injector(self) -> str:
@@ -65,7 +74,57 @@ class MatchExtractor(object):
 
 
 class Bet9ja(MatchExtractor):
-    def extractor(self):
+    def games_extractor(self, team):
+        driver = self.connect()
+        # driver = webdriver.Chrome(chrome_options=options, executable_path=os.getenv("CHROMEDRIVER_PATH_LOCAL", "/app/.chromedriver/bin/chromedriver"))
+        # driver.get("https://web.bet9ja.com/Sport/Default.aspx")
+        driver.implicitly_wait(1)
+        try:
+            elem = driver.find_element_by_xpath('//*[@id="h_w_PC_oddsSearch_txtSearch"]')
+        except Exception as e:
+            print(">>>>>>", str(e))
+        # else:
+        #     elem = driver.find_element_by_xpath('//*[@id="s_w_PC_oddsSearch_txtSearch"]')
+        elem.send_keys(team)
+
+        try:
+            submit = driver.find_element_by_xpath('//*[@id="h_w_PC_oddsSearch_btnCerca"]').click()
+        except Exception as e:
+            print(">>>>>>", str(e))  #terrible I know! debugging 
+        # else:
+        #     submit = driver.find_element_by_xpath('//*[@id="s_w_PC_oddsSearch_btnCerca"]').click()
+
+        # try:
+        #     tb = driver.find_element_by_xpath('//*[@id="h_w_PC_PC_gridSottoEventi"]') 
+        # except Exception as e:
+        #     print(">>>>>>", str(e))
+        # # else:
+            # tb = driver.find_element_by_xpath('//*[@id="s_w_PC_PC_gridSottoEventi"]')
+
+        page_title = driver.title
+
+
+        try:
+            rows = driver.find_element_by_xpath('//*[@id="h_w_PC_PC_gridSottoEventi"]').find_elements(By.TAG_NAME, "tr")[1:]
+        except NoSuchElementException:
+            rows = driver.find_element_by_xpath('//*[@id="s_w_PC_PC_gridSottoEventi"]').find_elements(By.TAG_NAME, "tr")[1:] #**barffs**
+
+        matches = []
+
+        for row in rows:
+            col = row.find_elements(By.TAG_NAME, "td")[0:]
+            match_team = str(col[0].text)
+            match_time = str(col[1].text)
+            league = match_team.split("\n")[0]
+            match = re.findall(r"\(.*?\)", match_team)
+            # print(match)
+            if not match and "simulated" not in league.lower() and "-zoom" not in league.lower() \
+                and "cyber live" not in league.lower() and "first goal" not in league.lower() and "match stats" not in league.lower() and "team to score " not in league.lower():
+                matches.append({"source": page_title, "league": str(league), "team": match_team.split("\n")[1], "datetime": str(match_time)})
+        return matches
+        
+
+    def slip_extractor(self):
         driver = self.connect()
 
         # elem = driver.find_element_by_xpath('//*[@id="toast-b2892900-126b-454e-9e82-65f4ee3622fc"]/div/div/div/div[2]/div/p[2]/a').click()
@@ -130,18 +189,19 @@ class Betway(MatchExtractor):
     pass
 
 
-# class SportyBet(MatchExtractor):
-#     def __init__(self, country):
-#         super().__init__(country: str = None)
-#         pass
-
-
 class NairaBet(MatchExtractor):
     pass
 
 
 class SportyBet(MatchExtractor):
-    def extractor(self):
+    # def __init__(self, country):
+    #     super().__init__(country)
+    #     pass
+
+    def games_extractor(self, team):
+        pass
+
+    def slip_extractor(self):
         driver = self.connect()
         
         # try: #select country
@@ -172,6 +232,12 @@ class SportyBet(MatchExtractor):
 
 
 class X1Bet(MatchExtractor):
+    def games_extractor(self, team):
+        pass
+
+    def slip_extractor(self):
+        pass
+
     def injector(self, match_detail, match, bet: str = None, bet_selection: str = None):
         driver = self.connect()
 
@@ -231,9 +297,72 @@ class X1Bet(MatchExtractor):
                     driver.find_element_by_xpath('//*[@id="allBetsTable"]/div[2]/div[1]/div/div[2]/div[3]/span[2]').click()
                 
 
+  
+class MSport(MatchExtractor):
+    def games_extractor(self, team):
+        driver = self.connect(wait_time=3)
+        page_title = driver.title
+        driver.find_element_by_xpath('/html/body/div[2]/div[2]/div/div/a[2]').click() or driver.find_element_by_class_name('m-pop-close-btn').click()
+        # if notification is not None:
+        #     notification.click()
+        try:
+            driver.find_element_by_class_name('m-az-btn').click()
+        except NoSuchElementException as e:
+            print(str(e))
         
 
+        try:
+            driver.find_element_by_xpath('/html/body/div[1]/header/div[4]/div[2]/div[2]/div[1]/a').click()
+        except Exception as e:
+            print(str(e))
+
+        # time.sleep(1)
+
+        try:
+            elem = driver.find_element_by_xpath('/html/body/div/div[1]/form/div/input')
+        except Exception as e:
+            print(str(e))
+
+        elem.send_keys(team)
+        time.sleep(2)
+
+        try:
+            driver.find_element_by_xpath('/html/body/div/div[1]/div[2]').click()
+        except NoSuchElementException:
+            pass
+
+        try:
+            tb = driver.find_element_by_class_name('m-search-main')
+        except Exception:
+            pass
+
+        try:
+            sections = tb.find_elements_by_class_name("m-result-section")
+        except Exception:
+            pass
         
+        matches = []
+        for section in sections:
+            if section.text.split('\n')[0].lower() == "not start":
+        #         print(section.text.split("\n")[1:-1])
+                games = section.find_elements_by_class_name("m-resultItem")
+                for game in games:
+                    if "simulated" not in game.text.lower() and "esports" not in game.text.lower() and "cyber live" not in game.text.lower() and "electronic league" not in game.text.lower():
+                        _game = game.text.split("\n")
+                        matches.append({
+                            "source": page_title,
+                            "datetime": _game[0],
+                            "league": _game[1],
+                            "team": ' '.join([a_ for a_ in _game[2:5]]).replace('vs','-')}
+                            )    
+        return matches
+
+    def slip_extractor(self):
+        pass
+
+
+        
+
         
         
 
