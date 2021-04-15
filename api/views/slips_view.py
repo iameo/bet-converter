@@ -67,29 +67,44 @@ def get_slip_by_code(booking_code: str, db: Session = Depends(get_db)):
     return slip
 
 
-@slip_view.get("/slips/convert/{booking_code}") #incomplete!!!!
+@slip_view.get("/slips/convert/{booking_code}")
 async def get_converted_slip(source: BetSources, destination: BetSources, booking_code: str, db: Session = Depends(get_db)):
     # check slip is valid against source, goto source, extract, "store", go to dest, input, book, return booking code
+
+    matches_extract = []
+    slip_code = ''
+
     if source == BetSources.bet9ja:
-        matches = Bet9ja(source=source, booking_code=booking_code, site=link_bet9ja)
-        matches_extract = matches.slip_extractor()
-        if destination == BetSources.betway:
-            pass
+        selections = Bet9ja(source=source, booking_code=booking_code, site=link_bet9ja).slip_extractor()
+
+        if destination == BetSources.bet9ja:
+            __bet9ja = Bet9ja(source=source, site=link_bet9ja)
+            slip_code = __bet9ja.injector('bet9ja', selections)
+
         if destination == BetSources.sportybet:
             pass
+
         if destination == BetSources.xbet:
             print("xtract", matches_extract)
             _xbet = X1Bet(source=source, site=link_1xbet)
             for game in matches_extract:
-                _xbet.injector(league=game[0][1], match=game[0][2], bet=game[0][3].split(" ")[1], _bet_type=game[0][3].split(" ")[0])
+                _xbet.injector(league=game[1][0], match=game[1][1], bet=game[2][0].split(" ")[1], _bet_type=game[2][0].split(" ")[0])
         if destination == BetSources.msport:
             pass
             
-        return {"source": matches.source, "booking code": matches.booking_code, "matches": matches_extract}
+        return {"source": source, "destination": destination, "booking code": slip_code}
+
     elif source == BetSources.sportybet:
-        matches = SportyBet(source=source, booking_code=booking_code, site=link_sportybet)
-        matches_extract = matches.slip_extractor()
-        return {"source": matches.source, "booking code": matches.booking_code, "matches": matches_extract}
+        selections = SportyBet(source=source, booking_code=booking_code, site=link_sportybet).slip_extractor()
+        
+        if destination == BetSources.bet9ja:
+            _bet9ja = Bet9ja(source=source, site=link_bet9ja)
+            slip_code = _bet9ja.injector('sportybet', selections)
+
+        return {"source": matches.source, "destination": destination, "booking code": slip_code}
+        # matches_extract = matches.slip_extractor()
+        # return {"source": matches.source, "booking code": matches.booking_code, "matches": matches_extract}
+    
     elif source == BetSources.xbet:
         matches = X1Bet(source=source, booking_code=booking_code, site=link_1xbet)
         matches_extract = matches.slip_extractor()
@@ -102,7 +117,6 @@ async def get_converted_slip(source: BetSources, destination: BetSources, bookin
 @slip_view.get("/slips/all/", response_model=List[schema.BookingSlipOut])
 async def get_slips(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     slips = crud.get_slips(db, skip=skip, limit=limit)
-    print(slips)
     if slips is None:
         raise HTTPException(status_code=404, detail="No slip at this time!")
     return slips
