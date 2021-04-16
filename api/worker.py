@@ -26,6 +26,8 @@ from abc import ABC, abstractmethod
 
 from .betsource import link_bet9ja, link_1xbet
 
+import pyperclip
+
 stopwords = stopwords.words('english')
 
 chrome_path = 'driver\\chromedriver.exe'
@@ -455,9 +457,10 @@ class X1Bet(MatchExtractor):
             min_index = min(range(len(csim_check)), key=csim_check.__getitem__)
             # driver.find_element_by_xpath('//*[@id="modals-container"]/div/div/div[2]/div/div[2]/div[1]/div[2]/div[1]/div').click()
 
-            time.sleep(2)
-            rows = driver.find_elements(By.CLASS_NAME, "search-popup-events__item")
+            time.sleep(5)
+            rows = driver.find_elements(By.CLASS_NAME, "search-popup-events__content")
 
+            print(rows, max_index)
             select_game = rows[max_index] #get the link of the max csim score
             if select_game:
                 pass
@@ -467,7 +470,7 @@ class X1Bet(MatchExtractor):
             ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
             driver.switch_to.window(driver.window_handles[1])
 
-            driver.refresh()
+            # driver.refresh()
             
 
             element = driver.find_element_by_class_name('right-banners-block')
@@ -479,7 +482,7 @@ class X1Bet(MatchExtractor):
 
             coupon.send_keys(Keys.CONTROL, 'a') #mark all
             coupon.send_keys(Keys.CONTROL, 'c') #copy
-            slip_code = pyper.paste() #paste copied object in environment
+            slip_code = pyperclip.paste() #paste copied object in environment
 
             return slip_code
 
@@ -548,25 +551,31 @@ class MSport(MatchExtractor):
         elem.send_keys(team)
         time.sleep(2)
 
-        try:
-            driver.find_element_by_xpath('/html/body/div/div[1]/div[2]').click()
-        except NoSuchElementException:
+        # try:
+        #     driver.find_element_by_xpath('/html/body/div/div[1]/div[2]').click()
+        # except NoSuchElementException:
+        #     pass
+
+        show_more = driver.find_element_by_xpath('/html/body/div/div[2]/div/div/div[2]/div[2]/div/div[7]')
+        if show_more:
+            show_more.click()
+        else:
             pass
 
-        try:
-            tb = driver.find_element_by_class_name('m-search-main')
-        except Exception:
-            pass
+        # try:
+        #     tb = driver.find_element_by_class_name('m-search-main')
+        # except Exception:
+        #     pass
+        time.sleep(3)
 
         try:
-            sections = tb.find_elements_by_class_name("m-result-section")
+            sections = driver.find_elements_by_class_name("m-result-section")
         except Exception:
             pass
         
         matches = []
         for section in sections:
             if section.text.split("\n")[0].lower() == "not start":
-        #         print(section.text.split("\n")[1:-1])
                 games = section.find_elements_by_class_name("m-resultItem")
                 for game in games:
                     if "simulated" not in game.text.lower() and "esports" not in game.text.lower() and "cyber live" not in game.text.lower() and "electronic league" not in game.text.lower():
@@ -577,13 +586,107 @@ class MSport(MatchExtractor):
                             "league": _game[1],
                             "team": ' '.join([a_ for a_ in _game[2:5]]).replace('vs','-')}
                             )    
-        return matches
+        print("MSPORT: ", matches)
+        return matches, driver
 
     def slip_extractor(self):
         pass
 
-    def injector(self):
-        pass
+    def injector(self, source, selections):
+
+        league = ''
+        bet = ''
+        _bet_type = ''
+
+        # driver = self.connect()
+
+        for __match in selections:
+            games, driver = self.games_extractor(__match[1])
+
+            league = __match[0]
+            match = __match[1]
+            bet = __match[2].split(" ")[1]
+            _bet_type=__match[2].split(" ")[0]
+                
+
+            n_games = [game['league'] + ' ~ ' + game['team'] for game in games]
+
+            p_match = [_match for _match in n_games if _match != [''] if _match != [' ~ ']]
+
+            csim_check = []
+            print("PMA: ", p_match)
+            for game in p_match:
+                print("GA<E: ", game, len(game))
+                if len(game) >= 4:
+                    relations = [self.clean_string(game), self.clean_string(league + ' ' + match)]
+                    csim = self.check_similarity(relations)
+                    csim_check.append([csim, game.split('~ ')[1]])
+                else:
+                    continue
+            
+            print("CK: ", csim_check)
+            max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
+            min_index = min(range(len(csim_check)), key=csim_check.__getitem__)
+            # driver.find_element_by_xpath('//*[@id="modals-container"]/div/div/div[2]/div/div[2]/div[1]/div[2]/div[1]/div').click()
+        
+            show_more = driver.find_element_by_xpath('/html/body/div/div[2]/div/div/div[2]/div[2]/div/div[7]')
+            if show_more:
+                show_more.click()
+            else:
+                pass
+            
+            time.sleep(3)
+            sections = driver.find_elements_by_class_name("m-result-section")
+            print("SEC: ", sections)
+            rows = ''
+            for section in sections:
+                # if section.text.split("\n")[0].lower() == "not start":
+                rows = section.find_elements_by_class_name("m-resultItem")
+                # if rows:
+                #     break
+            # rows = driver.find_elements(By.CLASS_NAME, "m-resultItem")
+            # print("GA: ", [g.text for g in rows])
+            print("ROWSX: ", rows)
+            print("INDEX: ", max_index)
+            select_game = rows[max_index] #get the link of the max csim score
+            if select_game:
+                pass
+            else:
+                return "Match not found"
+
+            ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
+            driver.switch_to.window(driver.window_handles[1])
+
+
+            bet_types = driver.find_elements_by_class_name("SEOddsTQ")
+            bet_selections = driver.find_elements_by_class_name("SECQ")
+
+            #place bet
+            for bet_type, bet_selection in zip(bet_types, bet_selections):
+
+                #match bet and bet type: Home - Home and 1x2 - 1x2
+                if str(bet_type.text).lower() == str(_bet_type).lower() and (bet_selection.text.lower() == bet.lower()):
+                    fo = bet_type.find_element_by_xpath('following-sibling::*')
+                    fo.click()
+                    break
+                    
+                else:
+                    continue
+            
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
+            # driver.refresh()
+            # driver.get(link_bet9ja)
+            # # driver.back()
+        driver.refresh()
+        place_the_bet = driver.find_element_by_class_name('dx').click()
+        time.sleep(2)
+        driver.switch_to.frame(driver.find_element_by_tag_name("iframe"))
+        slip_code = str(driver.find_element_by_class_name("number").text).split(':')[1]
+        driver.quit()
+
+        return slip_code
+
 
 
         
