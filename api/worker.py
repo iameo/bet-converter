@@ -170,37 +170,35 @@ class Bet9ja(MatchExtractor):
             driver.find_element_by_id('h_w_PC_cCoupon_lnkOkPrenotatore').click()
             
             time.sleep(1)
-
             driver.execute_script("$('.CEvento').css({'display':'block', 'position':'static'})")
             
-            try:
-                rows = driver.find_elements_by_class_name("CItem")
-                n_rows = len(driver.find_elements_by_class_name("CItem"))
-            except Exception as e:
-                print(">>>>>", str(e))
+            rows = driver.find_elements_by_class_name("CItem")
+            n_rows = len(driver.find_elements_by_class_name("CItem"))
 
-            selections = [MatchExtractor.chunk_it(_row.text.split("\n"), n_rows) for _row in rows] #exclude game tag and odd
-            _selections = [selection for selection in selections] #exclude game tag and odd
+            # selections = [MatchExtractor.chunk_it(_row.text.split("\n"), n_rows) for _row in rows] #exclude game tag and odd
+            # _selections = [selection for selection in selections] #exclude game tag and odd
+
+            selections = [row.text.split("\n")[1:-1] for row in rows] #['Premier League', 'Team A - Team B', '1 1X2']
+            print("SELE: ", selections)
 
             return selections
         
         else: #booking code found and intact
             driver.execute_script("$('.CEvento').css({'display':'block', 'position':'static'})")
-            try:
-                rows = driver.find_elements_by_class_name("CItem")
-                n_rows = len(driver.find_elements_by_class_name("CItem"))
-            except Exception as e:
-                print(">>>>>", str(e))
+                
+            rows = driver.find_elements_by_class_name("CItem")
+            n_rows = len(driver.find_elements_by_class_name("CItem"))
+
         
             # selections = [MatchExtractor.chunk_it(_row.text.split("\n"), n_rows) for _row in rows] #exclude game tag and odd
             # _selections = [selection for selection in selections]
-            _selections = [row.text.split('\n') for row in rows]
+            selections = [row.text.split("\n")[1:-1] for row in rows]
             print("SELE: ", selections)
 
             return selections
-
-
         #redundant code above; create a function and replace!
+
+
 
     def injector(self, source, selections):
         # matches_extract = _source.slip_extractor()
@@ -211,39 +209,22 @@ class Bet9ja(MatchExtractor):
         driver = self.connect()
 
         for __match in selections:
-            if source == 'bet9ja':
-                games = self.games_extractor(__match[1][1])
+            games = self.games_extractor(__match[1])
 
-                league = __match[1][0]
-                match = __match[1][1]
-                bet = __match[2][0].split(" ")[1]
-                _bet_type=__match[2][0].split(" ")[0]
+            league = __match[0]
+            match = __match[1]
+            bet = __match[2].split(" ")[1]
+            _bet_type=__match[2].split(" ")[0]
                 
-                if isinstance(games, dict):
-                    n_games = [games['league'] + ' ~ ' + games['team']]
-                else:
-                    n_games = [game['league'] + ' ~ ' + game['team'] for game in games]
 
-            elif source == 'sportybet':
-                games = self.games_extractor(__match[1])
-
-                league = '' #no league from slip extractor data so leave blank
-                match = __match[1]
-                bet = __match[2]
-                _bet_type=__match[0]
-
-                n_games = [game['league'] + ' ~ ' + game['team'] for game in games]
-
-            elif source == '1xbet':
-                pass
-            
-            else:
-                pass
+            n_games = [game['league'] + ' ~ ' + game['team'] for game in games]
 
             p_match = [_match for _match in n_games if _match != [''] if _match != [' ~ ']]
 
             csim_check = []
+            print("PMA: ", p_match)
             for game in p_match:
+                print("GA<E: ", game)
                 if len(game) >= 4:
                     relations = [self.clean_string(game), self.clean_string(league + ' ' + match)]
                     csim = self.check_similarity(relations)
@@ -328,7 +309,7 @@ class SportyBet(MatchExtractor):
         selection = []
         for row in rows[::2]: #duplicated in twos so get all even index([0,1,2,3] -> [1,3])
             print(row.text)
-            line = row.text.split('\n')
+            line = row.text.split("\n")
             line[1] = line[1].split("|")[1].lstrip().replace(' v ',' - ')
             access = [0,1,2] #['Home', 'Team A - Team B', '1x2']
             map_access = map(line.__getitem__, access)
@@ -344,6 +325,8 @@ class X1Bet(MatchExtractor):
 
         driver = self.connect()
 
+        # notification on 1xbet removed as at 16-04-2021
+        # back on 5 hours later
         notification = driver.find_element_by_xpath('//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')
         if notification:
             notification.click()
@@ -370,7 +353,7 @@ class X1Bet(MatchExtractor):
                 # print("MATCHES COL: ", col)
                 matches.append({"source": "1XBET", "league": str(col[1]), "team": str(col[2]), "datetime": ' '.join([a_ for a_ in col[0].split('.')[1:]]).replace(' ','/')})
             continue
-        return matches, driver
+        return matches
 
 
     def slip_extractor(self):
@@ -385,9 +368,8 @@ class X1Bet(MatchExtractor):
         except NoSuchElementException as e:
             print(str(e))
         
-        _selections = re.split('\n', selections)
+        _selections = re.split("\n", selections)
         _selections = [_selections[x:x+4] for x in range(0, len(_selections), 5)] #first 5 elements per selection
-        print("SELECTIONS: ", _selections)
         return _selections
 
 
@@ -396,37 +378,23 @@ class X1Bet(MatchExtractor):
         league = ''
         bet = '' #e.g Double Chance
         _bet_type = '' #1X or 12 or 2X
+        slip_code = ''
 
-        # driver = self.connect()
+        driver = self.connect()
+        driver.find_element_by_class_name('c-dropdown__trigger').click()
+        coupon = driver.find_element_by_class_name('coupon__input')
+        coupon.send_keys('faux') #faux code inorder to keep coupon field active otherwise bug from automated environment
 
         for __match in selections:
-            if source == 'bet9ja':
-                games, driver = self.games_extractor(__match[1][1])
-                print(games)
+            games = self.games_extractor(__match[1])
+            print(games)
 
-                league = __match[1][0]
-                match = __match[1][1]
-                bet = __match[2][0].split(" ")[1]
-                _bet_type=__match[2][0].split(" ")[0]
-                
-                if isinstance(games, dict):
-                    n_games = [games['league'] + ' ~ ' + games['team']]
-                else:
-                    n_games = [game['league'] + ' ~ ' + game['team'] for game in games]
+            league = __match[0]
+            match = __match[1]
+            bet = __match[2].split(" ")[1]
+            _bet_type=__match[2].split(" ")[0]
 
-            elif source == 'sportybet':
-                games, driver = self.games_extractor(__match[1])
-
-                league = '' #no league from slip extractor data so leave blank
-                match = __match[1]
-                bet = __match[2]
-                _bet_type=__match[0]
-
-                n_games = [game['league'] + ' ~ ' + game['team'] for game in games]
-
-
-            else:
-                pass
+            n_games = [game['league'] + ' ~ ' + game['team'] for game in games]
 
             p_match = [_match for _match in n_games if _match != [''] if _match != [' ~ ']]
 
@@ -490,18 +458,42 @@ class X1Bet(MatchExtractor):
             time.sleep(2)
             rows = driver.find_elements(By.CLASS_NAME, "search-popup-events__item")
 
-            select_game = rows[max_index]
-
+            select_game = rows[max_index] #get the link of the max csim score
             if select_game:
-                select_game.click()
+                pass
             else:
-                print("match not found")
                 return "Match not found"
+
+            ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
+            driver.switch_to.window(driver.window_handles[1])
+
+            driver.refresh()
+            
+
+            element = driver.find_element_by_class_name('right-banners-block')
+
+            actions = ActionChains(driver)
+            actions.move_to_element(element).perform() #move below save button for interactivity
+
+            driver.find_element_by_class_name('grid__cell.grid__cell--span-6.grid__cell--span-bsr-4.grid__cell--order-bsr-1').click() #tap on save button to generate code
+
+            coupon.send_keys(Keys.CONTROL, 'a') #mark all
+            coupon.send_keys(Keys.CONTROL, 'c') #copy
+            slip_code = pyper.paste() #paste copied object in environment
+
+            return slip_code
+
+
+            # if select_game:
+            #     select_game.click()
+            # else:
+            #     print("match not found")
+            #     return "Match not found"
                 # break
 
-            windows = driver.window_handles
+            # windows = driver.window_handles
 
-            driver.switch_to.window(windows[1])
+            # driver.switch_to.window(windows[1])
 
             bet_types = driver.find_elements_by_class_name("bet_type")
             bet_selections = driver.find_elements_by_class_name("bet-title")
@@ -516,24 +508,21 @@ class X1Bet(MatchExtractor):
             print("YOUR BET: ", _bet_type)
 
             for bet_type, bet_selection in zip(bet_types, bet_selections):
-                if bet_type.text != "" and bet_type.text != " ":
-                    if (bet_type.text == _bet_type.title() or bet_type.text == _bet_type.strip().upper()) and (str(bet_selection.text).lower() == str(bet).lower()):
-                        print(bet_type.text)
-                        print("BET SEEN")
-                        bet_type.click()
-                        time.sleep(1)
+                if (bet_type.text == _bet_type.title() or bet_type.text == _bet_type.strip().upper()) and (str(bet_selection.text).lower() == str(bet).lower()) and bet_type.text != "" and bet_type.text != " ":
+                    print(bet_type.text)
+                    print("BET SEEN")
+                    bet_type.click()
+                    time.sleep(1)
+                    # driver.switch_to.window(windows[0])
+                    # driver.refresh()
+                    
+                else:
+                    # print("NOOOOOOOOOOOOOOOOO")
+                    continue
                         # driver.switch_to.window(windows[0])
                         # driver.refresh()
-                    
-                    else:
-                        # print("NOOOOOOOOOOOOOOOOO")
-                        continue
-                                            # driver.switch_to.window(windows[0])
-                        # driver.refresh()
-                else:
-                    continue
-                driver.switch_to.window(windows[0])
-                driver.refresh()
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
 
   
 class MSport(MatchExtractor):
@@ -576,7 +565,7 @@ class MSport(MatchExtractor):
         
         matches = []
         for section in sections:
-            if section.text.split('\n')[0].lower() == "not start":
+            if section.text.split("\n")[0].lower() == "not start":
         #         print(section.text.split("\n")[1:-1])
                 games = section.find_elements_by_class_name("m-resultItem")
                 for game in games:
