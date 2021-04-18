@@ -310,14 +310,11 @@ class SportyBet(MatchExtractor):
 
         selection = []
         for row in rows[::2]: #duplicated in twos so get all even index([0,1,2,3] -> [1,3])
-            print(row.text)
             line = row.text.split("\n")
             line[1] = line[1].split("|")[1].lstrip().replace(' v ',' - ')
             access = [0,1,2] #['Home', 'Team A - Team B', '1x2']
             map_access = map(line.__getitem__, access)
             selection.append(list(map_access))
-            print("======================================================================")
-            print(selection)
         return selection
 
 
@@ -355,7 +352,7 @@ class X1Bet(MatchExtractor):
                 # print("MATCHES COL: ", col)
                 matches.append({"source": "1XBET", "league": str(col[1]), "team": str(col[2]), "datetime": ' '.join([a_ for a_ in col[0].split('.')[1:]]).replace(' ','/')})
             continue
-        return matches
+        return matches, driver
 
 
     def slip_extractor(self):
@@ -383,12 +380,12 @@ class X1Bet(MatchExtractor):
         slip_code = ''
 
         driver = self.connect()
-        driver.find_element_by_class_name('c-dropdown__trigger').click()
+        # driver.find_element_by_class_name('c-dropdown__trigger').click()
         coupon = driver.find_element_by_class_name('coupon__input')
         coupon.send_keys('faux') #faux code inorder to keep coupon field active otherwise bug from automated environment
 
         for __match in selections:
-            games = self.games_extractor(__match[1])
+            games, l = self.games_extractor(__match[1])
             print(games)
 
             league = __match[0]
@@ -458,9 +455,9 @@ class X1Bet(MatchExtractor):
             # driver.find_element_by_xpath('//*[@id="modals-container"]/div/div/div[2]/div/div[2]/div[1]/div[2]/div[1]/div').click()
 
             time.sleep(5)
-            rows = driver.find_elements(By.CLASS_NAME, "search-popup-events__content")
+            rows = driver.find_elements(By.CLASS_NAME, "search-popup-events__content") or driver.find_element_by_class_name('search-popup-events__item')
 
-            print(rows, max_index)
+            # print(rows, max_index)
             select_game = rows[max_index] #get the link of the max csim score
             if select_game:
                 pass
@@ -628,13 +625,14 @@ class MSport(MatchExtractor):
             max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
             min_index = min(range(len(csim_check)), key=csim_check.__getitem__)
             # driver.find_element_by_xpath('//*[@id="modals-container"]/div/div/div[2]/div/div[2]/div[1]/div[2]/div[1]/div').click()
-        
+
+            time.sleep(2)
             show_more = driver.find_element_by_xpath('/html/body/div/div[2]/div/div/div[2]/div[2]/div/div[7]')
             if show_more:
                 show_more.click()
             else:
                 pass
-            
+
             time.sleep(3)
             sections = driver.find_elements_by_class_name("m-result-section")
             print("SEC: ", sections)
