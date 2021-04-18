@@ -17,8 +17,8 @@ from selenium.common.exceptions import ElementNotInteractableException, NoSuchEl
 
 from .. import crud, models, schema
 from ..database import engine, SessionLocal
-from ..betsource import BetSources, link_bet9ja, link_sportybet, link_1xbet
-from ..worker import Bet9ja, SportyBet, X1Bet
+from ..betsource import BetSources, link_bet9ja, link_sportybet, link_1xbet, link_msport
+from ..worker import Bet9ja, SportyBet, X1Bet, MSport
 
 import re
 
@@ -84,14 +84,16 @@ async def get_converted_slip(source: BetSources, destination: BetSources, bookin
         if destination == BetSources.sportybet:
             pass
 
-        if destination == BetSources.xbet:
-            print("xtract", matches_extract)
-            _xbet = X1Bet(source=source, site=link_1xbet)
-            for game in matches_extract:
-                _xbet.injector(league=game[1][0], match=game[1][1], bet=game[2][0].split(" ")[1], _bet_type=game[2][0].split(" ")[0])
+        if destination == BetSources.x1bet:
+            __x1bet = X1Bet(source=source, site=link_1xbet)
+            slip_code = __x1bet.injector('bet9ja', selections)
+            # for game in matches_extract:
+            #     _x1bet.injector(league=game[1][0], match=game[1][1], bet=game[2][0].split(" ")[1], _bet_type=game[2][0].split(" ")[0])
+        
         if destination == BetSources.msport:
-            pass
-            
+            __msport = MSport(source=source, site=link_msport)
+            slip_code = __msport.injector('bet9ja', selections)
+
         return {"source": source, "destination": destination, "booking code": slip_code}
 
     elif source == BetSources.sportybet:
@@ -101,11 +103,11 @@ async def get_converted_slip(source: BetSources, destination: BetSources, bookin
             _bet9ja = Bet9ja(source=source, site=link_bet9ja)
             slip_code = _bet9ja.injector('sportybet', selections)
 
-        return {"source": matches.source, "destination": destination, "booking code": slip_code}
+        return {"source": source, "destination": destination, "booking code": slip_code}
         # matches_extract = matches.slip_extractor()
         # return {"source": matches.source, "booking code": matches.booking_code, "matches": matches_extract}
     
-    elif source == BetSources.xbet:
+    elif source == BetSources.x1bet:
         matches = X1Bet(source=source, booking_code=booking_code, site=link_1xbet)
         matches_extract = matches.slip_extractor()
         return {"source": matches.source, "booking code": matches.booking_code, "matches": matches_extract}
