@@ -25,6 +25,7 @@ numpy==1.20.2
 orjson==3.5.1
 promise==2.3
 pydantic==1.8.1
+pyperclip==1.8.2
 python-dotenv==0.17.0
 python-multipart==0.0.5
 PyYAML==5.4.1
