@@ -229,8 +229,7 @@ class Bet9ja(MatchExtractor):
 
             bet = __match[2].split(" ")[-1]
             _bet_type= ' '.join([a for a in __match[2].split(" ")[:-1]])
-            # print("???", bet, _bet_type)
-            
+
 
             n_games = [game['league'] + ' ~ ' + game['team'] for game in games]
 
@@ -445,10 +444,17 @@ class X1Bet(MatchExtractor):
         # coupon.send_keys('faux') #faux code inorder to keep coupon field active otherwise bug from automated environment
 
         for __match in selections:
-            games, driver = self.games_extractor(__match[1])
+            match = __match[1]
+
+            match = MatchExtractor.match_cleanser(match)
+            games, driver = self.games_extractor(match)
+
+            if not games:
+                continue
+
 
             league = __match[0]
-            match = __match[1]
+
             bet = __match[2].split(" ")[-1]
             _bet_type= ' '.join([a for a in __match[2].split(" ")[:-1]])
 
@@ -536,8 +542,8 @@ class X1Bet(MatchExtractor):
 
         driver.find_element_by_class_name('grid__cell.grid__cell--span-6.grid__cell--span-bsr-4.grid__cell--order-bsr-1').click() #tap on save button to generate code
 
-        coupon.send_keys(Keys.CONTROL, 'a') #mark all
-        coupon.send_keys(Keys.CONTROL, 'c') #copy
+        # coupon.send_keys(Keys.CONTROL, 'a') #mark all
+        # coupon.send_keys(Keys.CONTROL, 'c') #copy
         slip_code = pyperclip.paste() #paste copied object in environment
 
         return slip_code
