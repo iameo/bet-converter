@@ -235,7 +235,7 @@ class Bet9ja(MatchExtractor):
                     csim_check.append([csim, game.split('~ ')[1]])
                 else:
                     continue
-            select = driver.find_element_by_partial_link_text(max(csim_check)[1].title())
+            # select = driver.find_element_by_partial_link_text(max(csim_check)[1].title())
 
             max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
             
