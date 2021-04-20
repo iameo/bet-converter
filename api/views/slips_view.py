@@ -109,8 +109,11 @@ async def get_converted_slip(source: BetSources, destination: BetSources, bookin
     
     elif source == BetSources.x1bet:
         matches = X1Bet(source=source, booking_code=booking_code, site=link_1xbet)
-        matches_extract = matches.slip_extractor()
-        return {"source": matches.source, "booking code": matches.booking_code, "matches": matches_extract}
+        selections = matches.slip_extractor()
+        if destination == BetSources.x1bet:
+            __x1bet = X1Bet(source=source, site=link_1xbet)
+            slip_code = __x1bet.injector('1xbet', selections)
+        return {"source": source, "initial":booking_code, "destination": destination, "new code": slip_code}
         # for match in matches:
         #     fetch_team(match)
 
