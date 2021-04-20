@@ -227,8 +227,8 @@ class Bet9ja(MatchExtractor):
 
             league = __match[0]
 
-            bet = __match[2].split(" ")[1]
-            _bet_type=__match[2].split(" ")[0]
+            bet = __match[2].split(" ")[-1]
+            _bet_type= ' '.join([a for a in __match[2].split(" ")[:-1]])
             # print("???", bet, _bet_type)
             
 
@@ -301,7 +301,7 @@ class Bet9ja(MatchExtractor):
             # driver.get(link_bet9ja)
             # # driver.back()
         driver.refresh()
-        time.sleep(3)
+        time.sleep(2)
         place_the_bet = driver.find_element_by_class_name('dx').click()
         time.sleep(2)
         driver.switch_to.frame(driver.find_element_by_tag_name("iframe"))
@@ -420,9 +420,8 @@ class X1Bet(MatchExtractor):
         for game in _selections:
             game[0] = re.split('\d+', game[0])[1]
             game[1] =  game[1] + ' - ' + game[2]
-            game[2] =  game[3].split(' ')[1] + ' ' + game[3].split(' ')[0]
-            games.append(game)
-        # print("}}}}}}}}", games)
+            game[2] =  game[3].split(' ', 1)[1].title() + ' ' + game[3].split(' ', 1)[0]
+            games.append(game[:-1]) #exclude last index - redundant
         
 
         return games
@@ -435,23 +434,23 @@ class X1Bet(MatchExtractor):
         _bet_type = '' #1X or 12 or 2X
         slip_code = ''
 
-        driver = self.connect()
-        # notification = driver.find_element_by_xpath('//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')
-        # if notification:
-        #     notification.click()
-        # else:
-        #     pass
-        driver.find_element_by_class_name('c-dropdown__trigger').click()
-        coupon = driver.find_element_by_class_name('coupon__input')
-        coupon.send_keys('faux') #faux code inorder to keep coupon field active otherwise bug from automated environment
+        # driverx = self.connect()
+        # # notification = driver.find_element_by_xpath('//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')
+        # # if notification:
+        # #     notification.click()
+        # # else:
+        # #     pass
+        # driverx.find_element_by_class_name('c-dropdown__trigger').click()
+        # coupon = driverx.find_element_by_class_name('coupon__input')
+        # coupon.send_keys('faux') #faux code inorder to keep coupon field active otherwise bug from automated environment
 
         for __match in selections:
-            games, _ = self.games_extractor(__match[1])
+            games, driver = self.games_extractor(__match[1])
 
             league = __match[0]
             match = __match[1]
-            bet = __match[2].split(" ")[1]
-            _bet_type=__match[2].split(" ")[0]
+            bet = __match[2].split(" ")[-1]
+            _bet_type= ' '.join([a for a in __match[2].split(" ")[:-1]])
 
             n_games = [game['league'] + ' ~ ' + game['team'] for game in games]
 
@@ -478,17 +477,15 @@ class X1Bet(MatchExtractor):
                 else:
                     continue
                 
-            
             max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
 
             # driver.find_element_by_xpath('//*[@id="modals-container"]/div/div/div[2]/div/div[2]/div[1]/div[2]/div[1]/div').click()
             # driver.find_element_by_xpath('//*[@id="checkbox_1"]').click()
             
 
-            time.sleep(3)
+            time.sleep(2)
             rows = driver.find_element(By.CLASS_NAME, "search-popup-events").find_elements(By.TAG_NAME, "a")
             #  or driver.find_element_by_class_name('search-popup-events__item')
-            print("ROWS: ", rows, max_index)
             # print(rows, max_index)
             select_game = rows[max_index] #get the link of the max csim score
             if select_game:
@@ -504,6 +501,7 @@ class X1Bet(MatchExtractor):
             bet_types = driver.find_elements_by_class_name("bet_type")
             bet_selections = driver.find_elements_by_class_name("bet-title")
 
+
             if str(_bet_type) == '1': #Home team
                 _bet_type = max(csim_check)[1].split(' - ')[0] # Team A - Team B (split and get Team A)
             if str(_bet_type) == '2': #Away team; Draw is Draw still on 1Xbet so no need to alter that
@@ -511,11 +509,9 @@ class X1Bet(MatchExtractor):
             else:
                 _bet_type = _bet_type
 
-            print("YOUR BET: ", _bet_type)
 
             for bet_type, bet_selection in zip(bet_types, bet_selections):
                 if (bet_type.text == _bet_type.title() or bet_type.text == _bet_type.strip().upper()) and (str(bet_selection.text).lower() == str(bet).lower()) and bet_type.text != "" and bet_type.text != " ":
-                    print(bet_type.text)
                     print("BET SEEN")
                     bet_type.click()
                     time.sleep(1)
