@@ -114,6 +114,9 @@ async def get_converted_slip(source: BetSources, destination: BetSources, bookin
         # for match in matches:
         #     fetch_team(match)
 
+    elif source == BetSources.betway:
+        pass
+
 
 
 @slip_view.get("/slips/all/", response_model=List[schema.BookingSlipOut])
