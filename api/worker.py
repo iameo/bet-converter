@@ -210,10 +210,19 @@ class Bet9ja(MatchExtractor):
         driver = self.connect()
 
         for __match in selections:
-            games = self.games_extractor(__match[1])
+            match = __match[1]
+            if '&' in match:
+                match = match.split('&')[0]
+            else:
+                match = match
+
+            games = self.games_extractor(match)
+
+            if not games: #no record found, skip to next game
+                continue
 
             league = __match[0]
-            match = __match[1]
+
             bet = __match[2].split(" ")[1]
             _bet_type=__match[2].split(" ")[0]
                 
@@ -410,11 +419,11 @@ class X1Bet(MatchExtractor):
         slip_code = ''
 
         driver = self.connect()
-        notification = driver.find_element_by_xpath('//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')
-        if notification:
-            notification.click()
-        else:
-            pass
+        # notification = driver.find_element_by_xpath('//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')
+        # if notification:
+        #     notification.click()
+        # else:
+        #     pass
         driver.find_element_by_class_name('c-dropdown__trigger').click()
         coupon = driver.find_element_by_class_name('coupon__input')
         coupon.send_keys('faux') #faux code inorder to keep coupon field active otherwise bug from automated environment
@@ -468,7 +477,8 @@ class X1Bet(MatchExtractor):
             if select_game:
                 pass
             else:
-                return "Match not found"
+                # return "Match not found"
+                pass
 
             ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
             driver.switch_to.window(driver.window_handles[1])
@@ -492,6 +502,7 @@ class X1Bet(MatchExtractor):
                     print("BET SEEN")
                     bet_type.click()
                     time.sleep(1)
+                    break
                     # driver.switch_to.window(windows[0])
                     # driver.refresh()
                     
@@ -500,21 +511,23 @@ class X1Bet(MatchExtractor):
                     continue
                         # driver.switch_to.window(windows[0])
                         # driver.refresh()
-            driver.refresh()
+            driver.close()
             driver.switch_to.window(driver.window_handles[0])
 
-            element = driver.find_element_by_class_name('right-banners-block')
+        driver.refresh()
 
-            actions = ActionChains(driver)
-            actions.move_to_element(element).perform() #move below save button for interactivity
+        element = driver.find_element_by_class_name('right-banners-block')
 
-            driver.find_element_by_class_name('grid__cell.grid__cell--span-6.grid__cell--span-bsr-4.grid__cell--order-bsr-1').click() #tap on save button to generate code
+        actions = ActionChains(driver)
+        actions.move_to_element(element).perform() #move below save button for interactivity
 
-            coupon.send_keys(Keys.CONTROL, 'a') #mark all
-            coupon.send_keys(Keys.CONTROL, 'c') #copy
-            slip_code = pyperclip.paste() #paste copied object in environment
+        driver.find_element_by_class_name('grid__cell.grid__cell--span-6.grid__cell--span-bsr-4.grid__cell--order-bsr-1').click() #tap on save button to generate code
 
-            return slip_code
+        coupon.send_keys(Keys.CONTROL, 'a') #mark all
+        coupon.send_keys(Keys.CONTROL, 'c') #copy
+        slip_code = pyperclip.paste() #paste copied object in environment
+
+        return slip_code
 
   
 class MSport(MatchExtractor):
