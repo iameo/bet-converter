@@ -104,6 +104,12 @@ class MatchExtractor(ABC):
 
         return out
 
+    @staticmethod
+    def match_cleanser(match):
+        _match = re.sub(' & \w+', '', match) #Chelsea - Brighton & Hove ==> Chelsea - Brighton
+        return _match
+
+
 
 
 
@@ -140,7 +146,7 @@ class Bet9ja(MatchExtractor):
 
             if not match:
                 matches.append({"source": page_title, "league": str(league), "team": match_team.split("\n")[1], "datetime": str(match_time)})
-        return matches
+        return matches, driver
         
 
     def slip_extractor(self):
@@ -207,16 +213,14 @@ class Bet9ja(MatchExtractor):
         league = ''
         bet = ''
         _bet_type = ''
-        driver = self.connect()
+        # driver = self.connect()
 
         for __match in selections:
             match = __match[1]
-            if '&' in match:
-                match = match.split('&')[0]
-            else:
-                match = match
+            match = MatchExtractor.match_cleanser(match)
 
-            games = self.games_extractor(match)
+
+            games, driver = self.games_extractor(match)
 
             if not games: #no record found, skip to next game
                 continue
@@ -225,7 +229,8 @@ class Bet9ja(MatchExtractor):
 
             bet = __match[2].split(" ")[1]
             _bet_type=__match[2].split(" ")[0]
-                
+            # print("???", bet, _bet_type)
+            
 
             n_games = [game['league'] + ' ~ ' + game['team'] for game in games]
 
@@ -249,8 +254,12 @@ class Bet9ja(MatchExtractor):
             max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
             
             time.sleep(3)
-
+# driver.find_element_by_class_name('dgStyle').find_elements(By.TAG_NAME, "tr")[1:]
+            # try:
             rows = driver.find_element_by_class_name('dgStyle').find_elements(By.TAG_NAME, "a")[2:] #['descr', 'date','....']
+            # except NoSuchElementException:
+            #     rows = driver.find_element_by_id('h_w_PC_PC_gridSottoEventi').find_elements(By.TAG_NAME, "a")[2:] #['descr', 'date','....']
+
 
 
             select_game = rows[max_index] #get the link of the max csim score
@@ -265,21 +274,29 @@ class Bet9ja(MatchExtractor):
 
             bet_types = driver.find_elements_by_class_name("SEOddsTQ")
             bet_selections = driver.find_elements_by_class_name("SECQ")
+            
+            if str(_bet_type).lower() == str(__match[1].split(' - ')[0]).lower():
+                _bet_type = 1
+            elif str(_bet_type).lower() == str(__match[1].split(' - ')[1]).lower():
+                _bet_type = 2
+            else:
+                _bet_type = _bet_type
+
 
             #place bet
             for bet_type, bet_selection in zip(bet_types, bet_selections):
-
                 #match bet and bet type: Home - Home and 1x2 - 1x2
                 if str(bet_type.text).lower() == str(_bet_type).lower() and (bet_selection.text.lower() == bet.lower()):
                     fo = bet_type.find_element_by_xpath('following-sibling::*')
                     fo.click()
-                    break
+                    driver.close()
+                    driver.switch_to.window(driver.window_handles[0])
                     
                 else:
                     continue
             
-            driver.close()
-            driver.switch_to.window(driver.window_handles[0])
+            # driver.close()
+            # driver.switch_to.window(driver.window_handles[0])
             # driver.refresh()
             # driver.get(link_bet9ja)
             # # driver.back()
@@ -388,9 +405,9 @@ class X1Bet(MatchExtractor):
             driver.find_element_by_class_name('c-dropdown__trigger').click()
             coupon = driver.find_element_by_class_name('coupon__input')
             coupon.send_keys(self.booking_code)
-            time.sleep(3)
+            time.sleep(1)
             driver.find_element_by_xpath('//*[@id="sports_right"]/div/div[2]/div/div[2]/div[1]/div/div[3]/div[3]/div/div/div/div[2]/div/div/div[3]/div/button').click()
-            time.sleep(3)
+            time.sleep(2)
             selections = driver.find_element_by_class_name('coupon__bets').text
         except NoSuchElementException as e:
             print(str(e))
@@ -403,7 +420,7 @@ class X1Bet(MatchExtractor):
         for game in _selections:
             game[0] = re.split('\d+', game[0])[1]
             game[1] =  game[1] + ' - ' + game[2]
-            game[2] =  game[3]
+            game[2] =  game[3].split(' ')[1] + ' ' + game[3].split(' ')[0]
             games.append(game)
         # print("}}}}}}}}", games)
         
@@ -602,10 +619,14 @@ class MSport(MatchExtractor):
         # driver = self.connect()
 
         for __match in selections:
-            games, driver = self.games_extractor(__match[1])
+            match = __match[1]
+
+            match = MatchExtractor.match_cleanser(match)
+
+            games, driver = self.games_extractor(match)
 
             league = __match[0]
-            match = __match[1]
+
             bet = __match[2].split(" ")[1]
             _bet_type=__match[2].split(" ")[0]
                 
