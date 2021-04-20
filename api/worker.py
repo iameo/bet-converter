@@ -125,12 +125,10 @@ class Bet9ja(MatchExtractor):
 
         page_title = driver.title
 
+        time.sleep(2)
 
-        try:
-            rows = driver.find_element_by_xpath('//*[@id="h_w_PC_PC_gridSottoEventi"]').find_elements(By.TAG_NAME, "tr")[1:]
-        except NoSuchElementException:
-            rows = driver.find_element_by_xpath('//*[@id="s_w_PC_PC_gridSottoEventi"]').find_elements(By.TAG_NAME, "tr")[1:] #**barffs**
-
+        rows = driver.find_element_by_class_name('dgStyle').find_elements(By.TAG_NAME, "tr")[1:]
+        
         matches = []
 
         for row in rows:
@@ -139,30 +137,32 @@ class Bet9ja(MatchExtractor):
             match_time = str(col[1].text)
             league = match_team.split("\n")[0]
             match = re.findall(r"\(.*?\)", match_team)
-            # print(match)
-            if not match and "simulated" not in league.lower() and "-zoom" not in league.lower() \
-                and "cyber live" not in league.lower() and "first goal" not in league.lower() and "match stats" not in league.lower() and "team to score " not in league.lower():
+
+            if not match:
                 matches.append({"source": page_title, "league": str(league), "team": match_team.split("\n")[1], "datetime": str(match_time)})
-        
-        return matches
+        return matches, driver
         
 
     def slip_extractor(self):
         driver = self.connect()
 
         try:
-            elem = driver.find_element_by_xpath('//*[@id="h_w_PC_cCoupon_txtPrenotatore"]')
+            elem = driver.find_element_by_class_name('TextBox')
         except Exception as e:
             print(">>>>>>", str(e))
 
         elem.send_keys(self.booking_code)
 
         try:
-            load = driver.find_element_by_xpath('//*[@id="h_w_PC_cCoupon_lnkLoadPrenotazione"]').click()
+            load = driver.find_element_by_class_name('lnk.Load').click()
         except Exception as e:
             print(">>>>>>", str(e)) 
 
+        time.sleep(3)
+        # try:
         stat = driver.find_element_by_id('h_w_PC_cCoupon_mexPrenotazione')
+        # except NoSuchElementException:
+        #     stat = driver.find_element_by_id('s_w_PC_cCoupon_mexPrenotazione')
 
         if 'not found' in stat.text:
             return {"status": "booking code has expired or invalid!"}
@@ -181,7 +181,7 @@ class Bet9ja(MatchExtractor):
             # _selections = [selection for selection in selections] #exclude game tag and odd
 
             selections = [row.text.split("\n")[1:-1] for row in rows] #['Premier League', 'Team A - Team B', '1 1X2']
-            print("SELE: ", selections)
+            # print("SELE: ", selections)
 
             return selections
         
@@ -195,7 +195,6 @@ class Bet9ja(MatchExtractor):
             # selections = [MatchExtractor.chunk_it(_row.text.split("\n"), n_rows) for _row in rows] #exclude game tag and odd
             # _selections = [selection for selection in selections]
             selections = [row.text.split("\n")[1:-1] for row in rows]
-            print("SELE: ", selections)
 
             return selections
         #redundant code above; create a function and replace!
@@ -208,10 +207,10 @@ class Bet9ja(MatchExtractor):
         league = ''
         bet = ''
         _bet_type = ''
-        driver = self.connect()
+        # driver = self.connect()
 
         for __match in selections:
-            games = self.games_extractor(__match[1])
+            games, driver = self.games_extractor(__match[1])
 
             league = __match[0]
             match = __match[1]
@@ -224,23 +223,34 @@ class Bet9ja(MatchExtractor):
             p_match = [_match for _match in n_games if _match != [''] if _match != [' ~ ']]
 
             csim_check = []
-            print("PMA: ", p_match)
+
             for game in p_match:
-                print("GA<E: ", game)
                 if len(game) >= 4:
                     relations = [self.clean_string(game), self.clean_string(league + ' ' + match)]
-                    csim = self.check_similarity(relations)
+                    if "simulated" not in relations[0] and "-zoom" not in relations[0] \
+                            and "cyber live" not in relations[0] and "first goal" not in relations[0] and "match stats" not in relations[0] and "team to score " not in relations[0]:
+                        csim = self.check_similarity(relations)
+                    else:
+                        csim = 0
                     csim_check.append([csim, game.split('~ ')[1]])
                 else:
                     continue
-
             select = driver.find_element_by_partial_link_text(max(csim_check)[1].title())
-            if select:
+
+            max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
+            
+            time.sleep(2)
+
+            rows = driver.find_element_by_class_name('dgStyle').find_elements(By.TAG_NAME, "a")[2:] #['descr', 'date','....']
+
+
+            select_game = rows[max_index] #get the link of the max csim score
+            if select_game:
                 pass
             else:
                 return "Match not found"
 
-            ActionChains(driver).move_to_element(select).key_down(Keys.CONTROL).click(select).key_up(Keys.COMMAND).perform()
+            ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
             driver.switch_to.window(driver.window_handles[1])
 
 
@@ -265,6 +275,7 @@ class Bet9ja(MatchExtractor):
             # driver.get(link_bet9ja)
             # # driver.back()
         driver.refresh()
+        time.sleep(3)
         place_the_bet = driver.find_element_by_class_name('dx').click()
         time.sleep(2)
         driver.switch_to.frame(driver.find_element_by_tag_name("iframe"))
