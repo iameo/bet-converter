@@ -239,7 +239,7 @@ class Bet9ja(MatchExtractor):
 
             max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
             
-            time.sleep(2)
+            time.sleep(3)
 
             rows = driver.find_element_by_class_name('dgStyle').find_elements(By.TAG_NAME, "a")[2:] #['descr', 'date','....']
 
@@ -431,8 +431,6 @@ class X1Bet(MatchExtractor):
 
             p_match = [_match for _match in n_games if _match != [''] if _match != [' ~ ']]
 
-            print("PM", p_match)
-
          
             if 'euro' in league.lower():
                 league = 'UEFA European Championship'
@@ -467,7 +465,6 @@ class X1Bet(MatchExtractor):
             print("ROWS: ", rows, max_index)
             # print(rows, max_index)
             select_game = rows[max_index] #get the link of the max csim score
-            print("ROWS: ", rows, select_game)
             if select_game:
                 pass
             else:
@@ -476,33 +473,6 @@ class X1Bet(MatchExtractor):
             ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
             driver.switch_to.window(driver.window_handles[1])
 
-            # driver.refresh()
-            
-
-            element = driver.find_element_by_class_name('right-banners-block')
-
-            actions = ActionChains(driver)
-            actions.move_to_element(element).perform() #move below save button for interactivity
-
-            driver.find_element_by_class_name('grid__cell.grid__cell--span-6.grid__cell--span-bsr-4.grid__cell--order-bsr-1').click() #tap on save button to generate code
-
-            coupon.send_keys(Keys.CONTROL, 'a') #mark all
-            coupon.send_keys(Keys.CONTROL, 'c') #copy
-            slip_code = pyperclip.paste() #paste copied object in environment
-
-            return slip_code
-
-
-            # if select_game:
-            #     select_game.click()
-            # else:
-            #     print("match not found")
-            #     return "Match not found"
-                # break
-
-            # windows = driver.window_handles
-
-            # driver.switch_to.window(windows[1])
 
             bet_types = driver.find_elements_by_class_name("bet_type")
             bet_selections = driver.find_elements_by_class_name("bet-title")
@@ -530,8 +500,21 @@ class X1Bet(MatchExtractor):
                     continue
                         # driver.switch_to.window(windows[0])
                         # driver.refresh()
-            driver.close()
+            driver.refresh()
             driver.switch_to.window(driver.window_handles[0])
+
+            element = driver.find_element_by_class_name('right-banners-block')
+
+            actions = ActionChains(driver)
+            actions.move_to_element(element).perform() #move below save button for interactivity
+
+            driver.find_element_by_class_name('grid__cell.grid__cell--span-6.grid__cell--span-bsr-4.grid__cell--order-bsr-1').click() #tap on save button to generate code
+
+            coupon.send_keys(Keys.CONTROL, 'a') #mark all
+            coupon.send_keys(Keys.CONTROL, 'c') #copy
+            slip_code = pyperclip.paste() #paste copied object in environment
+
+            return slip_code
 
   
 class MSport(MatchExtractor):
@@ -592,7 +575,6 @@ class MSport(MatchExtractor):
                             "league": _game[1],
                             "team": ' '.join([a_ for a_ in _game[2:5]]).replace('vs','-')}
                             )    
-        print("MSPORT: ", matches)
         return matches, driver
 
     def slip_extractor(self):
@@ -632,8 +614,6 @@ class MSport(MatchExtractor):
             
             print("CK: ", csim_check)
             max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
-            min_index = min(range(len(csim_check)), key=csim_check.__getitem__)
-            # driver.find_element_by_xpath('//*[@id="modals-container"]/div/div/div[2]/div/div[2]/div[1]/div[2]/div[1]/div').click()
 
             time.sleep(2)
             show_more = driver.find_element_by_xpath('/html/body/div/div[2]/div/div/div[2]/div[2]/div/div[7]')
@@ -682,9 +662,7 @@ class MSport(MatchExtractor):
             
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
-            # driver.refresh()
-            # driver.get(link_bet9ja)
-            # # driver.back()
+
         driver.refresh()
         place_the_bet = driver.find_element_by_class_name('dx').click()
         time.sleep(2)
