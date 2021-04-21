@@ -452,7 +452,6 @@ class X1Bet(MatchExtractor):
             if not games:
                 continue
 
-
             league = __match[0]
 
             bet = __match[2].split(" ")[-1]
@@ -503,6 +502,7 @@ class X1Bet(MatchExtractor):
             ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
             driver.switch_to.window(driver.window_handles[1])
 
+            window_now = driver.window_handles[0]
 
             bet_types = driver.find_elements_by_class_name("bet_type")
             bet_selections = driver.find_elements_by_class_name("bet-title")
@@ -522,14 +522,11 @@ class X1Bet(MatchExtractor):
                     bet_type.click()
                     time.sleep(1)
                     break
-                    # driver.switch_to.window(windows[0])
-                    # driver.refresh()
+                    # driver.close()
+                    # driver.switch_to.window(driver.window_handles[0])
                     
                 else:
-                    # print("NOOOOOOOOOOOOOOOOO")
                     continue
-                        # driver.switch_to.window(windows[0])
-                        # driver.refresh()
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
 
