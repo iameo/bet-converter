@@ -67,8 +67,8 @@ def get_slip_by_code(booking_code: str, db: Session = Depends(get_db)):
     return slip
 
 
-@slip_view.get("/slips/convert/{booking_code}")
-async def get_converted_slip(source: BetSources, destination: BetSources, booking_code: str, db: Session = Depends(get_db)):
+@slip_view.get("/slips/convert/")
+async def get_converted_slip(booking_code: str, source: BetSources, destination: BetSources, db: Session = Depends(get_db)):
     # check slip is valid against source, goto source, extract, "store", go to dest, input, book, return booking code
 
     matches_extract = []
@@ -77,24 +77,25 @@ async def get_converted_slip(source: BetSources, destination: BetSources, bookin
     if source == BetSources.bet9ja:
         selections = Bet9ja(source=source, booking_code=booking_code, site=link_bet9ja).slip_extractor()
 
-        if destination == BetSources.bet9ja:
-            __bet9ja = Bet9ja(source=source, site=link_bet9ja)
-            slip_code = __bet9ja.injector('bet9ja', selections)
+        if selections is not None:
+            if destination == BetSources.bet9ja:
+                __bet9ja = Bet9ja(source=source, site=link_bet9ja)
+                slip_code = __bet9ja.injector('bet9ja', selections)
 
-        if destination == BetSources.sportybet:
-            pass
+            if destination == BetSources.sportybet:
+                pass
 
-        if destination == BetSources.x1bet:
-            __x1bet = X1Bet(source=source, site=link_1xbet)
-            slip_code = __x1bet.injector('bet9ja', selections)
-            # for game in matches_extract:
-            #     _x1bet.injector(league=game[1][0], match=game[1][1], bet=game[2][0].split(" ")[1], _bet_type=game[2][0].split(" ")[0])
-        
-        if destination == BetSources.msport:
-            __msport = MSport(source=source, site=link_msport)
-            slip_code = __msport.injector('bet9ja', selections)
+            if destination == BetSources.x1bet:
+                __x1bet = X1Bet(source=source, site=link_1xbet)
+                slip_code = __x1bet.injector('bet9ja', selections)
 
-        return {"source": source, "destination": destination, "booking code": slip_code}
+            if destination == BetSources.msport:
+                __msport = MSport(source=source, site=link_msport)
+                slip_code = __msport.injector('bet9ja', selections)
+
+            return {"source": source, "destination": destination, "booking code": slip_code}
+        else:
+            return {"status": "failed"}
 
     elif source == BetSources.sportybet:
         selections = SportyBet(source=source, booking_code=booking_code, site=link_sportybet).slip_extractor()
@@ -110,19 +111,23 @@ async def get_converted_slip(source: BetSources, destination: BetSources, bookin
     elif source == BetSources.x1bet:
         matches = X1Bet(source=source, booking_code=booking_code, site=link_1xbet)
         selections = matches.slip_extractor()
-        if destination == BetSources.x1bet:
-            __x1bet = X1Bet(source=source, site=link_1xbet)
-            slip_code = __x1bet.injector('1xbet', selections)
-        
-        
-        if destination == BetSources.bet9ja:
-            __bet9ja = Bet9ja(source=source, site=link_bet9ja)
-            slip_code = __bet9ja.injector('1xbet', selections)
 
-        return {"source": source, "initial":booking_code, "destination": destination, "new code": slip_code}
+        if selections is not None:
+            if destination == BetSources.x1bet:
+                __x1bet = X1Bet(source=source, site=link_1xbet)
+                slip_code = __x1bet.injector('1xbet', selections)
+            
+        
+            if destination == BetSources.bet9ja:
+                __bet9ja = Bet9ja(source=source, site=link_bet9ja)
+                slip_code = __bet9ja.injector('1xbet', selections)
+
+            return {"source": source, "initial":booking_code, "destination": destination, "new code": slip_code}
         # for match in matches:
         #     fetch_team(match)
-
+        else:
+            return {"status": "failed"}
+    
     elif source == BetSources.betway:
         pass
 
