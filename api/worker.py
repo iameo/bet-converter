@@ -147,7 +147,7 @@ class Bet9ja(MatchExtractor):
 
             if not match:
                 matches.append({"source": page_title, "league": str(league), "team": match_team.split("\n")[1], "datetime": str(match_time)})
-        return matches, driver
+        return matches
         
 
     def slip_extractor(self):
@@ -218,10 +218,15 @@ class Bet9ja(MatchExtractor):
 
         for __match in selections:
             match = __match[1]
-
             match = MatchExtractor.match_cleanser(match)
-            games, driver = self.games_extractor(match)
+            elem = driver.find_element_by_class_name("TxtCerca")
+            elem.click()
+            elem.send_keys("......................") #faux to allow input in next loop otherwise buggy
+            elem.clear()
+            elem.send_keys(match)
 
+            games = self.games_extractor(driver)
+                
             if not games: #no record found, skip to next game
                 continue
 
