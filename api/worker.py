@@ -302,7 +302,7 @@ class Bet9ja(MatchExtractor):
 
             except Exception as e:
                 print(str(e))
-        # driver.refresh() #since it refrehes in end of loop above
+
         time.sleep(2)
         place_the_bet = driver.find_element_by_class_name('dx').click()
         time.sleep(2)
@@ -359,22 +359,15 @@ class SportyBet(MatchExtractor):
 
 
 class X1Bet(MatchExtractor):
-    def games_extractor(self, team):
-
-        driver = self.connect()
+    def games_extractor(self, driver, team):
 
         # notification on 1xbet removed as at 16-04-2021
         # back on 5 hours 2later
         notification = driver.find_element_by_xpath('//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')
+        
         if notification:
             notification.click()
-        try:
-            elem = driver.find_element_by_xpath('//*[@id="hottest_games"]/div/div[1]/div/div/div/div/div[2]/div/div[1]/input')
-        except NoSuchElementException as e:
-            print(str(e))
             
-        elem.clear()
-        elem.send_keys(team)
 
         driver.find_element_by_class_name('sport-search__btn').click()
         time.sleep(2)
@@ -391,12 +384,13 @@ class X1Bet(MatchExtractor):
             if len(col) >= 4:
                 matches.append({"source": "1XBET", "league": str(col[1]), "team": str(col[2]), "datetime": ' '.join([a_ for a_ in col[0].split('.')[1:]]).replace(' ','/')})
             continue
-        return matches, driver
+        return matches
 
 
     def slip_extractor(self):
 
         driver = self.connect()
+        
         notification = driver.find_element_by_xpath('//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')
         if notification:
             notification.click()
@@ -435,7 +429,7 @@ class X1Bet(MatchExtractor):
         _bet_type = '' #1X or 12 or 2X
         slip_code = ''
 
-        # driver = self.connect()
+        driver = self.connect()
 
         # notification = driver.find_element_by_xpath('//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')
         # if notification:
@@ -452,7 +446,17 @@ class X1Bet(MatchExtractor):
 
             match = MatchExtractor.match_cleanser(match)
             time.sleep(1)
-            games, driver = self.games_extractor(match)
+            try:
+                elem = driver.find_element_by_xpath('//*[@id="hottest_games"]/div/div[1]/div/div/div/div/div[2]/div/div[1]/input')
+            except NoSuchElementException as e:
+                print(str(e))
+            
+            elem.click()
+            elem.send_keys(" ") #faux to allow input in next loop otherwise buggy
+            elem.clear()
+            elem.send_keys(match)
+
+            games = self.games_extractor(driver, match)
            
             if not games:
                 continue
@@ -494,17 +498,14 @@ class X1Bet(MatchExtractor):
             #  or driver.find_element_by_class_name('search-popup-events__item')
             # print(rows, max_index)
             select_game = rows[max_index] #get the link of the max csim score
-            if select_game:
 
+            if select_game:
                 ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
                 driver.switch_to.window(driver.window_handles[1])               
                 #  pass
             else:
                 # return "Match not found"
                 pass
-
-
-            window_now = driver.window_handles[0]
 
             bet_types = driver.find_elements_by_class_name("bet_type")
             bet_selections = driver.find_elements_by_class_name("bet-title")
@@ -520,19 +521,18 @@ class X1Bet(MatchExtractor):
 
             for bet_type, bet_selection in zip(bet_types, bet_selections):
                 if (bet_type.text == _bet_type.title() or bet_type.text == _bet_type.strip().upper()) and (str(bet_selection.text).lower() == str(bet).lower()) and bet_type.text != "" and bet_type.text != " ":
-                    print("BET SEEN")
                     bet_type.click()
                     time.sleep(1)
                     break
                     
                 else:
                     continue
-            # driver.close()
+            
+            driver.close()
             driver.switch_to.window(driver.window_handles[0])
+            driver.back()
             driver.refresh()
-            # driver.close()
 
-        driver.refresh()
 
         element = driver.find_element_by_class_name('right-banners-block')
 
