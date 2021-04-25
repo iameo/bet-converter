@@ -117,12 +117,6 @@ class MatchExtractor(ABC):
 class Bet9ja(MatchExtractor):
     def games_extractor(self, team):
 
-        elem = driver.find_element_by_class_name("TxtCerca")
-        elem.clear()
-
-        elem.send_keys(team)
-        time.sleep(1)
-
         try:
             submit = driver.find_element_by_xpath('//*[@id="h_w_PC_oddsSearch_btnCerca"]').click()
         except Exception as e:
