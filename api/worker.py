@@ -217,94 +217,99 @@ class Bet9ja(MatchExtractor):
         # driver = self.connect()
 
         for __match in selections:
-            match = __match[1]
-            match = MatchExtractor.match_cleanser(match)
-            elem = driver.find_element_by_class_name("TxtCerca")
-            elem.click()
-            elem.send_keys("......................") #faux to allow input in next loop otherwise buggy
-            elem.clear()
-            elem.send_keys(match)
+            print("SE:LE: ", selections)
+            try:
+                match = __match[1]
+                match = MatchExtractor.match_cleanser(match)
+                elem = driver.find_element_by_class_name("TxtCerca")
+                elem.click()
+                elem.send_keys("......................") #faux to allow input in next loop otherwise buggy
+                elem.clear()
+                elem.send_keys(match)
 
-            games = self.games_extractor(driver)
-                
-            if not games: #no record found, skip to next game
-                continue
-
-            league = __match[0]
-
-            bet = __match[2].split(" ")[-1]
-            _bet_type= ' '.join([a for a in __match[2].split(" ")[:-1]])
-
-
-            n_games = [game['league'] + ' ~ ' + game['team'] for game in games]
-
-            p_match = [_match for _match in n_games if _match != [''] if _match != [' ~ ']]
-
-            csim_check = []
-
-            for game in p_match:
-                if len(game) >= 4:
-                    relations = [self.clean_string(game), self.clean_string(league + ' ' + match)]
-                    if "simulated" not in relations[0] and "-zoom" not in relations[0] \
-                            and "cyber live" not in relations[0] and "first goal" not in relations[0] and "match stats" not in relations[0] and "team to score " not in relations[0]:
-                        csim = self.check_similarity(relations)
-                    else:
-                        csim = 0
-                    csim_check.append([csim, game.split('~ ')[1]])
-                else:
-                    continue
-            # select = driver.find_element_by_partial_link_text(max(csim_check)[1].title())
-
-            max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
-            
-            time.sleep(2)
-            # driver.find_element_by_class_name('dgStyle').find_elements(By.TAG_NAME, "tr")[1:]
-            # try:
-            rows = driver.find_element_by_class_name('dgStyle').find_elements(By.TAG_NAME, "a")[2:] #['descr', 'date','....']
-            # except NoSuchElementException:
-            #     rows = driver.find_element_by_id('h_w_PC_PC_gridSottoEventi').find_elements(By.TAG_NAME, "a")[2:] #['descr', 'date','....']
-
-
-
-            select_game = rows[max_index] #get the link of the max csim score
-            if select_game:
-                pass
-            else:
-                continue
-                # select_game.click()
-            ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
-            driver.switch_to.window(driver.window_handles[1])
-
-
-            bet_types = driver.find_elements_by_class_name("SEOddsTQ")
-            bet_selections = driver.find_elements_by_class_name("SECQ")
-            
-            if str(_bet_type).lower() == str(__match[1].split(' - ')[0]).lower():
-                _bet_type = 1
-            elif str(_bet_type).lower() == str(__match[1].split(' - ')[1]).lower():
-                _bet_type = 2
-            else:
-                _bet_type = _bet_type
-
-            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", bet_types, bet_selections)
-
-            #place bet
-            for bet_type, bet_selection in zip(bet_types, bet_selections):
-                #match bet and bet type: Home - Home and 1x2 - 1x2
-                print("+++++++++++++++++++++++++++", bet_type.text, _bet_type)
-                if str(bet_type.text).lower() == str(_bet_type).lower() and (bet_selection.text.lower() == bet.lower()):
-                    fo = bet_type.find_element_by_xpath('following-sibling::*')
-                    fo.click()
-                    break
+                games = self.games_extractor(driver)
                     
-                else:
+                if not games: #no record found, skip to next game
                     continue
-            
-            driver.close()
-            driver.switch_to.window(driver.window_handles[0])
-            driver.refresh()
 
-        driver.refresh()
+                league = __match[0]
+
+                bet = __match[2].split(" ")[-1]
+                _bet_type= ' '.join([a for a in __match[2].split(" ")[:-1]])
+
+
+                n_games = [game['league'] + ' ~ ' + game['team'] for game in games]
+
+                p_match = [_match for _match in n_games if _match != [''] if _match != [' ~ ']]
+
+                csim_check = []
+
+                for game in p_match:
+                    if len(game) >= 4:
+                        relations = [self.clean_string(game), self.clean_string(league + ' ' + match)]
+                        if "simulated" not in relations[0] and "-zoom" not in relations[0] \
+                                and "cyber live" not in relations[0] and "first goal" not in relations[0] and "match stats" not in relations[0] and "team to score " not in relations[0]:
+                            csim = self.check_similarity(relations)
+                        else:
+                            csim = 0
+                        csim_check.append([csim, game.split('~ ')[1]])
+                    else:
+                        continue
+                # select = driver.find_element_by_partial_link_text(max(csim_check)[1].title())
+
+                max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
+                
+                time.sleep(2)
+                # driver.find_element_by_class_name('dgStyle').find_elements(By.TAG_NAME, "tr")[1:]
+                # try:
+                rows = driver.find_element_by_class_name('dgStyle').find_elements(By.TAG_NAME, "a")[2:] #['descr', 'date','....']
+                # except NoSuchElementException:
+                #     rows = driver.find_element_by_id('h_w_PC_PC_gridSottoEventi').find_elements(By.TAG_NAME, "a")[2:] #['descr', 'date','....']
+
+
+
+                select_game = rows[max_index] #get the link of the max csim score
+                if select_game:
+                    if 'SRL' in select_game: #simulated game; break
+                        break #move to next match since selected game is simulated
+                else:
+                    break #move to next match since no match
+                
+                ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
+                driver.switch_to.window(driver.window_handles[1])
+
+
+                bet_types = driver.find_elements_by_class_name("SEOddsTQ")
+                bet_selections = driver.find_elements_by_class_name("SECQ")
+                
+                if str(_bet_type).lower() == str(__match[1].split(' - ')[0]).lower():
+                    _bet_type = 1
+                elif str(_bet_type).lower() == str(__match[1].split(' - ')[1]).lower():
+                    _bet_type = 2
+                else:
+                    _bet_type = _bet_type
+
+                print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", bet_types, bet_selections)
+
+                #place bet
+                for bet_type, bet_selection in zip(bet_types, bet_selections):
+                    #match bet and bet type: Home - Home and 1x2 - 1x2
+                    print("+++++++++++++++++++++++++++", bet_type.text, _bet_type)
+                    if str(bet_type.text).lower() == str(_bet_type).lower() and (bet_selection.text.lower() == bet.lower()):
+                        fo = bet_type.find_element_by_xpath('following-sibling::*')
+                        fo.click()
+                        break
+                        
+                    else:
+                        continue
+                
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
+                driver.back()
+                driver.refresh()
+            except Exception as e:
+                print(str(e))
+        # driver.refresh() #since it refrehes in end of loop above
         time.sleep(2)
         place_the_bet = driver.find_element_by_class_name('dx').click()
         time.sleep(2)
