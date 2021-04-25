@@ -115,7 +115,7 @@ class MatchExtractor(ABC):
 
 
 class Bet9ja(MatchExtractor):
-    def games_extractor(self, team):
+    def games_extractor(self, driver):
 
         try:
             submit = driver.find_element_by_xpath('//*[@id="h_w_PC_oddsSearch_btnCerca"]').click()
@@ -210,13 +210,12 @@ class Bet9ja(MatchExtractor):
         driver = self.connect()
 
         for __match in selections:
-            print("SE:LE: ", selections)
             try:
                 match = __match[1]
                 match = MatchExtractor.match_cleanser(match)
                 elem = driver.find_element_by_class_name("TxtCerca")
                 elem.click()
-                elem.send_keys("......................") #faux to allow input in next loop otherwise buggy
+                elem.send_keys(" ") #faux to allow input in next loop otherwise buggy
                 elem.clear()
                 elem.send_keys(match)
 
@@ -263,10 +262,12 @@ class Bet9ja(MatchExtractor):
 
                 select_game = rows[max_index] #get the link of the max csim score
                 if select_game:
-                    if 'SRL' in select_game: #simulated game; break
-                        break #move to next match since selected game is simulated
+                    if 'Srl' in select_game.text.title(): #"Barcelona Srl"; simulated game; break
+                        #move to next match since selected game is simulated
+                        driver.back()
+                        driver.refresh()
                 else:
-                    break #move to next match since no match
+                    continue #move to next match since no match
                 
                 ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
                 driver.switch_to.window(driver.window_handles[1])
@@ -282,12 +283,10 @@ class Bet9ja(MatchExtractor):
                 else:
                     _bet_type = _bet_type
 
-                print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", bet_types, bet_selections)
 
                 #place bet
                 for bet_type, bet_selection in zip(bet_types, bet_selections):
                     #match bet and bet type: Home - Home and 1x2 - 1x2
-                    print("+++++++++++++++++++++++++++", bet_type.text, _bet_type)
                     if str(bet_type.text).lower() == str(_bet_type).lower() and (bet_selection.text.lower() == bet.lower()):
                         fo = bet_type.find_element_by_xpath('following-sibling::*')
                         fo.click()
@@ -300,6 +299,7 @@ class Bet9ja(MatchExtractor):
                 driver.switch_to.window(driver.window_handles[0])
                 driver.back()
                 driver.refresh()
+
             except Exception as e:
                 print(str(e))
         # driver.refresh() #since it refrehes in end of loop above
