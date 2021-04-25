@@ -448,7 +448,6 @@ class X1Bet(MatchExtractor):
         # coupon.send_keys('faux') #faux code inorder to keep coupon field active otherwise bug from automated environment
 
         for __match in selections:
-            print("..........")
             match = __match[1]
 
             match = MatchExtractor.match_cleanser(match)
@@ -638,7 +637,6 @@ class MSport(MatchExtractor):
             p_match = [_match for _match in n_games if _match != [''] if _match != [' ~ ']]
 
             csim_check = []
-            print("PMA: ", p_match)
             for game in p_match:
                 print("GA<E: ", game, len(game))
                 if len(game) >= 4:
@@ -647,8 +645,7 @@ class MSport(MatchExtractor):
                     csim_check.append([csim, game.split('~ ')[1]])
                 else:
                     continue
-            
-            print("CK: ", csim_check)
+
             max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
 
             time.sleep(2)
@@ -669,8 +666,6 @@ class MSport(MatchExtractor):
                 #     break
             # rows = driver.find_elements(By.CLASS_NAME, "m-resultItem")
             # print("GA: ", [g.text for g in rows])
-            print("ROWSX: ", rows)
-            print("INDEX: ", max_index)
             select_game = rows[max_index] #get the link of the max csim score
             if select_game:
                 pass
