@@ -60,7 +60,7 @@ class MatchExtractor(ABC):
 
 
     @abstractmethod
-    def games_extractor(self, team) -> List[str]:
+    def games_extractor(self, driver, team):
         pass
 
 
@@ -123,6 +123,7 @@ class Bet9ja(MatchExtractor):
         elem.clear()
 
         elem.send_keys(team)
+        time.sleep(1)
 
         try:
             submit = driver.find_element_by_xpath('//*[@id="h_w_PC_oddsSearch_btnCerca"]').click()
@@ -217,9 +218,8 @@ class Bet9ja(MatchExtractor):
 
         for __match in selections:
             match = __match[1]
+
             match = MatchExtractor.match_cleanser(match)
-
-
             games, driver = self.games_extractor(match)
 
             if not games: #no record found, skip to next game
@@ -252,8 +252,8 @@ class Bet9ja(MatchExtractor):
 
             max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
             
-            time.sleep(3)
-# driver.find_element_by_class_name('dgStyle').find_elements(By.TAG_NAME, "tr")[1:]
+            time.sleep(2)
+            # driver.find_element_by_class_name('dgStyle').find_elements(By.TAG_NAME, "tr")[1:]
             # try:
             rows = driver.find_element_by_class_name('dgStyle').find_elements(By.TAG_NAME, "a")[2:] #['descr', 'date','....']
             # except NoSuchElementException:
@@ -265,8 +265,8 @@ class Bet9ja(MatchExtractor):
             if select_game:
                 pass
             else:
-                return "Match not found"
-
+                continue
+                # select_game.click()
             ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
             driver.switch_to.window(driver.window_handles[1])
 
@@ -281,24 +281,24 @@ class Bet9ja(MatchExtractor):
             else:
                 _bet_type = _bet_type
 
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", bet_types, bet_selections)
 
             #place bet
             for bet_type, bet_selection in zip(bet_types, bet_selections):
                 #match bet and bet type: Home - Home and 1x2 - 1x2
+                print("+++++++++++++++++++++++++++", bet_type.text, _bet_type)
                 if str(bet_type.text).lower() == str(_bet_type).lower() and (bet_selection.text.lower() == bet.lower()):
                     fo = bet_type.find_element_by_xpath('following-sibling::*')
                     fo.click()
-                    driver.close()
-                    driver.switch_to.window(driver.window_handles[0])
+                    break
                     
                 else:
                     continue
             
-            # driver.close()
-            # driver.switch_to.window(driver.window_handles[0])
-            # driver.refresh()
-            # driver.get(link_bet9ja)
-            # # driver.back()
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
+            driver.refresh()
+
         driver.refresh()
         time.sleep(2)
         place_the_bet = driver.find_element_by_class_name('dx').click()
@@ -361,7 +361,7 @@ class X1Bet(MatchExtractor):
         driver = self.connect()
 
         # notification on 1xbet removed as at 16-04-2021
-        # back on 5 hours later
+        # back on 5 hours 2later
         notification = driver.find_element_by_xpath('//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')
         if notification:
             notification.click()
@@ -370,14 +370,14 @@ class X1Bet(MatchExtractor):
         except NoSuchElementException as e:
             print(str(e))
             
+        elem.clear()
         elem.send_keys(team)
-        time.sleep(2)
 
         driver.find_element_by_class_name('sport-search__btn').click()
         time.sleep(2)
         driver.find_element_by_xpath('//*[@id="modals-container"]/div/div/div[2]/div/div[2]/div[1]/div[2]/div[1]/div').click()
 
-        time.sleep(3)
+        time.sleep(2)
         rows = driver.find_elements(By.CLASS_NAME, "search-popup-events__item")
         
         p_match = [_match.text.split("\n") for _match in rows if _match != '' if "LIVE" not in _match.text if 'Alternat' not in _match.text]
@@ -386,7 +386,6 @@ class X1Bet(MatchExtractor):
         matches = []
         for col in p_match:
             if len(col) >= 4:
-                # print("MATCHES COL: ", col)
                 matches.append({"source": "1XBET", "league": str(col[1]), "team": str(col[2]), "datetime": ' '.join([a_ for a_ in col[0].split('.')[1:]]).replace(' ','/')})
             continue
         return matches, driver
@@ -421,8 +420,8 @@ class X1Bet(MatchExtractor):
             game[1] =  game[1] + ' - ' + game[2]
             game[2] =  game[3].split(' ', 1)[1].title() + ' ' + game[3].split(' ', 1)[0]
             games.append(game[:-1]) #exclude last index - redundant
-        
 
+        driver.quit()
         return games
 
 
@@ -433,22 +432,26 @@ class X1Bet(MatchExtractor):
         _bet_type = '' #1X or 12 or 2X
         slip_code = ''
 
-        # driverx = self.connect()
-        # # notification = driver.find_element_by_xpath('//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')
-        # # if notification:
-        # #     notification.click()
-        # # else:
-        # #     pass
+        # driver = self.connect()
+
+        # notification = driver.find_element_by_xpath('//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')
+        # if notification:
+        #     notification.click()
+        # else:
+        #     pass
+        # driver.find_element_by_tag_name('body').send_keys(Keys.CONTROL + 't') 
         # driverx.find_element_by_class_name('c-dropdown__trigger').click()
         # coupon = driverx.find_element_by_class_name('coupon__input')
         # coupon.send_keys('faux') #faux code inorder to keep coupon field active otherwise bug from automated environment
 
         for __match in selections:
+            print("..........")
             match = __match[1]
 
             match = MatchExtractor.match_cleanser(match)
+            time.sleep(1)
             games, driver = self.games_extractor(match)
-
+           
             if not games:
                 continue
 
@@ -467,40 +470,37 @@ class X1Bet(MatchExtractor):
             else:
                 league = league
  
-            p_match = [_match for _match in n_games if _match != [''] if _match != [' ~ ']]
+            # p_match = [_match for _match in n_games if _match != [''] if _match != [' ~ ']]
 
             csim_check = []
             for game in p_match:
-                if len(game) >= 2:
-                    relations = [self.clean_string(game), self.clean_string(league + ' ' + match)]
-                    if "simulated" not in relations[0] and "-zoom" not in relations[0] \
+                relations = [self.clean_string(game), self.clean_string(league + ' ' + match)]
+                if "simulated" not in relations[0] and "-zoom" not in relations[0] \
                             and "alternative" not in relations[0] and "first goal" not in relations[0] and "match stats" not in relations[0] and "team to score " not in relations[0]:
-                        csim = self.check_similarity(relations)
-                    else:
-                        csim = 0
-                    csim_check.append([csim, game.split('~ ')[1]])
+                    csim = self.check_similarity(relations)
                 else:
-                    continue
-                
+                    csim = 0
+                csim_check.append([csim, game.split('~ ')[1]])
             max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
 
             # driver.find_element_by_xpath('//*[@id="modals-container"]/div/div/div[2]/div/div[2]/div[1]/div[2]/div[1]/div').click()
             # driver.find_element_by_xpath('//*[@id="checkbox_1"]').click()
             
 
-            time.sleep(2)
+            time.sleep(1)
             rows = driver.find_element(By.CLASS_NAME, "search-popup-events").find_elements(By.TAG_NAME, "a")
             #  or driver.find_element_by_class_name('search-popup-events__item')
             # print(rows, max_index)
             select_game = rows[max_index] #get the link of the max csim score
             if select_game:
-                pass
+
+                ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
+                driver.switch_to.window(driver.window_handles[1])               
+                #  pass
             else:
                 # return "Match not found"
                 pass
 
-            ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
-            driver.switch_to.window(driver.window_handles[1])
 
             window_now = driver.window_handles[0]
 
@@ -522,13 +522,13 @@ class X1Bet(MatchExtractor):
                     bet_type.click()
                     time.sleep(1)
                     break
-                    # driver.close()
-                    # driver.switch_to.window(driver.window_handles[0])
                     
                 else:
                     continue
-            driver.close()
+            # driver.close()
             driver.switch_to.window(driver.window_handles[0])
+            driver.refresh()
+            # driver.close()
 
         driver.refresh()
 
