@@ -116,9 +116,7 @@ class MatchExtractor(ABC):
 
 class Bet9ja(MatchExtractor):
     def games_extractor(self, team):
-        driver = self.connect()
 
-        # try:
         elem = driver.find_element_by_class_name("TxtCerca")
         elem.clear()
 
@@ -214,7 +212,8 @@ class Bet9ja(MatchExtractor):
         league = ''
         bet = ''
         _bet_type = ''
-        # driver = self.connect()
+
+        driver = self.connect()
 
         for __match in selections:
             print("SE:LE: ", selections)
