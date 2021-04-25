@@ -60,7 +60,7 @@ class MatchExtractor(ABC):
 
 
     @abstractmethod
-    def games_extractor(self, driver, team):
+    def games_extractor(self, driver, team) -> List[dict]:
         pass
 
 
