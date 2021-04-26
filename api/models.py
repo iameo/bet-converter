@@ -8,15 +8,15 @@ from datetime import datetime
 
 from .database import Base
 
-class MatchDetail(Base):
-    __tablename__ = "matchdetails"
+# class MatchDetail(Base):
+#     __tablename__ = "matchdetails"
 
-    id = Column(Integer, primary_key=True, index=True)
-    team = Column(String, index=True)
-    time = Column(String, index=True)
+#     id = Column(Integer, primary_key=True, index=True)
+#     team = Column(String, index=True)
+#     time = Column(String, index=True)
 
-    def __repr__(self):
-        return self.team
+#     def __repr__(self):
+#         return self.team
   
 
 class BookingSlip(Base):
@@ -30,4 +30,6 @@ class BookingSlip(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     def __repr__(self):
-        return '<Bet Code: ' + self.code + '>'
+        return f'from {self.source}({self.booking_code}) -> {self.destination}({self.new_booking_code})'
+
+
