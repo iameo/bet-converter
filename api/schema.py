@@ -29,34 +29,65 @@ class MatchDetail(MatchDetailBase):
 ############################BOOKING SLIP######################################
 
 class BookingSlipBase(BaseModel):
-    source: Optional[str] = None
-    booking_code: Optional[str] = None
+    booking_code: str = None
+
+    
+    # destination: Optional[str] = None
+    # new_booking_code: Optional[str] = None
+
+class ConvertedSlipBase(BaseModel):
     destination: Optional[str] = None
-    new_code: Optional[str] = None
 
 
 
+
+
+
+
+class ConvertedSlip(ConvertedSlipBase):
+    id: int
+    booking_slip_id: int
+    new_booking_code: Optional[str] = None
+
+    created_at: Optional[datetime]
+
+    class Config:
+        orm_mode = True
 
 class BookingSlipCreate(BookingSlipBase):
-    pass
+    source: Optional[str] = None
 
+class ConvertedSlipCreate(BookingSlipCreate, ConvertedSlipBase):
+    pass
 
 class BookingSlip(BookingSlipBase):
     id: int
+    converted_slips: List[ConvertedSlip] = [{}]
     created_at: Optional[datetime] = None
 
     class Config:
+        orm_mode = True
         allow_population_by_field_name =True
         schema_extra = {
             "example": {
                 "source": "bet9ja",
                 "booking_code": "3XVU9BA",
-                "destination": "1xbet",
-                "new_booking_code": "ZY7D2",
+
             }
         }
-        
-class BookingSlipOut(BookingSlipBase):
+
+
+
+# class BookingSlip(BookingSlipBase):
+#     id: int
+#     converted_slips: List[ConvertedSlip]
+
+#     class Config:
+#         orm_mode = True
+
+
+
+class BookingSlipOut(BookingSlipBase, ConvertedSlipBase):
     created_at: Optional[datetime] = None
 
     class Config:
@@ -65,12 +96,22 @@ class BookingSlipOut(BookingSlipBase):
                 "id": "1",
                 "source": "bet9ja",
                 "booking_code": "3XVU9BA",
-                "destination": "1xbet",
-                "new_booking_code": "ZY7D2",
+                "converts": [
+                    {"destination": "1xbet",
+                    "new_booking_code": "ZY7D2",
+                    "created_at": datetime.now(),
+                    "id": 2,
+                    "booking_slip_id": 1}
+                ],
                 "created_at": datetime.now()
             }
         }
 
+
+
+
+
+##################### RESPONSE #####################################
 
 def SuccessResponseModel(data, message):
     return {
