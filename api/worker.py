@@ -629,10 +629,31 @@ class MSport(MatchExtractor):
                             "league": _game[1],
                             "team": ' '.join([a_ for a_ in _game[2:5]]).replace('vs','-')}
                             )    
-        return matches, driver
+        return matches
+
 
     def slip_extractor(self):
-        pass
+
+        driver = self.connect()
+
+        notification = driver.find_element_by_class_name('m-pop-close-btn')
+        if notification:
+            notification.click()
+        else:
+            pass
+
+        try:
+            driver.find_element_by_class_name('m-betslip-ball').click()
+            coupon = driver.find_element_by_class_name('v-input--inner')
+            coupon.send_keys(self.booking_code)
+            time.sleep(1)
+            coupon.send_keys(Keys.ENTER)
+            selections = ''
+        except NoSuchElementException as e:
+            print(str(e))
+        
+        #process selections
+        #return selection
 
     def injector(self, source, selections):
 
