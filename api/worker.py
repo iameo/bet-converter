@@ -437,7 +437,6 @@ class X1Bet(MatchExtractor):
             notification.click()
         else:
             pass
-
  
 
         for __match in selections:
@@ -472,7 +471,6 @@ class X1Bet(MatchExtractor):
             else:
                 league = league
  
-            # p_match = [_match for _match in n_games if _match != [''] if _match != [' ~ ']]
 
             csim_check = []
             for game in p_match:
@@ -487,14 +485,10 @@ class X1Bet(MatchExtractor):
             
             max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
 
-            # driver.find_element_by_xpath('//*[@id="modals-container"]/div/div/div[2]/div/div[2]/div[1]/div[2]/div[1]/div').click()
-            # driver.find_element_by_xpath('//*[@id="checkbox_1"]').click()
-            
 
             time.sleep(1)
             rows = driver.find_element(By.CLASS_NAME, "search-popup-events").find_elements(By.TAG_NAME, "a")
-            #  or driver.find_element_by_class_name('search-popup-events__item')
-            # print(rows, max_index)
+
             select_game = rows[max_index] #get the link of the max csim score
 
             if select_game:
@@ -507,13 +501,6 @@ class X1Bet(MatchExtractor):
             ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
             driver.switch_to.window(driver.window_handles[1])
 
-            # if select_game:
-            #     ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
-            #     driver.switch_to.window(driver.window_handles[1])               
-            #     #  pass
-            # else:
-            #     # return "Match not found"
-            #     pass
 
             bet_types = driver.find_elements_by_class_name("bet_type")
             bet_selections = driver.find_elements_by_class_name("bet-title")
@@ -545,8 +532,7 @@ class X1Bet(MatchExtractor):
 
         actions = ActionChains(driver)
         actions.move_to_element(element).perform() #move below save button for interactivity
-        
-        # driver.find_element_by_class_name('c-dropdown__trigger').click()
+
         time.sleep(1)
         trigs = driver.find_elements_by_class_name('c-dropdown__trigger')
         trigs[-1].click()
@@ -575,8 +561,6 @@ class X1Bet(MatchExtractor):
 class MSport(MatchExtractor):
     def games_extractor(self, driver):
 
-        driver = self.connect(wait_time=3)
-        page_title = driver.title
         driver.find_element_by_xpath('/html/body/div[2]/div[2]/div/div/a[2]').click() or driver.find_element_by_class_name('m-pop-close-btn').click()
 
         try:
@@ -606,11 +590,9 @@ class MSport(MatchExtractor):
         #     pass
         time.sleep(3)
 
-        try:
-            sections = driver.find_elements_by_class_name("m-result-section")
-        except Exception:
-            pass
-        
+
+        sections = driver.find_elements_by_class_name("m-result-section")
+
         matches = []
         for section in sections:
             if section.text.split("\n")[0].lower() == "not start":
