@@ -60,7 +60,7 @@ class MatchExtractor(ABC):
 
 
     @abstractmethod
-    def games_extractor(self, driver, team) -> List[dict]:
+    def games_extractor(self, driver) -> List[dict]:
         pass
 
 
@@ -668,7 +668,7 @@ class MSport(MatchExtractor):
 
             match = MatchExtractor.match_cleanser(match)
 
-            games, driver = self.games_extractor(match)
+            games = self.games_extractor(match)
 
             league = __match[0]
 
@@ -749,7 +749,30 @@ class MSport(MatchExtractor):
 
 
 
-        
+class Bet22(MatchExtractor):
+    def games_extractor(self, driver):
+        pass
+
+    def slip_extractor(self):
+        driver = self.connect()
+
+        try:
+            coupon = driver.find_element_by_class_name('cc-controls__input_text.keyboardInput')
+
+            coupon.clear()
+            coupon.send_keys(self.booking_code)
+
+            load = driver.find_element_by_class_name('cc-controls__btn-main_upload').click()
+
+        except Exception as e:
+            print(str(e))
+
+        #get selections
+
+    def injector(self, source, selections):
+        pass
+
+
 
         
         
