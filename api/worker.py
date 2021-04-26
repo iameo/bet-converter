@@ -152,7 +152,7 @@ class Bet9ja(MatchExtractor):
         stat = driver.find_element_by_id('h_w_PC_cCoupon_mexPrenotazione')
 
         if 'not found' in stat.text:
-            return {"status": "booking code has expired or invalid!"}
+            driver.quit()
 
         elif 'proceed' in stat.text: #booking code found but with expired games
             
