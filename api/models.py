@@ -8,16 +8,7 @@ from datetime import datetime
 
 from .database import Base
 
-# class MatchDetail(Base):
-#     __tablename__ = "matchdetails"
 
-#     id = Column(Integer, primary_key=True, index=True)
-#     team = Column(String, index=True)
-#     time = Column(String, index=True)
-
-#     def __repr__(self):
-#         return self.team
-  
 
 class BookingSlip(Base):
     __tablename__ = "bookingslips"
@@ -25,11 +16,25 @@ class BookingSlip(Base):
     id = Column(Integer, primary_key=True, index=True)
     source = Column(String, index=True)
     booking_code = Column(String, index=True)
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    converted_slips = relationship("ConvertedSlip", back_populates="booking_slip")
+
+    def __repr__(self):
+        # return f'from {self.source}({self.booking_code}) -> {self.destination}({self.new_booking_code})'
+        return f'from {self.source}({self.booking_code})'
+
+
+class ConvertedSlip(Base):
+    __tablename__ = "convertedslips"
+    
+    id = Column(Integer, primary_key=True, index=True)
     destination = Column(String, index=True)
     new_booking_code = Column(String, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    def __repr__(self):
-        return f'from {self.source}({self.booking_code}) -> {self.destination}({self.new_booking_code})'
+    booking_slip_id = Column(Integer, ForeignKey("bookingslips.id"))
 
+    booking_slip = relationship("BookingSlip", back_populates="converted_slips")
 
