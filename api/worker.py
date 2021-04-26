@@ -734,7 +734,13 @@ class Bet22(MatchExtractor):
         #get selections
 
     def injector(self, source, selections):
-        
+        league = ''
+        bet = ''
+        _bet_type = ''
+        slip_code = ''
+
+        driver = self.connect()
+
         for __match in selections:
             match = __match[1]
 
