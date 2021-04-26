@@ -679,17 +679,22 @@ class MSport(MatchExtractor):
 
 
             csim_check = []
+
             for game in p_match:
                 if len(game) >= 4:
                     relations = [self.clean_string(game), self.clean_string(league + ' ' + match)]
-                    csim = self.check_similarity(relations)
+                    if "simulated" not in relations[0] and "cyber live" not in relations[0]:
+                        csim = self.check_similarity(relations)
+                    else:
+                        csim = 0
                     csim_check.append([csim, game.split('~ ')[1]])
                 else:
                     continue
 
             max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
-
+            
             time.sleep(2)
+            
             show_more = driver.find_element_by_xpath('/html/body/div/div[2]/div/div/div[2]/div[2]/div/div[7]')
             if show_more:
                 show_more.click()
