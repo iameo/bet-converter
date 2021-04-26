@@ -487,7 +487,6 @@ class X1Bet(MatchExtractor):
             
             max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
 
-            print("ch: ", csim_check)
             # driver.find_element_by_xpath('//*[@id="modals-container"]/div/div/div[2]/div/div[2]/div[1]/div[2]/div[1]/div').click()
             # driver.find_element_by_xpath('//*[@id="checkbox_1"]').click()
             
