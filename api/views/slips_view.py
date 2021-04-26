@@ -49,11 +49,11 @@ def get_db():
         db.close()
 
 
-@slip_view.post("/slips/", response_model=schema.BookingSlip)
+@slip_view.post("/slips/", response_model=schema.BookingSlipOut)
 def create_slip(
     _code: schema.BookingSlipCreate, db: Session = Depends(get_db)
 ):
-    _slip = crud.get_slip(db, code=_code.code)
+    _slip = crud.get_slip(db, booking_code=_code.booking_code)
     if _slip:
         raise HTTPException(status_code=400, detail="booking code exists!")
     return crud.create_slip(db=db, _code=_code)
@@ -61,7 +61,7 @@ def create_slip(
 
 @slip_view.get("/slips/{booking_code}", response_model=schema.BookingSlipOut)
 def get_slip_by_code(booking_code: str, db: Session = Depends(get_db)):
-    slip = crud.get_slip(db, code=booking_code)
+    slip = crud.get_slip(db, booking_code=booking_code)
     if slip is None:
         raise HTTPException(status_code=404, detail="booking slip not found!")
     return slip
@@ -95,18 +95,17 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
 
             return {"source": source, "initial":booking_code, "destination": destination, "new code": slip_code}
         else:
-            return {"status": "failed"}
+            return schema.ErrorResponseModel("INVALID BOOKING CODE!", "CHECK YOUR BOOKING CODE AND TRY AGAIN", 400)
 
     elif source == BetSources.sportybet:
         selections = SportyBet(source=source, booking_code=booking_code, site=link_sportybet).slip_extractor()
         
-        if destination == BetSources.bet9ja:
-            _bet9ja = Bet9ja(source=source, site=link_bet9ja)
-            slip_code = _bet9ja.injector('sportybet', selections)
+        if selections is not None:
+            if destination == BetSources.bet9ja:
+                _bet9ja = Bet9ja(source=source, site=link_bet9ja)
+                slip_code = _bet9ja.injector('sportybet', selections)
 
-        return {"source": source, "destination": destination, "booking code": slip_code}
-        # matches_extract = matches.slip_extractor()
-        # return {"source": matches.source, "booking code": matches.booking_code, "matches": matches_extract}
+            return {"source": source, "destination": destination, "booking code": slip_code}
     
     elif source == BetSources.x1bet:
         matches = X1Bet(source=source, booking_code=booking_code, site=link_1xbet)
@@ -117,6 +116,9 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                 __x1bet = X1Bet(source=source, site=link_1xbet)
                 slip_code = __x1bet.injector('1xbet', selections)
             
+                        # if slip_code:
+                        #     save to db
+                    
         
             if destination == BetSources.bet9ja:
                 __bet9ja = Bet9ja(source=source, site=link_bet9ja)
@@ -126,14 +128,20 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
         # for match in matches:
         #     fetch_team(match)
         else:
-            return {"status": "failed"}
+            return schema.ErrorResponseModel("INVALID BOOKING CODE!", "CHECK YOUR BOOKING CODE AND TRY AGAIN", 400)
     
     elif source == BetSources.betway:
         pass
 
 
+    
+    else:
+        return schema.ErrorResponseModel("INVALID OPTION!", "CHECK YOUR SELECTED OPTIONS AND TRY AGAIN", 400)
+    
 
-@slip_view.get("/slips/all/", response_model=List[schema.BookingSlipOut])
+   
+
+@slip_view.get("/slips/", response_model=List[schema.BookingSlipOut])
 async def get_slips(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     slips = crud.get_slips(db, skip=skip, limit=limit)
     if slips is None:
