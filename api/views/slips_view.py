@@ -93,7 +93,7 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                 __msport = MSport(source=source, site=link_msport)
                 slip_code = __msport.injector('bet9ja', selections)
 
-            return {"source": source, "destination": destination, "booking code": slip_code}
+            return {"source": source, "initial":booking_code, "destination": destination, "new code": slip_code}
         else:
             return {"status": "failed"}
 
