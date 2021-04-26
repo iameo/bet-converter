@@ -361,22 +361,22 @@ class SportyBet(MatchExtractor):
 class X1Bet(MatchExtractor):
     def games_extractor(self, driver, team):
 
-        # notification on 1xbet removed as at 16-04-2021
-        # back on 5 hours 2later
-        notification = driver.find_element_by_xpath('//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')
+        # # notification on 1xbet removed as at 16-04-2021
+        # # back on 5 hours 2later
+        # notification = driver.find_element_by_xpath('//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')
         
-        if notification:
-            notification.click()
+        # if notification:
+        #     notification.click()
             
 
         driver.find_element_by_class_name('sport-search__btn').click()
-        time.sleep(2)
+        time.sleep(3)
         driver.find_element_by_xpath('//*[@id="modals-container"]/div/div/div[2]/div/div[2]/div[1]/div[2]/div[1]/div').click()
 
         time.sleep(2)
         rows = driver.find_elements(By.CLASS_NAME, "search-popup-events__item")
         
-        p_match = [_match.text.split("\n") for _match in rows if _match != '' if "LIVE" not in _match.text if 'Alternat' not in _match.text]
+        p_match = [_match.text.split("\n") for _match in rows if _match != '']
         p_match = [_match for _match in p_match if _match != ['']]
 
         matches = []
@@ -396,6 +396,7 @@ class X1Bet(MatchExtractor):
             notification.click()
         else:
             pass
+
         try:
             driver.find_element_by_class_name('c-dropdown__trigger').click()
             coupon = driver.find_element_by_class_name('coupon__input')
@@ -431,26 +432,21 @@ class X1Bet(MatchExtractor):
 
         driver = self.connect()
 
-        # notification = driver.find_element_by_xpath('//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')
-        # if notification:
-        #     notification.click()
-        # else:
-        #     pass
-        # driver.find_element_by_tag_name('body').send_keys(Keys.CONTROL + 't') 
-        # driverx.find_element_by_class_name('c-dropdown__trigger').click()
-        # coupon = driverx.find_element_by_class_name('coupon__input')
-        # coupon.send_keys('faux') #faux code inorder to keep coupon field active otherwise bug from automated environment
+        notification = driver.find_element_by_xpath('//a[contains(@href,"deny")]').click()
+        if notification:
+            notification.click()
+        else:
+            pass
+
+ 
 
         for __match in selections:
             match = __match[1]
 
             match = MatchExtractor.match_cleanser(match)
             time.sleep(1)
-            try:
-                elem = driver.find_element_by_xpath('//*[@id="hottest_games"]/div/div[1]/div/div/div/div/div[2]/div/div[1]/input')
-            except NoSuchElementException as e:
-                print(str(e))
-            
+
+            elem = driver.find_element_by_class_name('sport-search__input')
             elem.click()
             elem.send_keys(" ") #faux to allow input in next loop otherwise buggy
             elem.clear()
@@ -481,14 +477,17 @@ class X1Bet(MatchExtractor):
             csim_check = []
             for game in p_match:
                 relations = [self.clean_string(game), self.clean_string(league + ' ' + match)]
+                print("REL: ", relations)
                 if "simulated" not in relations[0] and "-zoom" not in relations[0] \
                             and "alternative" not in relations[0] and "first goal" not in relations[0] and "match stats" not in relations[0] and "team to score " not in relations[0]:
                     csim = self.check_similarity(relations)
                 else:
                     csim = 0
                 csim_check.append([csim, game.split('~ ')[1]])
+            
             max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
 
+            print("ch: ", csim_check)
             # driver.find_element_by_xpath('//*[@id="modals-container"]/div/div/div[2]/div/div[2]/div[1]/div[2]/div[1]/div').click()
             # driver.find_element_by_xpath('//*[@id="checkbox_1"]').click()
             
@@ -500,12 +499,22 @@ class X1Bet(MatchExtractor):
             select_game = rows[max_index] #get the link of the max csim score
 
             if select_game:
-                ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
-                driver.switch_to.window(driver.window_handles[1])               
-                #  pass
+                if 'Alternative' in select_game.text.title(): #"Barcelona Srl"; simulated game; break
+                    #move to next match since selected game is simulated
+                    driver.refresh()
             else:
-                # return "Match not found"
-                pass
+                continue #move to next match since no match
+            
+            ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
+            driver.switch_to.window(driver.window_handles[1])
+
+            # if select_game:
+            #     ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
+            #     driver.switch_to.window(driver.window_handles[1])               
+            #     #  pass
+            # else:
+            #     # return "Match not found"
+            #     pass
 
             bet_types = driver.find_elements_by_class_name("bet_type")
             bet_selections = driver.find_elements_by_class_name("bet-title")
@@ -530,7 +539,6 @@ class X1Bet(MatchExtractor):
             
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
-            driver.back()
             driver.refresh()
 
 
@@ -538,12 +546,26 @@ class X1Bet(MatchExtractor):
 
         actions = ActionChains(driver)
         actions.move_to_element(element).perform() #move below save button for interactivity
+        
+        # driver.find_element_by_class_name('c-dropdown__trigger').click()
+        time.sleep(1)
+        trigs = driver.find_elements_by_class_name('c-dropdown__trigger')
+        trigs[-1].click()
 
+        
         driver.find_element_by_class_name('grid__cell.grid__cell--span-6.grid__cell--span-bsr-4.grid__cell--order-bsr-1').click() #tap on save button to generate code
+        
+        time.sleep(1)
+        xd = driver.find_elements_by_class_name('coupon-btn-group__item.save-coupon__input-wrap')[-1]
+        xd.click()
+        fd = xd.find_element_by_class_name("coupon__input")
+        fd.click()
+        a = ActionChains(driver)
+        # perform the ctrl+c pressing action
+        a.key_down(Keys.CONTROL).click(fd).send_keys('C').key_up(Keys.CONTROL).perform()
 
-        # coupon.send_keys(Keys.CONTROL, 'a') #mark all
-        # coupon.send_keys(Keys.CONTROL, 'c') #copy
-        slip_code = pyperclip.paste() #paste copied object in environment
+        # slip_code = pyperclip.paste() #paste copied object in environment
+        slip_code = fd.get_attribute("value")
 
         return slip_code
 
