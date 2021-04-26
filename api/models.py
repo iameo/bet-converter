@@ -24,8 +24,9 @@ class BookingSlip(Base):
       
     id = Column(Integer, primary_key=True, index=True)
     source = Column(String, index=True)
-    match = Column(PickleType, default=[])
-    code = Column(String, index=True)
+    booking_code = Column(String, index=True)
+    destination = Column(String, index=True)
+    new_booking_code = Column(String, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     def __repr__(self):
