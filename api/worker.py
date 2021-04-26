@@ -566,6 +566,7 @@ class X1Bet(MatchExtractor):
 
         # slip_code = pyperclip.paste() #paste copied object in environment
         slip_code = fd.get_attribute("value")
+        driver.quit()
 
         return slip_code
 
