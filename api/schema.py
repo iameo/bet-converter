@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from datetime import datetime
 
@@ -31,8 +31,11 @@ class MatchDetail(MatchDetailBase):
 
 class BookingSlipBase(BaseModel):
     source: Optional[str] = None
-    code: Optional[str] = None
-    match: Optional[List] = []
+    booking_code: Optional[str] = None
+    destination: Optional[str] = None
+    new_code: Optional[str] = None
+
+
 
 
 class BookingSlipCreate(BookingSlipBase):
@@ -44,12 +47,28 @@ class BookingSlip(BookingSlipBase):
     created_at: Optional[datetime] = None
 
     class Config:
-        orm_mode = True
-
+        allow_population_by_field_name =True
+        schema_extra = {
+            "example": {
+                "source": "bet9ja",
+                "booking_code": "3XVU9BA",
+                "destination": "1xbet",
+                "new_code": "ZY7D2",
+            }
+        }
+        
 class BookingSlipOut(BookingSlipBase):
     created_at: Optional[datetime] = None
 
     class Config:
-        orm_mode = True
-
+        schema_extra = {
+            "example": {
+                "id": "1",
+                "source": "bet9ja",
+                "booking_code": "3XVU9BA",
+                "destination": "1xbet",
+                "new_code": "ZY7D2",
+                "created_at": datetime.now()
+            }
+        }
 
