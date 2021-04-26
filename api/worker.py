@@ -555,16 +555,18 @@ class X1Bet(MatchExtractor):
         driver.find_element_by_class_name('grid__cell.grid__cell--span-6.grid__cell--span-bsr-4.grid__cell--order-bsr-1').click() #tap on save button to generate code
         
         time.sleep(1)
-        xd = driver.find_elements_by_class_name('coupon-btn-group__item.save-coupon__input-wrap')[-1]
-        xd.click()
-        fd = xd.find_element_by_class_name("coupon__input")
-        fd.click()
+
+        trigger_dropdowns = driver.find_elements_by_class_name('coupon-btn-group__item.save-coupon__input-wrap')[-1] #use the last one
+        trigger_dropdowns.click()
+        
+        coupon = trigger_dropdowns.find_element_by_class_name("coupon__input")
+        coupon.click()
         a = ActionChains(driver)
         # perform the ctrl+c pressing action
-        a.key_down(Keys.CONTROL).click(fd).send_keys('C').key_up(Keys.CONTROL).perform()
+        a.key_down(Keys.CONTROL).click(coupon).send_keys('C').key_up(Keys.CONTROL).perform()
 
         # slip_code = pyperclip.paste() #paste copied object in environment
-        slip_code = fd.get_attribute("value")
+        slip_code = coupon.get_attribute("value")
         driver.quit()
 
         return slip_code
@@ -694,7 +696,7 @@ class MSport(MatchExtractor):
             max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
             
             time.sleep(2)
-            
+
             show_more = driver.find_element_by_xpath('/html/body/div/div[2]/div/div/div[2]/div[2]/div/div[7]')
             if show_more:
                 show_more.click()
