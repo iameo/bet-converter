@@ -571,7 +571,8 @@ class X1Bet(MatchExtractor):
 
   
 class MSport(MatchExtractor):
-    def games_extractor(self, team):
+    def games_extractor(self, driver):
+
         driver = self.connect(wait_time=3)
         page_title = driver.title
         driver.find_element_by_xpath('/html/body/div[2]/div[2]/div/div/a[2]').click() or driver.find_element_by_class_name('m-pop-close-btn').click()
@@ -585,13 +586,6 @@ class MSport(MatchExtractor):
 
         # time.sleep(1)
 
-        try:
-            elem = driver.find_element_by_xpath('/html/body/div/div[1]/form/div/input')
-        except Exception as e:
-            print(str(e))
-
-        elem.send_keys(team)
-        time.sleep(2)
 
         # try:
         #     driver.find_element_by_xpath('/html/body/div/div[1]/div[2]').click()
@@ -666,10 +660,14 @@ class MSport(MatchExtractor):
             match = __match[1]
 
             match = MatchExtractor.match_cleanser(match)
+            time.sleep(1)
 
-            games = self.games_extractor(match)
+            elem = driver.find_element_by_xpath('/html/body/div/div[1]/form/div/input')
+            elem.click()
+            elem.send_keys(" ") #faux to allow input in next loop otherwise buggy
+            elem.clear()
+            elem.send_keys(match)
 
-            league = __match[0]
 
             bet = __match[2].split(" ")[1]
             _bet_type=__match[2].split(" ")[0]
@@ -679,9 +677,9 @@ class MSport(MatchExtractor):
 
             p_match = [_match for _match in n_games if _match != [''] if _match != [' ~ ']]
 
+
             csim_check = []
             for game in p_match:
-                print("GA<E: ", game, len(game))
                 if len(game) >= 4:
                     relations = [self.clean_string(game), self.clean_string(league + ' ' + match)]
                     csim = self.check_similarity(relations)
@@ -769,8 +767,18 @@ class Bet22(MatchExtractor):
         #get selections
 
     def injector(self, source, selections):
-        pass
+        
+        for __match in selections:
+            match = __match[1]
 
+            match = MatchExtractor.match_cleanser(match)
+            time.sleep(1)
+
+            elem = driver.find_element_by_class_name('sport-search__input')
+            elem.click()
+            elem.send_keys(" ") #faux to allow input in next loop otherwise buggy
+            elem.clear()
+            elem.send_keys(match)
 
 
         
