@@ -117,10 +117,7 @@ class MatchExtractor(ABC):
 class Bet9ja(MatchExtractor):
     def games_extractor(self, driver):
 
-        try:
-            submit = driver.find_element_by_xpath('//*[@id="h_w_PC_oddsSearch_btnCerca"]').click()
-        except Exception as e:
-            print(str(e))  #terrible I know! debugging 
+        submit = driver.find_element_by_xpath('//*[@id="h_w_PC_oddsSearch_btnCerca"]').click()
 
         page_title = driver.title
 
@@ -145,23 +142,14 @@ class Bet9ja(MatchExtractor):
     def slip_extractor(self):
         driver = self.connect()
 
-        try:
-            elem = driver.find_element_by_class_name('TextBox')
-        except Exception as e:
-            print(">>>>>>", str(e))
-
+        elem = driver.find_element_by_class_name('TextBox')
         elem.send_keys(self.booking_code)
 
-        try:
-            load = driver.find_element_by_class_name('lnk.Load').click()
-        except Exception as e:
-            print(">>>>>>", str(e)) 
+        load = driver.find_element_by_class_name('lnk.Load').click()
 
         time.sleep(3)
-        # try:
+ 
         stat = driver.find_element_by_id('h_w_PC_cCoupon_mexPrenotazione')
-        # except NoSuchElementException:
-        #     stat = driver.find_element_by_id('s_w_PC_cCoupon_mexPrenotazione')
 
         if 'not found' in stat.text:
             return {"status": "booking code has expired or invalid!"}
@@ -176,11 +164,7 @@ class Bet9ja(MatchExtractor):
             rows = driver.find_elements_by_class_name("CItem")
             n_rows = len(driver.find_elements_by_class_name("CItem"))
 
-            # selections = [MatchExtractor.chunk_it(_row.text.split("\n"), n_rows) for _row in rows] #exclude game tag and odd
-            # _selections = [selection for selection in selections] #exclude game tag and odd
-
             selections = [row.text.split("\n")[1:-1] for row in rows] #['Premier League', 'Team A - Team B', '1 1X2']
-            # print("SELE: ", selections)
 
             return selections
         
@@ -190,13 +174,10 @@ class Bet9ja(MatchExtractor):
             rows = driver.find_elements_by_class_name("CItem")
             n_rows = len(driver.find_elements_by_class_name("CItem"))
 
-        
-            # selections = [MatchExtractor.chunk_it(_row.text.split("\n"), n_rows) for _row in rows] #exclude game tag and odd
-            # _selections = [selection for selection in selections]
             selections = [row.text.split("\n")[1:-1] for row in rows]
 
             return selections
-        #redundant code above; create a function and replace!
+            #redundant code above; create a function and replace!
 
 
 
@@ -252,13 +233,8 @@ class Bet9ja(MatchExtractor):
                 max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
                 
                 time.sleep(2)
-                # driver.find_element_by_class_name('dgStyle').find_elements(By.TAG_NAME, "tr")[1:]
-                # try:
+
                 rows = driver.find_element_by_class_name('dgStyle').find_elements(By.TAG_NAME, "a")[2:] #['descr', 'date','....']
-                # except NoSuchElementException:
-                #     rows = driver.find_element_by_id('h_w_PC_PC_gridSottoEventi').find_elements(By.TAG_NAME, "a")[2:] #['descr', 'date','....']
-
-
 
                 select_game = rows[max_index] #get the link of the max csim score
                 if select_game:
@@ -359,7 +335,7 @@ class SportyBet(MatchExtractor):
 
 
 class X1Bet(MatchExtractor):
-    def games_extractor(self, driver, team):
+    def games_extractor(self, driver):
 
         # # notification on 1xbet removed as at 16-04-2021
         # # back on 5 hours 2later
@@ -451,7 +427,7 @@ class X1Bet(MatchExtractor):
             elem.clear()
             elem.send_keys(match)
 
-            games = self.games_extractor(driver, match)
+            games = self.games_extractor(driver)
            
             if not games:
                 continue
@@ -601,7 +577,7 @@ class MSport(MatchExtractor):
                     if "simulated" not in game.text.lower() and "esports" not in game.text.lower() and "cyber live" not in game.text.lower() and "electronic league" not in game.text.lower():
                         _game = game.text.split("\n")
                         matches.append({
-                            "source": page_title,
+                            "source": 'msport',
                             "datetime": _game[0],
                             "league": _game[1],
                             "team": ' '.join([a_ for a_ in _game[2:5]]).replace('vs','-')}
@@ -637,8 +613,9 @@ class MSport(MatchExtractor):
         league = ''
         bet = ''
         _bet_type = ''
+        slip_code = ''
 
-        # driver = self.connect()
+        driver = self.connect()
 
         for __match in selections:
             match = __match[1]
@@ -652,10 +629,15 @@ class MSport(MatchExtractor):
             elem.clear()
             elem.send_keys(match)
 
+            games = self.games_extractor(driver)
+           
+            if not games:
+                continue
 
-            bet = __match[2].split(" ")[1]
-            _bet_type=__match[2].split(" ")[0]
-                
+            league = __match[0]
+
+            bet = __match[2].split(" ")[-1]
+            _bet_type= ' '.join([a for a in __match[2].split(" ")[:-1]])
 
             n_games = [game['league'] + ' ~ ' + game['team'] for game in games]
 
@@ -697,10 +679,12 @@ class MSport(MatchExtractor):
             # rows = driver.find_elements(By.CLASS_NAME, "m-resultItem")
 
             select_game = rows[max_index] #get the link of the max csim score
+
             if select_game:
-                pass
+                if 'Alternative' in select_game.text.title():
+                    driver.refresh()
             else:
-                return "Match not found"
+                continue
 
             ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
             driver.switch_to.window(driver.window_handles[1])
