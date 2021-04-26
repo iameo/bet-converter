@@ -7,8 +7,7 @@ from datetime import datetime
 # class MatchDetailBase(BaseModel):
 #     source: str
 
-# class AnonUserCreate(MatchDetailBase):
-#     pass
+
 
 # class MatchDetail(MatchDetailBase):
 #     team: str
@@ -53,7 +52,7 @@ class BookingSlip(BookingSlipBase):
                 "source": "bet9ja",
                 "booking_code": "3XVU9BA",
                 "destination": "1xbet",
-                "new_code": "ZY7D2",
+                "new_booking_code": "ZY7D2",
             }
         }
         
@@ -67,7 +66,7 @@ class BookingSlipOut(BookingSlipBase):
                 "source": "bet9ja",
                 "booking_code": "3XVU9BA",
                 "destination": "1xbet",
-                "new_code": "ZY7D2",
+                "new_booking_code": "ZY7D2",
                 "created_at": datetime.now()
             }
         }
