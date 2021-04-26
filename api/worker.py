@@ -713,7 +713,7 @@ class MSport(MatchExtractor):
                 # if rows:
                 #     break
             # rows = driver.find_elements(By.CLASS_NAME, "m-resultItem")
-            # print("GA: ", [g.text for g in rows])
+
             select_game = rows[max_index] #get the link of the max csim score
             if select_game:
                 pass
@@ -724,8 +724,8 @@ class MSport(MatchExtractor):
             driver.switch_to.window(driver.window_handles[1])
 
 
-            bet_types = driver.find_elements_by_class_name("SEOddsTQ")
-            bet_selections = driver.find_elements_by_class_name("SECQ")
+            bet_types = driver.find_elements_by_class_name("")
+            bet_selections = driver.find_elements_by_class_name("")
 
             #place bet
             for bet_type, bet_selection in zip(bet_types, bet_selections):
@@ -742,13 +742,7 @@ class MSport(MatchExtractor):
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
 
-        driver.refresh()
-        place_the_bet = driver.find_element_by_class_name('dx').click()
-        time.sleep(2)
-        driver.switch_to.frame(driver.find_element_by_tag_name("iframe"))
-        slip_code = str(driver.find_element_by_class_name("number").text).split(':')[1]
-        driver.quit()
-
+        #place bet and return slipcode
         return slip_code
 
 
