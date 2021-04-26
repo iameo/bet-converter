@@ -15,30 +15,21 @@ from . import models, schema
 def get_slips(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.BookingSlip).offset(skip).limit(limit).all()
 
-def get_slip(db: Session, code: str):
-    return db.query(models.BookingSlip).filter(models.BookingSlip.code == code).first()
+def get_slip(db: Session, booking_code: str):
+    return db.query(models.BookingSlip).filter(models.BookingSlip.booking_code == booking_code).first()
 
 def create_slip(db: Session, _code: schema.BookingSlipCreate):
-    db_slip = models.BookingSlip(source = _code.source, code = _code.code, match = _code.match)
+    db_slip = models.BookingSlip(source = _code.source, booking_code = _code.booking_code, converted_slips = _code.converted_slips)
     db.add(db_slip)
     db.commit()
     db.refresh(db_slip)
     return db_slip
 
   
+def create_slip_convert(db: Session, _convert: schema.ConvertedSlipCreate, bookingslip_id: int):
+    db_convert = models.ConvertedSlip(**_convert.dict(), booking_slip_id=bookingslip_id)
+    db.add(db_convert)
+    db.commit()
+    db.refresh(db_convert)
+    return db_convert
 
-
-# def get_postits(db: Session, skip: int = 0, limit: int = 100):
-#     return db.query(models.PostIT).offset(skip).limit(limit).all()
-
-# def create_anon_postit(db: Session, postit: schema.PostITCreate, anon_id: int):
-#     db_postit = models.PostIT(**postit.dict(), anon_id=anon_id)
-#     db.add(db_postit)
-#     db.commit()
-#     db.refresh(db_postit)
-#     return db_postit
-
-
-
-    #get match by tag
-    #get ma
