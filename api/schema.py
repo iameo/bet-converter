@@ -72,3 +72,18 @@ class BookingSlipOut(BookingSlipBase):
             }
         }
 
+
+def SuccessResponseModel(data, message):
+    return {
+        "data": [data],
+        "message": message,
+        "code": 200
+    }
+
+
+def ErrorResponseModel(error, message, code):
+    return {
+        "error": error,
+        "message": message,
+        "code": code
+    }
