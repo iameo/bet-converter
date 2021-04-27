@@ -20,7 +20,7 @@ def log_error(status_error):
         os.makedirs(directory)
 
     error_csv = str(today)+"_"+str(now.hour)+':'+str(now.minute)+':'+ str(now.second), status_error
-    error_file = open(str(directory)+'/betconv_exceptions'+str(directory)+'.csv', 'a+')
+    error_file = open(str(directory)+'/betconv'+str(directory)+'.csv', 'a+')
     with error_file:
         writer = csv.writer(error_file)
         writer.writerow(error_csv)
