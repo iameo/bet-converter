@@ -59,11 +59,10 @@ class MatchExtractor(ABC):
         options.add_argument('--no-sandbox')
 
         #comment below in local production - fix to this is already on local, I shall push soon
-        options.binary_location = os.getenv("GOOGLE_CHROME_PATH")
-
+        options.binary_location = os.getenv("GOOGLE_CHROME_BIN")
 
         options.add_experimental_option('excludeSwitches', ['enable-logging'])
-        driver = webdriver.Chrome(chrome_options=options, executable_path=os.getenv('CHROMEDRIVER_PATH_LOCAL') or os.getenv('GOOGLE_CHROME_PATH'))
+        driver = webdriver.Chrome(chrome_options=options, executable_path=os.getenv('CHROMEDRIVER_PATH'))
         # driver.maximize_window()
         driver.get(self.site)
         driver.implicitly_wait(wait_time)
