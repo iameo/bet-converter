@@ -18,8 +18,12 @@ def get_slips(db: Session, skip: int = 0, limit: int = 100):
 def get_slip(db: Session, booking_code: str):
     return db.query(models.BookingSlip).filter(models.BookingSlip.booking_code == booking_code).first()
 
-def create_slip(db: Session, _code: schema.BookingSlipCreate):
-    db_slip = models.BookingSlip(source = _code.source, booking_code = _code.booking_code, converted_slips = _code.converted_slips)
+def get_slip_detail(db: Session, booking_code: str, source: str, destination: str):
+    return db.query(models.BookingSlip).filter(models.BookingSlip.booking_code == booking_code)\
+        .filter(models.BookingSlip.source == source).filter(models.BookingSlip.destination == destination).first()
+
+def create_slip(db: Session, source='', destination='', booking_code='', new_bookingcode=''):
+    db_slip = models.BookingSlip(source=source, destination=destination, booking_code=booking_code, new_bookingcode=new_bookingcode)
     db.add(db_slip)
     db.commit()
     db.refresh(db_slip)
