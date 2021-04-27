@@ -53,7 +53,7 @@ class MatchExtractor(ABC):
         options = webdriver.ChromeOptions()
 
         options.add_argument("--headless")
-        options.add_argument('window-size=1920x1080')
+        # options.add_argument('window-size=1920x1080')
         options.add_argument('--disable-gpu')
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument('--no-sandbox')
@@ -63,7 +63,7 @@ class MatchExtractor(ABC):
 
         options.add_experimental_option('excludeSwitches', ['enable-logging'])
         driver = webdriver.Chrome(chrome_options=options, executable_path=os.getenv('CHROMEDRIVER_PATH'))
-        # driver.maximize_window()
+        driver.maximize_window()
         driver.get(self.site)
         driver.implicitly_wait(wait_time)
         return driver
@@ -126,7 +126,7 @@ class MatchExtractor(ABC):
 class Bet9ja(MatchExtractor):
     def games_extractor(self, driver):
 
-        submit = driver.find_element_by_xpath('//*[@id="h_w_PC_oddsSearch_btnCerca"]').click()
+        submit = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@id="h_w_PC_oddsSearch_btnCerca"]'))).click()
 
         page_title = driver.title
 
@@ -154,7 +154,7 @@ class Bet9ja(MatchExtractor):
     def slip_extractor(self):
         driver = self.connect()
 
-        elem = driver.find_element_by_class_name('TextBox')
+        elem = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'TextBox')))
         elem.send_keys(self.booking_code)
 
         load = driver.find_element_by_class_name('lnk.Load').click()
@@ -397,7 +397,7 @@ class X1Bet(MatchExtractor):
 
         driver = self.connect()
         
-        notification = driver.find_element_by_xpath('//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')
+        notification = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')))
         if notification:
             notification.click()
         else:
@@ -445,7 +445,7 @@ class X1Bet(MatchExtractor):
 
         driver = self.connect()
 
-        notification = driver.find_element_by_xpath('//a[contains(@href,"deny")]').click()
+        notification = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//a[contains(@href,"deny")]')))
         if notification:
             notification.click()
         else:
@@ -573,6 +573,7 @@ class X1Bet(MatchExtractor):
         a.key_down(Keys.CONTROL).click(coupon).send_keys('C').key_up(Keys.CONTROL).perform()
 
         # slip_code = pyperclip.paste() #paste copied object in environment
+        time.sleep(1)
         slip_code = coupon.get_attribute("value")
 
         driver.quit()
