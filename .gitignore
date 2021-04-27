@@ -13,6 +13,7 @@ env/*
 .vscode/
 vscode/*
 
+errorlog/
 
 api/views/__pycache__/*.pyc
 
