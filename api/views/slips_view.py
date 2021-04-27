@@ -22,9 +22,6 @@ from ..worker import Bet9ja, SportyBet, X1Bet, MSport
 
 import re
 
-from sqlalchemy.sql.expression import ClauseElement
-from sqlalchemy.orm import Session
-
 
 from typing import List
 from pydantic import BaseModel
@@ -85,7 +82,7 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
         slip = crud.get_slip_detail(db, booking_code, source, destination)
 
         if slip:
-            return slip
+            return schema.SuccessResponseModel(data=slip, message="BOOKING CODE MATCHING YOUR SELECTIONS RETRIEVED!")
         
         matches_extract = []
         slip_code = ''
