@@ -89,7 +89,6 @@ class BookingSlipOut(BookingSlipBase):
         schema_extra = {
             "example": {
                 "booking_code": "3D9FXWQ",
-                "id": 5,
                 "created_at": datetime.now(),
                 "destination": "x1bet",
                 "source": "bet9ja",
