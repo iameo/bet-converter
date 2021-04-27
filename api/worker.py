@@ -444,7 +444,7 @@ class X1Bet(MatchExtractor):
 
         driver = self.connect()
 
-        notification = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//a[contains(@href,"deny")]')))
+        notification = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')))
         if notification:
             notification.click()
         else:
