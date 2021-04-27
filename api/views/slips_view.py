@@ -74,7 +74,7 @@ async def get_slip_by_detail(booking_code: str, source: str, destination: str, d
     return slip
 
 
-@slip_view.get("/slips/convert/", response_model=schema.BookingSlipOut, summary="convert bet slip")
+@slip_view.get("/slips/convert/", summary="convert bet slip")
 async def get_converted_slip(booking_code: str, source: BetSources, destination: BetSources, db: Session = Depends(get_db)):
     """
     Convert bet slip from source to your destination site:
@@ -117,7 +117,8 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
 
                 return db_slip
             else:
-                return schema.ErrorResponseModel("INVALID BOOKING CODE!", "CHECK YOUR BOOKING CODE AND TRY AGAIN", 400)
+                return {"status":"FAILED - INVALID BOOKING CODE"}
+                # return schema.ErrorResponseModel("INVALID BOOKING CODE!", "CHECK YOUR BOOKING CODE AND TRY AGAIN", 400)
 
         elif source == BetSources.sportybet:
             selections = SportyBet(source=source, booking_code=booking_code, site=link_sportybet).slip_extractor()
@@ -148,7 +149,7 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                 return db_slip
 
             else:
-                return schema.ErrorResponseModel("INVALID BOOKING CODE!", "CHECK YOUR BOOKING CODE AND TRY AGAIN", 400)
+                return {"status":"FAILED - INVALID BOOKING CODE"}
         
         elif source == BetSources.betway:
             pass
