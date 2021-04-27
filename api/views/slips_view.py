@@ -75,7 +75,7 @@ async def get_slip_by_detail(booking_code: str, source: str, destination: str, d
 
 
 @slip_view.get("/slips/convert/", summary="convert bet slip")
-async def get_converted_slip(booking_code: str, source: BetSources, destination: BetSources, db: Session = Depends(get_db)):
+def get_converted_slip(booking_code: str, source: BetSources, destination: BetSources, db: Session = Depends(get_db)):
     """
     Convert bet slip from source to your destination site:
 
