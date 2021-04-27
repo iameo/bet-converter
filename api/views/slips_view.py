@@ -59,7 +59,7 @@ async def create_slip(
     return crud.create_slip(db=db, _code=_code)
 
 
-@slip_view.get("/slips/{booking_code}", response_model=List[schema.BookingSlipOut], summary="get bet slip by booking code")
+@slip_view.get("/slips/{booking_code}", response_model=schema.BookingSlipOut, summary="get bet slip by booking code")
 async def get_slip_by_code(booking_code: str, db: Session = Depends(get_db)):
     slip = crud.get_slip(db, booking_code=booking_code)
     if slip is None:
@@ -76,7 +76,14 @@ async def get_slip_by_detail(booking_code: str, source: str, destination: str, d
 
 @slip_view.get("/slips/convert/", response_model=schema.BookingSlipOut, summary="convert bet slip")
 async def get_converted_slip(booking_code: str, source: BetSources, destination: BetSources, db: Session = Depends(get_db)):
-    # check slip is valid against source, goto source, extract, "store", go to dest, input, book, return booking code
+    """
+    Convert bet slip from source to your destination site:
+
+    - **booking code**: your generated booking code e.g Y5GSHW
+    - **source**: the site booking code was (originally) generated
+    - **destination**: the site you would like to convert the booking slip to
+    - **NB**: Depending on both source and destination sites & number of games in bet slip, conversion could span from 40s to minutes
+    """
 
     if len(booking_code) >= 4:
         slip = crud.get_slip_detail(db, booking_code, source, destination)
@@ -106,9 +113,9 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                     __msport = MSport(source=source, site=link_msport)
                     slip_code = __msport.injector('bet9ja', selections)
                 
-                db_slip = crud.create_slip(db, source=source, destination=destination, booking_code=booking_code, new_bookingcode=slip_code)
+                db_slip = crud.create_slip(db, source=source, destination=destination, booking_code=str(booking_code).upper(), new_bookingcode=slip_code)
 
-                return schema.SuccessResponseModel(data=db_slip, message="SUCCESS! SAVED TO DATABASE", code=200)
+                return db_slip
             else:
                 return schema.ErrorResponseModel("INVALID BOOKING CODE!", "CHECK YOUR BOOKING CODE AND TRY AGAIN", 400)
 
@@ -137,7 +144,8 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                 
                 db_slip = crud.create_slip(db, source=source, destination=destination, booking_code=booking_code, new_bookingcode=slip_code)
 
-                return schema.SuccessResponseModel(data=db_slip, message="SLIP SAVED TO DATABASE")
+                # return schema.SuccessResponseModel(data=db_slip, message="SLIP SAVED TO DATABASE")
+                return db_slip
 
             else:
                 return schema.ErrorResponseModel("INVALID BOOKING CODE!", "CHECK YOUR BOOKING CODE AND TRY AGAIN", 400)
