@@ -52,17 +52,17 @@ class MatchExtractor(ABC):
     def connect(self, wait_time=1):
         options = webdriver.ChromeOptions()
 
-        # options.add_argument("--headless")
+        options.add_argument("--headless")
         options.add_argument("--window-size=1500,1000")
         options.add_argument('--disable-gpu')
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument('--no-sandbox')
         options.add_argument('--remote-debugging-port=9222')
 
-        # options.binary_location = os.getenv("GOOGLE_CHROME_BIN")
+        options.binary_location = os.getenv("GOOGLE_CHROME_BIN")
 
         options.add_experimental_option('excludeSwitches', ['enable-logging'])
-        driver = webdriver.Chrome(chrome_options=options, executable_path=os.getenv('CHROMEDRIVER_PATH_LOCAL'))
+        driver = webdriver.Chrome(chrome_options=options, executable_path=os.getenv('CHROMEDRIVER_PATH'))
         try:
             driver.get(self.site)
             driver.implicitly_wait(wait_time)
