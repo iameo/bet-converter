@@ -29,11 +29,11 @@ class MatchDetail(MatchDetailBase):
 ############################BOOKING SLIP######################################
 
 class BookingSlipBase(BaseModel):
-    booking_code: str = None
+    booking_code: str
+    source: str
+    destination: str
+    new_bookingcode: str
 
-    
-    # destination: Optional[str] = None
-    # new_booking_code: Optional[str] = None
 
 class ConvertedSlipBase(BaseModel):
     destination: Optional[str] = None
@@ -47,23 +47,23 @@ class ConvertedSlipBase(BaseModel):
 class ConvertedSlip(ConvertedSlipBase):
     id: int
     booking_slip_id: int
-    new_booking_code: Optional[str] = None
 
     created_at: Optional[datetime]
 
     class Config:
         orm_mode = True
 
+
 class BookingSlipCreate(BookingSlipBase):
-    source: Optional[str] = None
+    pass
+
 
 class ConvertedSlipCreate(BookingSlipCreate, ConvertedSlipBase):
     pass
 
 class BookingSlip(BookingSlipBase):
     id: int
-    converted_slips: List[ConvertedSlip] = [{}]
-    created_at: Optional[datetime] = None
+    created_at: datetime
 
     class Config:
         orm_mode = True
@@ -72,38 +72,28 @@ class BookingSlip(BookingSlipBase):
             "example": {
                 "source": "bet9ja",
                 "booking_code": "3XVU9BA",
-
+                "destination": "x1bet",
+                "new_bookingcode": "CJXPY",
+                "created_at": "2021-04-27T04:44:11",
             }
         }
 
 
 
-# class BookingSlip(BookingSlipBase):
-#     id: int
-#     converted_slips: List[ConvertedSlip]
 
-#     class Config:
-#         orm_mode = True
-
-
-
-class BookingSlipOut(BookingSlipBase, ConvertedSlipBase):
-    created_at: Optional[datetime] = None
+class BookingSlipOut(BookingSlipBase):
+    created_at: datetime
 
     class Config:
+        orm_mode = True
         schema_extra = {
             "example": {
-                "id": "1",
+                "booking_code": "3D9FXWQ",
+                "id": 5,
+                "created_at": datetime.now(),
+                "destination": "x1bet",
                 "source": "bet9ja",
-                "booking_code": "3XVU9BA",
-                "converts": [
-                    {"destination": "1xbet",
-                    "new_booking_code": "ZY7D2",
-                    "created_at": datetime.now(),
-                    "id": 2,
-                    "booking_slip_id": 1}
-                ],
-                "created_at": datetime.now()
+                "new_bookingcode": "ABYPY",
             }
         }
 
@@ -113,11 +103,11 @@ class BookingSlipOut(BookingSlipBase, ConvertedSlipBase):
 
 ##################### RESPONSE #####################################
 
-def SuccessResponseModel(data, message):
+def SuccessResponseModel(data, message, code=200):
     return {
         "data": [data],
         "message": message,
-        "code": 200
+        "code": code
     }
 
 
