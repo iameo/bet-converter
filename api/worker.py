@@ -25,8 +25,13 @@ import time
 from abc import ABC, abstractmethod
 
 from .betsource import link_bet9ja, link_1xbet
+from . import models
+
+
 
 import pyperclip
+
+from sqlalchemy.sql.expression import ClauseElement
 
 stopwords = stopwords.words('english')
 
@@ -110,6 +115,25 @@ class MatchExtractor(ABC):
         return _match
 
 
+# https://stackoverflow.com/questions/2546207/does-sqlalchemy-have-an-equivalent-of-djangos-get-or-create
+# def get_or_create(db: Session, model, defaults=None, **kwargs):
+#     instance = db.query(model).filter_by(**kwargs).one_or_none()
+#     print(">>>>>>>>>>>>>>>>>>>>>>>>>>", instance)
+#     if instance:
+#         return instance, False
+#     else:
+#         params = {k: v for k, v in kwargs.items() if not isinstance(v, ClauseElement)}
+#         params.update(defaults or {})
+#         instance = model(**params)
+#         try:
+#             db.add(instance)
+#             db.commit()
+#         except Exception:  # The actual exception depends on the specific database so we catch all exceptions. This is similar to the official documentation: https://docs.sqlalchemy.org/en/latest/orm/session_transaction.html
+#             db.rollback()
+#             instance = db.query(model).filter_by(**kwargs).one()
+#             return instance, False
+#         else:
+#             return instance, True
 
 
 
@@ -166,6 +190,7 @@ class Bet9ja(MatchExtractor):
 
             selections = [row.text.split("\n")[1:-1] for row in rows] #['Premier League', 'Team A - Team B', '1 1X2']
 
+            driver.quit()
             return selections
         
         else: #booking code found and intact
@@ -175,7 +200,8 @@ class Bet9ja(MatchExtractor):
             n_rows = len(driver.find_elements_by_class_name("CItem"))
 
             selections = [row.text.split("\n")[1:-1] for row in rows]
-
+            
+            driver.quit()
             return selections
             #redundant code above; create a function and replace!
 
@@ -451,7 +477,6 @@ class X1Bet(MatchExtractor):
             csim_check = []
             for game in p_match:
                 relations = [self.clean_string(game), self.clean_string(league + ' ' + match)]
-                print("REL: ", relations)
                 if "simulated" not in relations[0] and "-zoom" not in relations[0] \
                             and "alternative" not in relations[0] and "first goal" not in relations[0] and "match stats" not in relations[0] and "team to score " not in relations[0]:
                     csim = self.check_similarity(relations)
@@ -489,7 +514,7 @@ class X1Bet(MatchExtractor):
             else:
                 _bet_type = _bet_type
 
-
+            time.sleep(1)
             for bet_type, bet_selection in zip(bet_types, bet_selections):
                 if (bet_type.text == _bet_type.title() or bet_type.text == _bet_type.strip().upper()) and (str(bet_selection.text).lower() == str(bet).lower()) and bet_type.text != "" and bet_type.text != " ":
                     bet_type.click()
@@ -529,6 +554,7 @@ class X1Bet(MatchExtractor):
 
         # slip_code = pyperclip.paste() #paste copied object in environment
         slip_code = coupon.get_attribute("value")
+
         driver.quit()
 
         return slip_code
