@@ -59,22 +59,22 @@ async def create_slip(
     return crud.create_slip(db=db, _code=_code)
 
 
-@slip_view.get("/slips/{booking_code}", response_model=schema.BookingSlipOut)
+@slip_view.get("/slips/{booking_code}", response_model=List[schema.BookingSlipOut], summary="get bet slip by booking code")
 async def get_slip_by_code(booking_code: str, db: Session = Depends(get_db)):
     slip = crud.get_slip(db, booking_code=booking_code)
     if slip is None:
         raise HTTPException(status_code=404, detail="booking slip not found!")
     return slip
 
-@slip_view.get("/slips/detail/{booking_code}", response_model=schema.BookingSlipOut)
-async def get_slip_by_code(booking_code: str, source: str, destination: str, db: Session = Depends(get_db)):
+@slip_view.get("/slips/detail/{booking_code}", response_model=schema.BookingSlipOut, summary="get bet slip by details (booking code, source and destination)")
+async def get_slip_by_detail(booking_code: str, source: str, destination: str, db: Session = Depends(get_db)):
     slip = crud.get_slip_detail(db, booking_code=booking_code, source=source, destination=destination)
     if slip is None:
         raise HTTPException(status_code=404, detail="booking slip not found!")
     return slip
 
 
-@slip_view.get("/slips/convert/")
+@slip_view.get("/slips/convert/", response_model=schema.BookingSlipOut, summary="convert bet slip")
 async def get_converted_slip(booking_code: str, source: BetSources, destination: BetSources, db: Session = Depends(get_db)):
     # check slip is valid against source, goto source, extract, "store", go to dest, input, book, return booking code
 
@@ -82,7 +82,7 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
         slip = crud.get_slip_detail(db, booking_code, source, destination)
 
         if slip:
-            return schema.SuccessResponseModel(data=slip, message="BOOKING CODE MATCHING YOUR SELECTIONS RETRIEVED!")
+            return slip
         
         matches_extract = []
         slip_code = ''
@@ -92,9 +92,8 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
 
             if selections is not None:
                 if destination == BetSources.bet9ja:
-                    xp = booking_code
                     __bet9ja = Bet9ja(source=source, site=link_bet9ja)
-                    slip_code = __bet9ja.injector(xp, selections)
+                    slip_code = __bet9ja.injector("bet9ja", selections)
 
                 if destination == BetSources.sportybet:
                     pass
@@ -152,7 +151,8 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
             return schema.ErrorResponseModel("INVALID OPTION!", "CHECK YOUR SELECTED OPTIONS AND TRY AGAIN", 400)
     
 
-    return schema.ErrorResponseModel("INVALID BOOKING CODE!", "REGUIRED LENGTH IS A MINIMUM OF 4!!", 400)
+    else:
+        raise HTTPException(status_code=400, detail=f"booking code can not be less than 4 characters!")
 
 @slip_view.get("/slips/", response_model=List[schema.BookingSlipOut])
 async def get_slips(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
