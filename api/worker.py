@@ -49,6 +49,7 @@ class MatchExtractor(ABC):
         options = webdriver.ChromeOptions()
 
         options.add_argument("--headless")
+        options.add_argument('window-size=1920x1080')
         options.add_argument('--disable-gpu')
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument('--no-sandbox')
@@ -59,7 +60,7 @@ class MatchExtractor(ABC):
 
         options.add_experimental_option('excludeSwitches', ['enable-logging'])
         driver = webdriver.Chrome(chrome_options=options, executable_path=chrome_path)
-        driver.maximize_window()
+        # driver.maximize_window()
         driver.get(self.site)
         driver.implicitly_wait(wait_time)
         return driver
@@ -454,7 +455,17 @@ class X1Bet(MatchExtractor):
             match = MatchExtractor.match_cleanser(match)
             time.sleep(1)
 
-            elem = driver.find_element_by_class_name('sport-search__input')
+            try:
+                elem = driver.find_element_by_class_name('sport-search__input')
+            except NoSuchElementException as e:
+                log_error(str(e))
+
+            except ElementNotInteractableException as e:
+                log_error(str(e))
+
+            except Exception as e:
+                log_error(str(e)) 
+
             elem.click()
             elem.send_keys(" ") #faux to allow input in next loop otherwise buggy
             elem.clear()
