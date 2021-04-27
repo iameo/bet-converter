@@ -26,6 +26,7 @@ from abc import ABC, abstractmethod
 
 from .betsource import link_bet9ja, link_1xbet
 from . import models
+from .helpers import log_error
 
 
 
@@ -128,7 +129,10 @@ class Bet9ja(MatchExtractor):
         time.sleep(2)
 
         rows = driver.find_element_by_class_name('dgStyle').find_elements(By.TAG_NAME, "tr")[1:]
-        
+
+        if not rows:
+            driver.refresh()
+
         matches = []
 
         for row in rows:
@@ -282,9 +286,15 @@ class Bet9ja(MatchExtractor):
                 driver.back()
                 driver.refresh()
 
-            except Exception as e:
-                print(str(e))
+            except NoSuchElementException as e:
+                log_error(str(e))
 
+            except ElementNotInteractableException as e:
+                log_error(str(e))
+
+            except Exception as e:
+                log_error(str(e))
+            
         time.sleep(2)
         place_the_bet = driver.find_element_by_class_name('dx').click()
         time.sleep(2)
@@ -321,8 +331,15 @@ class SportyBet(MatchExtractor):
         #     print(">>>")
         try:
             elem = driver.find_element_by_xpath('//*[@id="j_betslip"]/div[2]/div[1]/div/div[2]/span/input')
+        
         except NoSuchElementException as e:
-            print(">>>>>>>", str(e))
+            log_error(str(e))
+
+        except ElementNotInteractableException as e:
+            log_error(str(e))
+
+        except Exception as e:
+            log_error(str(e))
 
         elem.send_keys(self.booking_code)
         load = driver.find_element_by_xpath('//*[@id="j_betslip"]/div[2]/div[1]/div/button').click()
@@ -358,6 +375,9 @@ class X1Bet(MatchExtractor):
         time.sleep(2)
         rows = driver.find_elements(By.CLASS_NAME, "search-popup-events__item")
         
+        if not rows:
+            driver.refresh()
+
         p_match = [_match.text.split("\n") for _match in rows if _match != '']
         p_match = [_match for _match in p_match if _match != ['']]
 
@@ -387,9 +407,16 @@ class X1Bet(MatchExtractor):
             driver.find_element_by_xpath('//*[@id="sports_right"]/div/div[2]/div/div[2]/div[1]/div/div[3]/div[3]/div/div/div/div[2]/div/div/div[3]/div/button').click()
             time.sleep(2)
             selections = driver.find_element_by_class_name('coupon__bets').text
-        except NoSuchElementException as e:
-            print(str(e))
         
+        except NoSuchElementException as e:
+            log_error(str(e))
+
+        except ElementNotInteractableException as e:
+            log_error(str(e))
+
+        except Exception as e:
+            log_error(str(e))
+
         _selections = re.split("\n", selections)
         _selections = [_selections[x:x+4] for x in range(0, len(_selections), 5)] #first 5 elements per selection
         # _selections[0] = re.split('\d+', selections[0])
@@ -471,7 +498,6 @@ class X1Bet(MatchExtractor):
             rows = driver.find_element(By.CLASS_NAME, "search-popup-events").find_elements(By.TAG_NAME, "a")
 
             select_game = rows[max_index] #get the link of the max csim score
-
             if select_game:
                 if 'Alternative' in select_game.text.title(): #"Barcelona Srl"; simulated game; break
                     #move to next match since selected game is simulated
@@ -550,8 +576,13 @@ class MSport(MatchExtractor):
             driver.find_element_by_xpath('/html/body/div[1]/header/div[4]/div[2]/div[2]/div[1]/a').click()
 
         except NoSuchElementException as e:
-            print(str(e))
+            log_error(str(e))
 
+        except ElementNotInteractableException as e:
+            log_error(str(e))
+
+        except Exception as e:
+            log_error(str(e))
         # time.sleep(1)
 
 
@@ -608,9 +639,16 @@ class MSport(MatchExtractor):
             time.sleep(1)
             coupon.send_keys(Keys.ENTER)
             selections = ''
-        except NoSuchElementException as e:
-            print(str(e))
         
+        except NoSuchElementException as e:
+            log_error(str(e))
+
+        except ElementNotInteractableException as e:
+            log_error(str(e))
+
+        except Exception as e:
+            log_error(str(e))
+
         #process selections
         #return selection
 
@@ -734,8 +772,14 @@ class Bet22(MatchExtractor):
 
             load = driver.find_element_by_class_name('cc-controls__btn-main_upload').click()
 
+        except NoSuchElementException as e:
+            log_error(str(e))
+
+        except ElementNotInteractableException as e:
+            log_error(str(e))
+        
         except Exception as e:
-            print(str(e))
+            log_error(str(e))
 
         #get selections
 
