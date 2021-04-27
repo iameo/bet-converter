@@ -52,19 +52,22 @@ class MatchExtractor(ABC):
     def connect(self, wait_time=1):
         options = webdriver.ChromeOptions()
 
-        options.add_argument("--headless")
+        # options.add_argument("--headless")
         options.add_argument("--window-size=1500,1000")
         options.add_argument('--disable-gpu')
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument('--no-sandbox')
+        options.add_argument('--remote-debugging-port=9222')
 
-        #comment below in local production - fix to this is already on local, I shall push soon
-        options.binary_location = os.getenv("GOOGLE_CHROME_BIN")
+        # options.binary_location = os.getenv("GOOGLE_CHROME_BIN")
 
         options.add_experimental_option('excludeSwitches', ['enable-logging'])
-        driver = webdriver.Chrome(chrome_options=options, executable_path=os.getenv('CHROMEDRIVER_PATH'))
-        driver.get(self.site)
-        driver.implicitly_wait(wait_time)
+        driver = webdriver.Chrome(chrome_options=options, executable_path=os.getenv('CHROMEDRIVER_PATH_LOCAL'))
+        try:
+            driver.get(self.site)
+            driver.implicitly_wait(wait_time)
+        except Exception as e:
+            driver.quit()
         return driver
 
 
@@ -125,13 +128,11 @@ class MatchExtractor(ABC):
 class Bet9ja(MatchExtractor):
     def games_extractor(self, driver):
 
-        submit = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@id="h_w_PC_oddsSearch_btnCerca"]'))).click()
+        wait = WebDriverWait(driver, 10)
 
-        page_title = driver.title
+        submit = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="h_w_PC_oddsSearch_btnCerca"]'))).click()
 
-        time.sleep(2)
-
-        rows = driver.find_element_by_class_name('dgStyle').find_elements(By.TAG_NAME, "tr")[1:]
+        rows =  wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'dgStyle'))).find_elements(By.TAG_NAME, "tr")[1:]
 
         if not rows:
             driver.refresh()
@@ -146,21 +147,23 @@ class Bet9ja(MatchExtractor):
             match = re.findall(r"\(.*?\)", match_team)
 
             if not match:
-                matches.append({"source": page_title, "league": str(league), "team": match_team.split("\n")[1], "datetime": str(match_time)})
+                matches.append({"source": "bet9ja", "league": str(league), "team": match_team.split("\n")[1], "datetime": str(match_time)})
         return matches
         
 
     def slip_extractor(self):
         driver = self.connect()
 
-        elem = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'TextBox')))
+        selections = None
+
+        wait = WebDriverWait(driver, 10)
+
+        elem = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'TextBox')))
         elem.send_keys(self.booking_code)
 
         load = driver.find_element_by_class_name('lnk.Load').click()
-
-        time.sleep(3)
  
-        stat = driver.find_element_by_id('h_w_PC_cCoupon_mexPrenotazione')
+        stat = wait.until(EC.presence_of_element_located((By.ID, 'h_w_PC_cCoupon_mexPrenotazione')))
 
         if 'not found' in stat.text:
             driver.quit()
@@ -173,25 +176,21 @@ class Bet9ja(MatchExtractor):
             driver.execute_script("$('.CEvento').css({'display':'block', 'position':'static'})")
             
             rows = driver.find_elements_by_class_name("CItem")
-            n_rows = len(driver.find_elements_by_class_name("CItem"))
 
             selections = [row.text.split("\n")[1:-1] for row in rows] #['Premier League', 'Team A - Team B', '1 1X2']
 
-            driver.quit()
-            return selections
-        
         else: #booking code found and intact
             driver.execute_script("$('.CEvento').css({'display':'block', 'position':'static'})")
                 
             rows = driver.find_elements_by_class_name("CItem")
-            n_rows = len(driver.find_elements_by_class_name("CItem"))
 
             selections = [row.text.split("\n")[1:-1] for row in rows]
             
-            driver.quit()
-            return selections
-            #redundant code above; create a function and replace!
 
+        driver.quit()
+
+        return selections
+        
 
 
     def injector(self, source, selections):
@@ -202,6 +201,8 @@ class Bet9ja(MatchExtractor):
         _bet_type = ''
 
         driver = self.connect()
+        wait = WebDriverWait(driver, 10)
+
 
         for __match in selections:
             try:
@@ -245,9 +246,9 @@ class Bet9ja(MatchExtractor):
 
                 max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
                 
-                time.sleep(2)
+                # time.sleep(2)
 
-                rows = driver.find_element_by_class_name('dgStyle').find_elements(By.TAG_NAME, "a")[2:] #['descr', 'date','....']
+                rows = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'dgStyle'))).find_elements(By.TAG_NAME, "a")[2:] #['descr', 'date','....']
 
                 select_game = rows[max_index] #get the link of the max csim score
                 if select_game:
@@ -298,8 +299,8 @@ class Bet9ja(MatchExtractor):
             except Exception as e:
                 log_error(str(e))
             
-        time.sleep(2)
-        place_the_bet = driver.find_element_by_class_name('dx').click()
+        # time.sleep(2)
+        place_the_bet = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'dx'))).click()
         time.sleep(2)
         driver.switch_to.frame(driver.find_element_by_tag_name("iframe"))
         slip_code = str(driver.find_element_by_class_name("number").text).split(':')[1]
@@ -370,6 +371,7 @@ class X1Bet(MatchExtractor):
         # if notification:
         #     notification.click()
             
+        wait = WebDriverWait(driver, 10)
 
         driver.find_element_by_class_name('sport-search__btn').click()
         time.sleep(3)
@@ -395,12 +397,10 @@ class X1Bet(MatchExtractor):
     def slip_extractor(self):
 
         driver = self.connect()
+
+        wait = WebDriverWait(driver, 10)
         
-        notification = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')))
-        if notification:
-            notification.click()
-        else:
-            pass
+        notification = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a'))).click()
 
         try:
             driver.find_element_by_class_name('c-dropdown__trigger').click()
@@ -444,13 +444,8 @@ class X1Bet(MatchExtractor):
 
         driver = self.connect()
 
-        notification = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')))
-        if notification:
-            notification.click()
-        else:
-            pass
+        notification = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a'))).click()
  
-
         for __match in selections:
             match = __match[1]
 
