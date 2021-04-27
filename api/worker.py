@@ -48,13 +48,13 @@ class MatchExtractor(ABC):
     def connect(self, wait_time=1):
         options = webdriver.ChromeOptions()
 
-        # options.add_argument("--headless")
-        # options.add_argument('--disable-gpu')
-        # options.add_argument("--disable-dev-shm-usage")
-        # options.add_argument('--no-sandbox')
+        options.add_argument("--headless")
+        options.add_argument('--disable-gpu')
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument('--no-sandbox')
 
-        # comment out in local production - fix to this is already on local, I shall push soon
-        # options.binary_location = os.getenv("GOOGLE_CHROME_PATH")
+        #comment below in local production - fix to this is already on local, I shall push soon
+        options.binary_location = os.getenv("GOOGLE_CHROME_PATH")
 
 
         options.add_experimental_option('excludeSwitches', ['enable-logging'])
