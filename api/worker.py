@@ -28,15 +28,19 @@ from .betsource import link_bet9ja, link_1xbet
 from . import models
 from .helpers import log_error
 
-
-
 import pyperclip
 
-from sqlalchemy.sql.expression import ClauseElement
+import os
+from os.path import join, dirname
+from dotenv import load_dotenv
+
+dotenv_path = join(dirname(__file__), ".env")
+load_dotenv(dotenv_path)
+
 
 stopwords = stopwords.words('english')
 
-chrome_path = 'driver\\chromedriver.exe'
+# chrome_path = 'driver\\chromedriver.exe'
 
 
 class MatchExtractor(ABC):
@@ -59,7 +63,7 @@ class MatchExtractor(ABC):
 
 
         options.add_experimental_option('excludeSwitches', ['enable-logging'])
-        driver = webdriver.Chrome(chrome_options=options, executable_path=chrome_path)
+        driver = webdriver.Chrome(chrome_options=options, executable_path=os.getenv('CHROMEDRIVER_PATH_LOCAL') or os.getenv('GOOGLE_CHROME_PATH'))
         # driver.maximize_window()
         driver.get(self.site)
         driver.implicitly_wait(wait_time)
