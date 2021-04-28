@@ -250,6 +250,9 @@ class Bet9ja(MatchExtractor):
 
                 rows = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'dgStyle'))).find_elements(By.TAG_NAME, "a")[2:] #['descr', 'date','....']
 
+                if not rows:
+                    continue
+                
                 select_game = rows[max_index] #get the link of the max csim score
                 if select_game:
                     if 'Srl' in select_game.text.title(): #"Barcelona Srl"; simulated game; break
@@ -299,8 +302,8 @@ class Bet9ja(MatchExtractor):
             except Exception as e:
                 log_error(str(e))
             
-        # time.sleep(2)
-        place_the_bet = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'dx'))).click()
+        time.sleep(2)
+        place_the_bet = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'dx'))).click()
         time.sleep(2)
         driver.switch_to.frame(driver.find_element_by_tag_name("iframe"))
         slip_code = str(driver.find_element_by_class_name("number").text).split(':')[1]
