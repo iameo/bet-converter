@@ -821,7 +821,19 @@ class Bet22(MatchExtractor):
         except Exception as e:
             log_error(str(e))
 
-        #get selections
+        selections = driver.find_element_by_id('all_bets')
+        _selections = re.split("\n", selections.text)
+        _selections = [_selections[x:x+3] for x in range(0, len(_selections), 4)] #first 3 elements per selection
+
+        games = []      
+        for game in _selections:
+            game[0] = re.split('\d+', game[0])[1]
+            game[1] =  game[1]
+            game[2] =  game[2]
+            games.append(game)
+
+        driver.quit()
+        return games
 
     def injector(self, source, selections):
         league = ''
@@ -939,6 +951,7 @@ class Bet22(MatchExtractor):
         time.sleep(2)
         slip = driver.find_element_by_class_name('cc-controls__input_text.keyboardInput')
         slip_code = slip.get_attribute('value')
+
         driver.quit()
 
         return slip_code
