@@ -796,7 +796,7 @@ class Bet22(MatchExtractor):
                 match_team = league_match[1]
                 match_time = list_view[1]
 
-                matches.append({"source": "22bet", "league": str(league), "team": match_team.lstrip(), "datetime": str(match_time)})
+                matches.append({"source": "22bet", "league": str(league), "team": match_team.lstrip().replace('-', ' - '), "datetime": str(match_time)})
             continue
         
         return matches
@@ -867,8 +867,8 @@ class Bet22(MatchExtractor):
                 for game in p_match:
                     if len(game) >= 4:
                         relations = [self.clean_string(game), self.clean_string(league + ' ' + match)]
-                        if "simulated" not in relations[0] and "-zoom" not in relations[0] \
-                                and "cyber live" not in relations[0] and "first goal" not in relations[0] and "match stats" not in relations[0] and "team to score " not in relations[0]:
+                        if "simulated" not in relations[0] and "pes" not in relations[0] \
+                                and "cyber" not in relations[0] and "fifa" not in relations[0] and "4x4" not in relations[0] and "team to score " not in relations[0]:
                             csim = self.check_similarity(relations)
                         else:
                             csim = 0
@@ -877,12 +877,13 @@ class Bet22(MatchExtractor):
                         continue
 
                 max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
+                _team = max(csim_check)[1].split(' - ')
                 
-                rows = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'search-results-list__item')))
+                rows = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'search-results-list'))).find_elements(By.TAG_NAME, "a")
 
                 if not rows:
                     continue
-
+                
                 select_game = rows[max_index] #get the link of the max csim score
                 if select_game:
                     if '4x4' in select_game.text.title(): #"Barcelona Srl"; simulated game; break
@@ -893,24 +894,25 @@ class Bet22(MatchExtractor):
                     continue #move to next match since no match
                 
                 ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
-                driver.switch_to.window(driver.window_handles[1])
+                # driver.switch_to.window(driver.window_handles[1])
 
-
+# ActionChains(driver).key_down(Keys.CONTROL).send_keys('t').key_up(Keys.CONTROL).perform(
                 bet_types = driver.find_elements_by_class_name("bet_type")
                 bet_selections = driver.find_elements_by_class_name("bet_group")
+
                 
-                if str(_bet_type).lower() == str(__match[1].split(' - ')[0]).lower():
-                    _bet_type = 1
-                elif str(_bet_type).lower() == str(__match[1].split(' - ')[1]).lower():
-                    _bet_type = 2
+                if str(_bet_type).lower() == "1" and str(bet) == '1X2':
+                    _bet_type = _team[0]
+                elif str(_bet_type).lower() == "2" and str(bet) == '1X2':
+                    _bet_type = _team[1]
                 else:
                     _bet_type = _bet_type
 
 
                 #place bet
                 for bet_type, bet_selection in zip(bet_types, bet_selections):
-                    #match bet and bet type: Home - Home and 1x2 - 1x2
                     _bet_selection = bet_selection.text.split('\n')
+                    # print(":::::::::::", bet_type.text, _bet_type, bet, _bet_selection[0])
                     if str(bet_type.text).lower() == str(_bet_type).lower() and (str(_bet_selection[0]).lower() == bet.lower()):
                         bet_type.click()
                         break
@@ -918,8 +920,8 @@ class Bet22(MatchExtractor):
                     else:
                         continue
                 
-                driver.close()
-                driver.switch_to.window(driver.window_handles[0])
+                # driver.close()
+                # driver.switch_to.window(driver.window_handles[0])
                 driver.back()
                 driver.refresh()
 
