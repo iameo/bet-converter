@@ -186,7 +186,6 @@ class Bet9ja(MatchExtractor):
 
             selections = [row.text.split("\n")[1:-1] for row in rows]
             
-
         driver.quit()
 
         return selections
@@ -252,7 +251,7 @@ class Bet9ja(MatchExtractor):
 
                 if not rows:
                     continue
-                
+
                 select_game = rows[max_index] #get the link of the max csim score
                 if select_game:
                     if 'Srl' in select_game.text.title(): #"Barcelona Srl"; simulated game; break
@@ -771,7 +770,36 @@ class MSport(MatchExtractor):
 
 class Bet22(MatchExtractor):
     def games_extractor(self, driver):
-        pass
+
+        try:
+            rows = driver.find_elements_by_class_name('search-results-list__item')
+        
+        except NoSuchElementException as e:
+            log_error(str(e))
+
+        except ElementNotInteractableException as e:
+            log_error(str(e))
+
+        except Exception as e:
+            log_error(str(e))
+        
+        if not rows:
+            driver.refresh()
+
+        matches = []
+
+        for row in rows:
+            list_view = row.text.split("\n")
+            if len(list_view) == 3:
+                league_match = list_view[2].rsplit(".", 1)
+                league = league_match[0]
+                match_team = league_match[1]
+                match_time = list_view[1]
+
+                matches.append({"source": "22bet", "league": str(league), "team": match_team.lstrip(), "datetime": str(match_time)})
+            continue
+        
+        return matches
 
     def slip_extractor(self):
         driver = self.connect()
@@ -802,18 +830,117 @@ class Bet22(MatchExtractor):
         slip_code = ''
 
         driver = self.connect()
-
+        
+        wait = WebDriverWait(driver, 10)
+        
         for __match in selections:
-            match = __match[1]
+            try:
+                match = __match[1]
 
-            match = MatchExtractor.match_cleanser(match)
-            time.sleep(1)
+                match = MatchExtractor.match_cleanser(match)
+                time.sleep(1)
 
-            elem = driver.find_element_by_class_name('sport-search__input')
-            elem.click()
-            elem.send_keys(" ") #faux to allow input in next loop otherwise buggy
-            elem.clear()
-            elem.send_keys(match)
+                elem = driver.find_element_by_class_name('input.searchInput.keyboardInput')
+                elem.click()
+                elem.send_keys(" ") #faux to allow input in next loop otherwise buggy
+                elem.clear()
+                elem.send_keys(match)
+                elem.send_keys(Keys.ENTER)
+
+                games = self.games_extractor(driver)
+                    
+                if not games: 
+                    continue
+
+                league = __match[0]
+
+                bet = __match[2].split(" ")[-1]
+                _bet_type= ' '.join([a for a in __match[2].split(" ")[:-1]])
+
+
+                n_games = [game['league'] + ' ~ ' + game['team'] for game in games]
+
+                p_match = [_match for _match in n_games if _match != [''] if _match != [' ~ ']]
+
+                csim_check = []
+
+                for game in p_match:
+                    if len(game) >= 4:
+                        relations = [self.clean_string(game), self.clean_string(league + ' ' + match)]
+                        if "simulated" not in relations[0] and "-zoom" not in relations[0] \
+                                and "cyber live" not in relations[0] and "first goal" not in relations[0] and "match stats" not in relations[0] and "team to score " not in relations[0]:
+                            csim = self.check_similarity(relations)
+                        else:
+                            csim = 0
+                        csim_check.append([csim, game.split('~ ')[1]])
+                    else:
+                        continue
+
+                max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
+                
+                rows = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'search-results-list__item')))
+
+                if not rows:
+                    continue
+
+                select_game = rows[max_index] #get the link of the max csim score
+                if select_game:
+                    if '4x4' in select_game.text.title(): #"Barcelona Srl"; simulated game; break
+                        #move to next match since selected game is simulated
+                        driver.back()
+                        driver.refresh()
+                else:
+                    continue #move to next match since no match
+                
+                ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
+                driver.switch_to.window(driver.window_handles[1])
+
+
+                bet_types = driver.find_elements_by_class_name("bet_type")
+                bet_selections = driver.find_elements_by_class_name("bet_group")
+                
+                if str(_bet_type).lower() == str(__match[1].split(' - ')[0]).lower():
+                    _bet_type = 1
+                elif str(_bet_type).lower() == str(__match[1].split(' - ')[1]).lower():
+                    _bet_type = 2
+                else:
+                    _bet_type = _bet_type
+
+
+                #place bet
+                for bet_type, bet_selection in zip(bet_types, bet_selections):
+                    #match bet and bet type: Home - Home and 1x2 - 1x2
+                    _bet_selection = bet_selection.text.split('\n')
+                    if str(bet_type.text).lower() == str(_bet_type).lower() and (str(_bet_selection[0]).lower() == bet.lower()):
+                        bet_type.click()
+                        break
+                        
+                    else:
+                        continue
+                
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
+                driver.back()
+                driver.refresh()
+
+            except NoSuchElementException as e:
+                log_error(str(e))
+
+            except ElementNotInteractableException as e:
+                log_error(str(e))
+
+            except Exception as e:
+                log_error(str(e))
+            
+        time.sleep(2)
+        save_btn = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'cc-controls__btn-main_get'))).click()
+        time.sleep(2)
+        slip = driver.find_element_by_class_name('cc-controls__input_text.keyboardInput')
+        slip_code = slip.get_attribute('value')
+        driver.quit()
+
+        return slip_code
+
 
 
         
