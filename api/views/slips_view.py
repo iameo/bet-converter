@@ -18,7 +18,7 @@ from selenium.common.exceptions import ElementNotInteractableException, NoSuchEl
 from .. import crud, models, schema
 from ..database import engine, SessionLocal
 from ..betsource import BetSources, link_bet9ja, link_sportybet, link_1xbet, link_msport
-from ..worker import Bet9ja, SportyBet, X1Bet, MSport
+from ..worker import Bet9ja, SportyBet, X1Bet, MSport, Bet22
 
 import re
 
@@ -113,6 +113,10 @@ def get_converted_slip(booking_code: str, source: BetSources, destination: BetSo
                     __msport = MSport(source=source, site=link_msport)
                     slip_code = __msport.injector('bet9ja', selections)
                 
+                if destination == BetSources.bet22:
+                    __bet22 = Bet22(source=source, site=link_msport)
+                    slip_code = __bet22.injector('bet9ja', selections)
+                
                 db_slip = crud.create_slip(db, source=source, destination=destination, booking_code=str(booking_code).upper(), new_bookingcode=slip_code)
 
                 return db_slip
@@ -142,6 +146,14 @@ def get_converted_slip(booking_code: str, source: BetSources, destination: BetSo
                 if destination == BetSources.bet9ja:
                     __bet9ja = Bet9ja(source=source, site=link_bet9ja)
                     slip_code = __bet9ja.injector('1xbet', selections)
+                
+                if destination == BetSources.msport:
+                    __msport = MSport(source=source, site=link_msport)
+                    slip_code = __msport.injector('1xbet', selections)
+                
+                if destination == BetSources.bet22:
+                    __bet22 = Bet22(source=source, site=link_msport)
+                    slip_code = __bet22.injector('1xbet', selections)
                 
                 db_slip = crud.create_slip(db, source=source, destination=destination, booking_code=booking_code, new_bookingcode=slip_code)
 
