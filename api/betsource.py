@@ -22,4 +22,4 @@ link_bet9ja = 'https://web.bet9ja.com/Sport/Default.aspx'
 link_sportybet = 'https://www.sportybet.com/ng/sport/football/' #to evade homepage popups
 link_1xbet = 'https://1xbet.ng/en/line/' #to evade homepage popups but handles one
 link_msport = 'https://www.msport.ng/'
-link_22bet = 'https://22bet.ng/'
+link_22bet = 'https://22bet.ng/line/'
