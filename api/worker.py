@@ -104,10 +104,6 @@ class MatchExtractor(ABC):
 
         return csim
 
-    # def bet_cleanser(self, bet):
-    #     if 'btts yes' in bet:
-    #         return 'btts yes'
-
     @staticmethod
     def chunk_it(seq, num): #courtesy of stackover
         avg = len(seq) / float(num)
@@ -256,7 +252,7 @@ class Bet9ja(MatchExtractor):
                 n_rows = len(wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'dgStyle'))).find_elements(By.TAG_NAME, "a")[2:])
 
                 if not rows or n_rows < 1:
-                    continue
+                    driver.back()
 
                 select_game = rows[max_index] #get the link of the max csim score
                 if select_game:
@@ -462,6 +458,7 @@ class X1Bet(MatchExtractor):
         notification = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a'))).click()
  
         for __match in selections:
+            driver.refresh()
             match = __match[1]
             league = __match[0]
 
