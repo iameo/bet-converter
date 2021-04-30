@@ -27,6 +27,10 @@ from abc import ABC, abstractmethod
 from .betsource import link_bet9ja, link_1xbet
 from . import models
 from .helpers import log_error
+from .bet_selections import (
+    x1bet_to_msport, x1bet_to_bet22, x1bet_to_bet9ja, bet9ja_to_1xbet,\
+    msport_to_bet9ja, bet9ja_to_msport, bet22_to_bet9ja, bet22_to_1xbet
+    )
 
 import pyperclip
 
@@ -199,6 +203,9 @@ class Bet9ja(MatchExtractor):
         bet = ''
         _bet_type = ''
 
+        rows = None
+        n_rows = ''
+
         driver = self.connect()
         wait = WebDriverWait(driver, 10)
 
@@ -220,8 +227,8 @@ class Bet9ja(MatchExtractor):
 
                 league = __match[0]
 
-                bet = __match[2].split(" ")[-1]
-                _bet_type= ' '.join([a for a in __match[2].split(" ")[:-1]])
+                # bet = __match[2].split(" ")[-1]
+                # _bet_type= ' '.join([a for a in __match[2].split(" ")[:-1]])
 
 
                 n_games = [game['league'] + ' ~ ' + game['team'] for game in games]
@@ -241,15 +248,14 @@ class Bet9ja(MatchExtractor):
                         csim_check.append([csim, game.split('~ ')[1]])
                     else:
                         continue
-                # select = driver.find_element_by_partial_link_text(max(csim_check)[1].title())
-
-                max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
                 
-                # time.sleep(2)
-
+                max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
+                _team = max(csim_check)[1].split(' - ')
+                
                 rows = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'dgStyle'))).find_elements(By.TAG_NAME, "a")[2:] #['descr', 'date','....']
+                n_rows = len(wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'dgStyle'))).find_elements(By.TAG_NAME, "a")[2:])
 
-                if not rows:
+                if not rows or n_rows < 1:
                     continue
 
                 select_game = rows[max_index] #get the link of the max csim score
@@ -268,17 +274,23 @@ class Bet9ja(MatchExtractor):
                 bet_types = driver.find_elements_by_class_name("SEOddsTQ")
                 bet_selections = driver.find_elements_by_class_name("SECQ")
                 
-                if str(_bet_type).lower() == str(__match[1].split(' - ')[0]).lower():
-                    _bet_type = 1
-                elif str(_bet_type).lower() == str(__match[1].split(' - ')[1]).lower():
-                    _bet_type = 2
+                # Southampton 1X2
+                if source == '1xbet':
+                    _bet_type, bet = x1bet_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
+                
                 else:
-                    _bet_type = _bet_type
+                    if str(_bet_type).lower() == str(__match[1].split(' - ')[0]).lower():
+                        _bet_type = 1
+                    elif str(_bet_type).lower() == str(__match[1].split(' - ')[1]).lower():
+                        _bet_type = 2
+                    else:
+                        _bet_type = _bet_type
 
 
                 #place bet
                 for bet_type, bet_selection in zip(bet_types, bet_selections):
                     #match bet and bet type: Home - Home and 1x2 - 1x2
+                    # print("YY: ", bet_type.text, _bet_type, bet_selection.text, bet )
                     if str(bet_type.text).lower() == str(_bet_type).lower() and (bet_selection.text.lower() == bet.lower()):
                         fo = bet_type.find_element_by_xpath('following-sibling::*')
                         fo.click()
@@ -373,7 +385,7 @@ class X1Bet(MatchExtractor):
         # if notification:
         #     notification.click()
             
-        wait = WebDriverWait(driver, 10)
+        # wait = WebDriverWait(driver, 10)
 
         driver.find_element_by_class_name('sport-search__btn').click()
         time.sleep(3)
@@ -392,7 +404,8 @@ class X1Bet(MatchExtractor):
         for col in p_match:
             if len(col) >= 4:
                 matches.append({"source": "1XBET", "league": str(col[1]), "team": str(col[2]), "datetime": ' '.join([a_ for a_ in col[0].split('.')[1:]]).replace(' ','/')})
-            continue
+            else:
+                continue
         return matches
 
 
@@ -450,6 +463,7 @@ class X1Bet(MatchExtractor):
  
         for __match in selections:
             match = __match[1]
+            league = __match[0]
 
             match = MatchExtractor.match_cleanser(match)
             time.sleep(1)
@@ -465,17 +479,16 @@ class X1Bet(MatchExtractor):
             except Exception as e:
                 log_error(str(e)) 
 
-            elem.click()
+            # elem.click()
             elem.send_keys(" ") #faux to allow input in next loop otherwise buggy
             elem.clear()
-            elem.send_keys(match)
+            elem.send_keys(match + ' ' + league)
 
             games = self.games_extractor(driver)
-           
             if not games:
                 continue
 
-            league = __match[0]
+
 
             bet = __match[2].split(" ")[-1]
             _bet_type= ' '.join([a for a in __match[2].split(" ")[:-1]])
@@ -495,7 +508,8 @@ class X1Bet(MatchExtractor):
             for game in p_match:
                 relations = [self.clean_string(game), self.clean_string(league + ' ' + match)]
                 if "simulated" not in relations[0] and "-zoom" not in relations[0] \
-                            and "alternative" not in relations[0] and "first goal" not in relations[0] and "match stats" not in relations[0] and "team to score " not in relations[0]:
+                            and "alternative" not in relations[0] and "first goal" not in relations[0] and "match stats" not in relations[0] \
+                                and "team to score " not in relations[0] and "lottery" not in relations[0] and "dream" not in relations[0]:
                     csim = self.check_similarity(relations)
                 else:
                     csim = 0
@@ -506,15 +520,18 @@ class X1Bet(MatchExtractor):
 
             time.sleep(1)
             rows = driver.find_element(By.CLASS_NAME, "search-popup-events").find_elements(By.TAG_NAME, "a")
+            n_rows = len(driver.find_element(By.CLASS_NAME, "search-popup-events").find_elements(By.TAG_NAME, "a"))
 
             select_game = rows[max_index] #get the link of the max csim score
-            if select_game:
-                if 'Alternative' in select_game.text.title(): #"Barcelona Srl"; simulated game; break
-                    #move to next match since selected game is simulated
-                    driver.refresh()
-            else:
-                continue #move to next match since no match
             
+            if not select_game or n_rows < 1:
+                continue
+            
+            link_text = select_game.text.lower()
+            if 'alternative' in link_text or 'draft' in link_text or 'esport' in link_text: #"Barcelona Srl"; simulated game; skip
+                print(">>>", link_text)
+                continue
+
             ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
             driver.switch_to.window(driver.window_handles[1])
 
