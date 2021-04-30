@@ -38,7 +38,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
 
         bet_selection = bet.split(' ', 2)[1]
 
-    elif ('basketball' in league or 'nba' in league) and '1 - 2' in bet:
+    elif ('basketball' in league or 'nba' in league) and '1x2' in bet:
         if home in bet_type:
             bet_type = "1HH"
         elif away in bet_type:
@@ -62,15 +62,40 @@ def x1bet_to_bet9ja(bet, home, away, league):
         else:
             bet_type = 'X'
 
-    else:
-        bet_type = bet.split(' ')[0]
-        bet_selection = bet.split(' ')[1]
+    elif '1x2' in bet.split(" ")[-1] and 'baseball' in league:
+        bet_type = ' '.join([a for a in bet.split(" ")[:-1]])
+        bet_selection = '1 - 2'
+        # print("PPPPPPPJ: ", bet_type,'c', home,'d', bet, 'e', bet_selection)
+        if str(bet_type).lower() in str(home).lower():
+            bet_type = '1HH'
+        else:
+            bet_type = '2HH'
+
+
+
+    elif '1x2' in bet.split(" ")[-1]:
+        bet_type = ' '.join([a for a in bet.split(" ")[:-1]])
+        # bet_selection = bet.split(" ")[-1]
+        print("PPPPPPP: ", bet_type,'c', home,'d', away,'f', bet, 'e', bet_selection, league)
         if str(bet_type).lower() == str(home).lower():
             bet_type = 1
         elif str(bet_type).lower() == str(away).lower():
             bet_type = 2
         else:
             bet_type = "X"
+
+ 
+    else:
+        bet_type = ' '.join([a for a in bet.split(" ")[:-1]])
+        bet_selection = bet.split(" ")[-1]
+        # print("PPPPPPPX: ", bet_type,'c', home,'d', bet, 'e', bet_selection, league)
+        if str(bet_type).lower() in str(home).lower():
+            bet_type = 1
+        elif str(bet_type).lower() in str(away).lower():
+            bet_type = 2
+        else:
+            bet_type = "X"
+
     return bet_type, bet_selection
     
 
