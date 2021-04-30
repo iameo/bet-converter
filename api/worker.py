@@ -223,9 +223,6 @@ class Bet9ja(MatchExtractor):
 
                 league = __match[0]
 
-                # bet = __match[2].split(" ")[-1]
-                # _bet_type= ' '.join([a for a in __match[2].split(" ")[:-1]])
-
 
                 n_games = [game['league'] + ' ~ ' + game['team'] for game in games]
 
