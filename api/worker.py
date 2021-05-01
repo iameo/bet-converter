@@ -527,14 +527,15 @@ class X1Bet(MatchExtractor):
                 _bet_type = _bet_type
 
             time.sleep(1)
-            for bet_type, bet_selection in zip(bet_types, bet_selections):
-                if (bet_type.text == _bet_type.title() or bet_type.text == _bet_type.strip().upper()) and (str(bet_selection.text).lower() == str(bet).lower()) and bet_type.text != "" and bet_type.text != " ":
-                    bet_type.click()
-                    time.sleep(1)
-                    break
-                    
-                else:
-                    continue
+            for bet_selection in bet_selections:
+                if bet_selection.text.lower() == bet.lower():
+                    for bet_type in bet_types:
+                        # print("YY: ", bet_type.text, _bet_type, bet_selection.text, bet )
+                        if str(bet_type.text).lower() == str(_bet_type).lower():
+                            fo = bet_type.find_element_by_xpath('following-sibling::*')
+                            fo.click()
+                            break
+                        continue
             
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
@@ -745,16 +746,15 @@ class MSport(MatchExtractor):
             bet_selections = driver.find_elements_by_class_name("")
 
             #place bet
-            for bet_type, bet_selection in zip(bet_types, bet_selections):
-
-                #match bet and bet type: Home - Home and 1x2 - 1x2
-                if str(bet_type.text).lower() == str(_bet_type).lower() and (bet_selection.text.lower() == bet.lower()):
-                    fo = bet_type.find_element_by_xpath('following-sibling::*')
-                    fo.click()
-                    break
-                    
-                else:
-                    continue
+            for bet_selection in bet_selections:
+                if bet_selection.text.lower() == bet.lower():
+                    for bet_type in bet_types:
+                        # print("YY: ", bet_type.text, _bet_type, bet_selection.text, bet )
+                        if str(bet_type.text).lower() == str(_bet_type).lower():
+                            fo = bet_type.find_element_by_xpath('following-sibling::*')
+                            fo.click()
+                            break
+                        continue
             
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
@@ -918,16 +918,15 @@ class Bet22(MatchExtractor):
 
 
                 #place bet
-                for bet_type, bet_selection in zip(bet_types, bet_selections):
-                    _bet_selection = bet_selection.text.split('\n')
-                    # print(":::::::::::", bet_type.text, _bet_type, bet, _bet_selection[0])
-                    if str(bet_type.text).lower() == str(_bet_type).lower() and (str(_bet_selection[0]).lower() == bet.lower()):
-                        bet_type.click()
-                        break
-                        
-                    else:
-                        continue
-                
+                for bet_selection in bet_selections:
+                    if bet_selection.text.lower() == bet.lower():
+                        for bet_type in bet_types:
+                            # print("YY: ", bet_type.text, _bet_type, bet_selection.text, bet )
+                            if str(bet_type.text).lower() == str(_bet_type).lower():
+                                fo = bet_type.find_element_by_xpath('following-sibling::*')
+                                fo.click()
+                                break
+                            continue
                 # driver.close()
                 # driver.switch_to.window(driver.window_handles[0])
                 driver.back()
