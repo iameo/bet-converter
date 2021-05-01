@@ -321,10 +321,6 @@ class NairaBet(MatchExtractor):
 
 
 class SportyBet(MatchExtractor):
-    # def __init__(self, country):
-    #     super().__init__(country)
-    #     pass
-
     def games_extractor(self, team):
         pass
 
