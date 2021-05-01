@@ -19,23 +19,33 @@ def x1bet_to_bet9ja(bet, home, away, league):
     bet_type = ''
     bet_selection = ''
 
+    #to qualify
     if 'qualify' in bet:
         bet_type = bet.rsplit(' - ')[0]
         bet_selection = bet.rsplit(' - ')[1]
+
+    #total over x.x
     elif 'total over' in bet:
         o_u = re.search('\d.\d', bet)
         bet_type = 'Over'
         bet_selection = f'O/U {float(o_u.group())}'
+    #total under x.x
     elif 'total under' in bet:
         o_u = re.search('\d.\d', bet)
         bet_type = 'Under'
         bet_selection = f'O/U {float(o_u.group())}'
+
+    #handicap market
     elif 'handicap' in bet:
         bet_selection = bet.split(' ', 1)[0]
         bet_type = bet.split(' ', 1)[1]
+    
+    #3way win
     elif 'to win by (3way)' in bet:
         bet_type = bet.split('.')[0]
         bet_selection = bet.split('.')[1]
+    
+    #double chance
     elif 'double chance' in bet:
         if f'{home} or {away}' in bet:
             bet_type = "12"
@@ -75,14 +85,16 @@ def x1bet_to_bet9ja(bet, home, away, league):
         bet_selection = 'Correct Score'
         bet_type = re.search('\d+-\d+', bet)
 
+    #both teams to score - yes
     elif bet == 'both teams to score both teams to score - yes':
         bet_selection = 'GG/NG'
         bet_type = 'GG'
-
+    #both teams to score - no
     elif bet == 'both teams to score both teams to score - no':
         bet_selection = 'GG/NG'
         bet_type = 'NG'
 
+    #basketball specials######
     elif ('basketball' in league or 'nba' in league) and '1x2' in bet:
         bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
         if home in bet_type:
@@ -111,6 +123,9 @@ def x1bet_to_bet9ja(bet, home, away, league):
         else:
             bet_type = 'X'
 
+    # --- end of basketball special markets ----
+
+    # -- baseball market ---
     elif '1x2' in bet.split(" ")[-1] and 'baseball' in league:
         bet_type = ' '.join([a for a in bet.split(" ")[:-1]])
         bet_selection = '1 - 2'
@@ -119,7 +134,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
             bet_type = '1HH'
         else:
             bet_type = '2HH'
-
+    # -- end of baseball marker ---
 
 
     elif '1x2' in bet.split(" ")[-1]:
@@ -148,6 +163,8 @@ def x1bet_to_bet9ja(bet, home, away, league):
     return bet_type, bet_selection
     
 
+
+############## X1bet -> 22BET ###############
 def x1bet_to_bet22(bet):
     bet_type = ''
     bet_selection = ''
