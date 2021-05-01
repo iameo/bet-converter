@@ -48,6 +48,33 @@ def x1bet_to_bet9ja(bet, home, away, league):
 
         bet_selection = ' '.join([a for a in bet.split(" ",2)[:-1]])
 
+    #first goal
+    elif 'next goal 1' in bet:
+        if home in bet:
+            bet_type = 1
+        elif away in bet:
+            bet_type = 2
+        elif 'neither' in bet:
+            bet_type = 'No Goal'
+        else:
+            bet_type = ''
+        bet_selection = 'First Goal'
+    #last goal
+    elif 'next goal 1' in bet:
+        if home in bet:
+            bet_type = 1
+        elif away in bet:
+            bet_type = 2
+        else:
+            #'no one' in bet:
+            bet_type = 'No Goal'
+        bet_selection = 'Last Goal'
+
+    #correct score
+    elif 'correct score (17way' in bet:
+        bet_selection = 'Correct Score'
+        bet_type = re.search('\d+-\d+', bet)
+
     elif bet == 'both teams to score both teams to score - yes':
         bet_selection = 'GG/NG'
         bet_type = 'GG'
