@@ -44,8 +44,6 @@ load_dotenv(dotenv_path)
 
 stopwords = stopwords.words('english')
 
-# chrome_path = 'driver\\chromedriver.exe'
-
 
 class MatchExtractor(ABC):
     def __init__(self, source: str = None, site: str = None, booking_code: str = None) -> None:
