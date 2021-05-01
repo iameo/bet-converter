@@ -56,17 +56,17 @@ class MatchExtractor(ABC):
     def connect(self, wait_time=1):
         options = webdriver.ChromeOptions()
 
-        options.add_argument("--headless")
-        options.add_argument("--window-size=1500,1000")
-        options.add_argument('--disable-gpu')
-        options.add_argument("--disable-dev-shm-usage")
-        options.add_argument('--no-sandbox')
-        options.add_argument('--remote-debugging-port=9222')
+        # options.add_argument("--headless")
+        # options.add_argument("--window-size=1500,1000")
+        # options.add_argument('--disable-gpu')
+        # options.add_argument("--disable-dev-shm-usage")
+        # options.add_argument('--no-sandbox')
+        # options.add_argument('--remote-debugging-port=9222')
 
-        options.binary_location = os.getenv("GOOGLE_CHROME_BIN")
+        # options.binary_location = os.getenv("GOOGLE_CHROME_BIN")
 
         options.add_experimental_option('excludeSwitches', ['enable-logging'])
-        driver = webdriver.Chrome(chrome_options=options, executable_path=os.getenv('CHROMEDRIVER_PATH'))
+        driver = webdriver.Chrome(chrome_options=options, executable_path=os.getenv('CHROMEDRIVER_PATH_LOCAL'))
         try:
             driver.get(self.site)
             driver.implicitly_wait(wait_time)
@@ -205,7 +205,6 @@ class Bet9ja(MatchExtractor):
         driver = self.connect()
         wait = WebDriverWait(driver, 10)
 
-
         for __match in selections:
             try:
                 match = __match[1]
@@ -280,17 +279,15 @@ class Bet9ja(MatchExtractor):
                         _bet_type = _bet_type
 
 
-                #place bet
-                for bet_type, bet_selection in zip(bet_types, bet_selections):
-                    #match bet and bet type: Home - Home and 1x2 - 1x2
-                    # print("YY: ", bet_type.text, _bet_type, bet_selection.text, bet )
-                    if str(bet_type.text).lower() == str(_bet_type).lower() and (bet_selection.text.lower() == bet.lower()):
-                        fo = bet_type.find_element_by_xpath('following-sibling::*')
-                        fo.click()
-                        break
-                        
-                    else:
-                        continue
+                for bet_selection in bet_selections:
+                    if bet_selection.text.lower() == bet.lower():
+                        for bet_type in bet_types:
+                            # print("YY: ", bet_type.text, _bet_type, bet_selection.text, bet )
+                            if str(bet_type.text).lower() == str(_bet_type).lower():
+                                fo = bet_type.find_element_by_xpath('following-sibling::*')
+                                fo.click()
+                                break
+                            continue
                 
                 driver.close()
                 driver.switch_to.window(driver.window_handles[0])
@@ -371,15 +368,6 @@ class SportyBet(MatchExtractor):
 class X1Bet(MatchExtractor):
     def games_extractor(self, driver):
 
-        # # notification on 1xbet removed as at 16-04-2021
-        # # back on 5 hours 2later
-        # notification = driver.find_element_by_xpath('//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a')
-        
-        # if notification:
-        #     notification.click()
-            
-        # wait = WebDriverWait(driver, 10)
-
         driver.find_element_by_class_name('sport-search__btn').click()
         time.sleep(3)
         driver.find_element_by_xpath('//*[@id="modals-container"]/div/div/div[2]/div/div[2]/div[1]/div[2]/div[1]/div').click()
@@ -436,7 +424,7 @@ class X1Bet(MatchExtractor):
         for game in _selections:
             game[0] = re.split('\d+', game[0])[1]
             game[1] =  game[1] + ' - ' + game[2]
-            game[2] =  game[3].split(' ', 1)[1].title() + ' ' + game[3].split(' ', 1)[0]
+            game[2] =  game[3]
             games.append(game[:-1]) #exclude last index - redundant
 
         driver.quit()
@@ -523,7 +511,6 @@ class X1Bet(MatchExtractor):
             
             link_text = select_game.text.lower()
             if 'alternative' in link_text or 'draft' in link_text or 'esport' in link_text: #"Barcelona Srl"; simulated game; skip
-                print(">>>", link_text)
                 continue
 
             ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
