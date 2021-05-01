@@ -894,7 +894,7 @@ class Bet22(MatchExtractor):
                 
                 select_game = rows[max_index] #get the link of the max csim score
                 if select_game:
-                    if '4x4' in select_game.text.title(): #"Barcelona Srl"; simulated game; break
+                    if '4x4' in select_game.text.title() or 'simulated' in select_game.text.lower(): #"Barcelona Srl"; simulated game; break
                         #move to next match since selected game is simulated
                         driver.back()
                         driver.refresh()
