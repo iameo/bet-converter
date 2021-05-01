@@ -1,3 +1,6 @@
+import re
+
+
 ###### SOURCE: BET9JA#######
 
 def bet9ja_to_1xbet(bet):
@@ -20,13 +23,21 @@ def x1bet_to_bet9ja(bet, home, away, league):
         bet_type = bet.rsplit(' - ')[0]
         bet_selection = bet.rsplit(' - ')[1]
     elif 'total over' in bet:
-        bet_type = bet.split(' ', 1)[0]
-        bet_selection = bet.split(' ', 1)[1]
+        o_u = re.search('\d.\d', bet)
+        bet_type = 'Over'
+        bet_selection = f'O/U {float(o_u.group)}'
+    elif 'total under' in bet:
+        o_u = re.search('\d.\d', bet)
+        bet_type = 'Under'
+        bet_selection = f'O/U {float(o_u.group)}'
+    elif 'handicap' in bet:
+        bet_selection = bet.split(' ', 1)[0]
+        bet_type = bet.split(' ', 1)[1]
     elif 'to win by (3way)' in bet:
         bet_type = bet.split('.')[0]
         bet_selection = bet.split('.')[1]
     elif 'double chance' in bet:
-        bet_type = bet.split(' ', 2)[0]
+        bet_type = bet.split(' ', 2)[-1]
         if home in bet_type and away in bet_type:
             bet_type = "12"
         elif home in bet_type:
@@ -36,17 +47,29 @@ def x1bet_to_bet9ja(bet, home, away, league):
         else:
             bet_type = ''
 
-        bet_selection = bet.split(' ', 2)[1]
+        bet_selection = ' '.join([a for a in bet.split(" ",2)[:-1]])
+
+    elif bet == 'both teams to score both teams to score - yes':
+        print("XXXXXXx")
+        bet_selection = 'GG/NG'
+        bet_type = 'GG'
+
+    elif bet == 'both teams to score both teams to score - yes':
+        bet_selection = 'GG/NG'
+        bet_type = 'NG'
 
     elif ('basketball' in league or 'nba' in league) and '1x2' in bet:
+        bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
         if home in bet_type:
             bet_type = "1HH"
         elif away in bet_type:
             bet_type = '2HH'
         else:
             bet_type = ''
+
     
     elif ('basketball' in league or 'nba' in league) and ('1x2 rt' in bet or '1x2' in bet or '1x2 (5.5)' in bet):
+        bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
         if home in bet_type:
             bet_type = "1"
         elif away in bet_type:
@@ -55,6 +78,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
             bet_type = 'X'
 
     elif ('basketball' in league or 'nba' in league) and ('1x2 in regular time' in bet):
+        bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
         if home in bet_type:
             bet_type = "1"
         elif away in bet_type:
@@ -65,7 +89,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
     elif '1x2' in bet.split(" ")[-1] and 'baseball' in league:
         bet_type = ' '.join([a for a in bet.split(" ")[:-1]])
         bet_selection = '1 - 2'
-        # print("PPPPPPPJ: ", bet_type,'c', home,'d', bet, 'e', bet_selection)
+        print("PPPPPPPJ: ", bet_type,'c', home,'d', bet, 'e', bet_selection)
         if str(bet_type).lower() in str(home).lower():
             bet_type = '1HH'
         else:
@@ -74,8 +98,8 @@ def x1bet_to_bet9ja(bet, home, away, league):
 
 
     elif '1x2' in bet.split(" ")[-1]:
-        bet_type = ' '.join([a for a in bet.split(" ")[:-1]])
-        # bet_selection = bet.split(" ")[-1]
+        bet_type = bet.split(" ")[-1]
+        bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
         print("PPPPPPP: ", bet_type,'c', home,'d', away,'f', bet, 'e', bet_selection, league)
         if str(bet_type).lower() == str(home).lower():
             bet_type = 1
@@ -86,9 +110,9 @@ def x1bet_to_bet9ja(bet, home, away, league):
 
  
     else:
-        bet_type = ' '.join([a for a in bet.split(" ")[:-1]])
-        bet_selection = bet.split(" ")[-1]
-        # print("PPPPPPPX: ", bet_type,'c', home,'d', bet, 'e', bet_selection, league)
+        bet_type = bet.split(" ")[-1]
+        bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
+        print("PPPPPPPX: ", bet_type,'c', home,'d', bet, 'e', bet_selection, league)
         if str(bet_type).lower() in str(home).lower():
             bet_type = 1
         elif str(bet_type).lower() in str(away).lower():
