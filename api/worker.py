@@ -38,6 +38,8 @@ import os
 from os.path import join, dirname
 from dotenv import load_dotenv
 
+from fastapi.
+
 dotenv_path = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
 
@@ -409,6 +411,9 @@ class X1Bet(MatchExtractor):
 
         except Exception as e:
             log_error(str(e))
+
+        if selections is None:
+            return selections
 
         _selections = re.split("\n", selections)
         _selections = [_selections[x:x+4] for x in range(0, len(_selections), 5)] #first 5 elements per selection
