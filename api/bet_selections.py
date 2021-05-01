@@ -25,11 +25,11 @@ def x1bet_to_bet9ja(bet, home, away, league):
     elif 'total over' in bet:
         o_u = re.search('\d.\d', bet)
         bet_type = 'Over'
-        bet_selection = f'O/U {float(o_u.group)}'
+        bet_selection = f'O/U {float(o_u.group())}'
     elif 'total under' in bet:
         o_u = re.search('\d.\d', bet)
         bet_type = 'Under'
-        bet_selection = f'O/U {float(o_u.group)}'
+        bet_selection = f'O/U {float(o_u.group())}'
     elif 'handicap' in bet:
         bet_selection = bet.split(' ', 1)[0]
         bet_type = bet.split(' ', 1)[1]
@@ -37,12 +37,11 @@ def x1bet_to_bet9ja(bet, home, away, league):
         bet_type = bet.split('.')[0]
         bet_selection = bet.split('.')[1]
     elif 'double chance' in bet:
-        bet_type = bet.split(' ', 2)[-1]
-        if home in bet_type and away in bet_type:
+        if f'{home} or {away}' in bet:
             bet_type = "12"
-        elif home in bet_type:
+        elif f'{home} or x':
             bet_type = "1X"
-        elif away in bet_type:
+        elif f'{away} or x' in bet_type:
             bet_type = 'X2'
         else:
             bet_type = ''
@@ -50,11 +49,10 @@ def x1bet_to_bet9ja(bet, home, away, league):
         bet_selection = ' '.join([a for a in bet.split(" ",2)[:-1]])
 
     elif bet == 'both teams to score both teams to score - yes':
-        print("XXXXXXx")
         bet_selection = 'GG/NG'
         bet_type = 'GG'
 
-    elif bet == 'both teams to score both teams to score - yes':
+    elif bet == 'both teams to score both teams to score - no':
         bet_selection = 'GG/NG'
         bet_type = 'NG'
 
