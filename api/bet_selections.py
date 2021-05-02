@@ -106,7 +106,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
     #HT-FT 1x2
     elif 'ht-ft ht-ft' in bet:
         bet_selection = "HT/FT"
-        _bet_type = bet.split(' ', 1)[-1].lower()
+        _bet_type = bet.split(' ', 1)[-1]
         if f'ht-ft w {home} w {home}' == _bet_type:
             bet_type = '1/1'
         elif f'ht-ft w {home} x' == _bet_type:#ht-ft ht-ft W UDINESE CALCIO X
@@ -125,6 +125,19 @@ def x1bet_to_bet9ja(bet, home, away, league):
             bet_type = '2/X'
         elif f'ht-ft w {away} w {away}' == _bet_type: 
             bet_type = '2/2'
+        else:
+            bet_type = ''
+        
+# SCORES IN EACH HALF 1ST HALF > 2ND HALF
+    elif 'scores in each half' in bet.rsplit(' ',5):
+        bet_selection = 'hughest scoring half'
+        _bet_type = bet.split(' ', 4)[4]
+        if '1st half > 2nd half' == _bet_type:
+            bet_type = '1st'
+        elif '1st half < 2nd half' == _bet_type:
+            bet_type = '2nd'
+        elif '1st half = 2nd half' == _bet_type:
+            bet_type = 'Equal'
         else:
             bet_type = ''
 
