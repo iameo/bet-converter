@@ -20,8 +20,8 @@ def x1bet_to_bet9ja(bet, home, away, league):
     bet_selection = ''
 
     #to qualify
-    if 'qualify' in bet:
-        bet_type = bet.rsplit(' - ')[0]
+    if 'to qualify' in bet:
+        bet_type = bet.rsplit(' - ')[1]
         bet_selection = bet.rsplit(' - ')[1]
 
     #total over x.x
