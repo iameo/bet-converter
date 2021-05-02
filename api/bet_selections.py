@@ -142,13 +142,23 @@ def x1bet_to_bet9ja(bet, home, away, league):
             bet_type = ''
 
     #yellow card - team
-    elif 'yellow cards' in bet:
-        if home in bet:
-            bet_type = 1
-        elif away in bet:
-            bet_type = 2
+    elif 'yellow card yellow card' in bet:
+        if 'yellow card - yes' in bet:
+            bet_type = 'yes yellow card'
+        elif 'yellow card - no' in bet:
+            bet_type = 'no yellow card'
         else:
-            bet_type = 'No yellow Cards'
+            bet_type = ''
+
+    #red card - team
+    elif 'red card red card' in bet:
+        if 'red card - yes' in bet:
+            bet_type = 'yes red card'
+        elif 'red card - no' in bet:
+            bet_type = 'no red card'
+        else:
+            bet_type = ''
+
 
     #basketball specials######
     elif ('basketball' in league or 'nba' in league) and '1x2' in bet:
