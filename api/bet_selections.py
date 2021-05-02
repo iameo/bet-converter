@@ -93,6 +93,49 @@ def x1bet_to_bet9ja(bet, home, away, league):
     elif bet == 'both teams to score both teams to score - no':
         bet_selection = 'GG/NG'
         bet_type = 'NG'
+    
+    #both teams to score - 2 goals+ yes
+    elif bet == 'both teams to score each team to score 2 or more - yes':
+        bet_selection = 'GG/NG 2+'
+        bet_type = 'GG'
+    #both teams to score - 2 goals+ no
+    elif bet == 'both teams to score each team to score 2 or more - no':
+        bet_selection = 'GG/NG 2+'
+        bet_type = 'NG'
+
+    #HT-FT 1x2
+    elif 'ht-ft ht-ft' in bet:
+        bet_selection = "HT/FT"
+        _bet_type = bet.split(' ', 1)[-1].lower()
+        if f'ht-ft w {home} w {home}' == _bet_type:
+            bet_type = '1/1'
+        elif f'ht-ft w {home} x' == _bet_type:#ht-ft ht-ft W UDINESE CALCIO X
+            bet_type = '1/X'
+        elif f'ht-ft w {home} w {away}'  == _bet_type: 
+            bet_type = '1/2'
+        elif f'ht-ft xw {home}' == _bet_type: #ht-ft ht-ft XW UDINESE CALCIO
+            bet_type = 'X/1'
+        elif f'ht-ft xx' == _bet_type:
+            bet_type = 'X/X'
+        elif f'ht-ft xw {away}' == _bet_type:
+            bet_type = 'X/2'
+        elif f'ht-ft w {away} w {home}' == _bet_type: 
+            bet_type = '2/1'
+        elif f'ht-ft w {away} x' == _bet_type: 
+            bet_type = '2/X'
+        elif f'ht-ft w {away} w {away}' == _bet_type: 
+            bet_type = '2/2'
+        else:
+            bet_type = ''
+
+    #yellow card - team
+    elif 'yellow cards' in bet:
+        if home in bet:
+            bet_type = 1
+        elif away in bet:
+            bet_type = 2
+        else:
+            bet_type = 'No yellow Cards'
 
     #basketball specials######
     elif ('basketball' in league or 'nba' in league) and '1x2' in bet:
