@@ -130,7 +130,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
         
 # SCORES IN EACH HALF 1ST HALF > 2ND HALF
     elif 'scores in each half' in bet.rsplit(' ',5):
-        bet_selection = 'hughest scoring half'
+        bet_selection = 'highest scoring half'
         _bet_type = bet.split(' ', 4)[4]
         if '1st half > 2nd half' == _bet_type:
             bet_type = '1st'
