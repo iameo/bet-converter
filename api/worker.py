@@ -38,7 +38,6 @@ import os
 from os.path import join, dirname
 from dotenv import load_dotenv
 
-from fastapi.
 
 dotenv_path = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
@@ -269,7 +268,10 @@ class Bet9ja(MatchExtractor):
                 # Southampton 1X2
                 if source == '1xbet':
                     _bet_type, bet = x1bet_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
-                
+                elif source == 'msport':
+                    pass
+                elif source == '22bet':
+                    _bet_type, bet = bet22_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
                 else:
                     if str(_bet_type).lower() == str(__match[1].split(' - ')[0]).lower():
                         _bet_type = 1
