@@ -396,8 +396,8 @@ class X1Bet(MatchExtractor):
         driver = self.connect()
 
         wait = WebDriverWait(driver, 10)
-        
-        notification = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a'))).click()
+        time.sleep(3)
+        notification = driver.find_element(By.XPATH, '//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a').click()
 
         try:
             driver.find_element_by_class_name('c-dropdown__trigger').click()
