@@ -16,7 +16,7 @@ def bet9ja_to_1xbet(bet, home, away, league):
     elif 'O/U' in bet:
         o_u = re.search('\d.\d', bet)
         bet_type = 'Over'
-        bet_selection = f'O/U {float(o_u.group())}' 'total'
+        bet_selection = f'O/U {float(o_u.group())}'
     #total under x.x
     elif 'total under' in bet:
         o_u = re.search('\d.\d', bet)
@@ -235,8 +235,15 @@ def x1bet_to_bet9ja(bet, home, away, league):
     #to qualify
     if 'to qualify' in bet:
         bet_type = bet.rsplit(' - ')[1]
-        bet_selection = bet.rsplit(' - ')[1]
+        bet_selection = 'to qualify'
 
+        if home.lower() in bet_type:
+            bet_type = '1 to qualify'
+        elif away.lower() in bet_type:
+            bet_type = '2 to qualify'
+        else:
+            bet_type = ''
+            
     #total over x.x
     elif 'total over' in bet:
         o_u = re.search('\d.\d', bet)
@@ -374,15 +381,25 @@ def x1bet_to_bet9ja(bet, home, away, league):
 
 
     #basketball specials######
-    elif ('basketball' in league or 'nba' in league) and '1x2' in bet:
-        bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
-        if home in bet_type:
+    elif ('basketball' in league or 'nba' in league) and '1x2 in regular time' in bet:
+        bet_selection = '1 - 2'
+        if home.lower() in bet:
             bet_type = "1HH"
-        elif away in bet_type:
+        elif away.lower() in bet:
             bet_type = '2HH'
         else:
             bet_type = ''
 
+    #overtime - yes/no
+    elif ('basketball' in league or 'nba' in league) and 'will there be overtime' in bet:
+        bet_selection = 'overtime yes/no'
+        bet_type = bet.split(' ', 6)[-1]
+        if 'will there be overtime? - yes' == bet_type:
+            bet_type = "ot yes"
+        elif 'will there be overtime? - no' == bet_type:
+            bet_type = 'ot no'
+        else:
+            bet_type = ''
     
     elif ('basketball' in league or 'nba' in league) and ('1x2 rt' in bet or '1x2' in bet or '1x2 (5.5)' in bet):
         bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
@@ -393,14 +410,14 @@ def x1bet_to_bet9ja(bet, home, away, league):
         else:
             bet_type = 'X'
 
-    elif ('basketball' in league or 'nba' in league) and ('1x2 in regular time' in bet):
-        bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
-        if home in bet_type:
-            bet_type = "1"
-        elif away in bet_type:
-            bet_type = '2'
-        else:
-            bet_type = 'X'
+    # elif ('basketball' in league or 'nba' in league) and ('1x2 in regular time' in bet):
+    #     bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
+    #     if home in bet_type:
+    #         bet_type = "1"
+    #     elif away in bet_type:
+    #         bet_type = '2'
+    #     else:
+    #         bet_type = 'X'
 
     # --- end of basketball special markets ----
 
