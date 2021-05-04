@@ -134,6 +134,7 @@ class Bet9ja(MatchExtractor):
         rows =  wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'dgStyle'))).find_elements(By.TAG_NAME, "tr")[1:]
 
         if not rows:
+            driver.back()
             driver.refresh()
 
         matches = []
@@ -248,13 +249,15 @@ class Bet9ja(MatchExtractor):
 
                 if not rows or n_rows < 1:
                     driver.back()
+                    driver.refresh()
 
                 select_game = rows[max_index] #get the link of the max csim score
                 if select_game:
-                    if 'Srl' in select_game.text.title(): #"Barcelona Srl"; simulated game; break
+                    if 'Srl' in select_game.text.title() or 'srl' in select_game.text.lower().split(' ')[-1]: #"Barcelona Srl"; simulated game; break
                         #move to next match since selected game is simulated
                         driver.back()
                         driver.refresh()
+                        continue
                 else:
                     continue #move to next match since no match
                 
@@ -427,7 +430,6 @@ class X1Bet(MatchExtractor):
             game[1] =  game[1] + ' - ' + game[2]
             game[2] =  game[3]
             games.append(game[:-1]) #exclude last index - redundant
-
         driver.quit()
         return games
 
@@ -512,6 +514,7 @@ class X1Bet(MatchExtractor):
             
             link_text = select_game.text.lower()
             if 'alternative' in link_text or 'draft' in link_text or 'esport' in link_text: #"Barcelona Srl"; simulated game; skip
+                driver.refresh()
                 continue
 
             ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
@@ -738,6 +741,7 @@ class MSport(MatchExtractor):
             if select_game:
                 if 'Alternative' in select_game.text.title():
                     driver.refresh()
+                    continue
             else:
                 continue
 
@@ -901,6 +905,7 @@ class Bet22(MatchExtractor):
                         #move to next match since selected game is simulated
                         driver.back()
                         driver.refresh()
+                        continue
                 else:
                     continue #move to next match since no match
                 
