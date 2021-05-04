@@ -9,7 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import ElementNotInteractableException, NoSuchElementException
+from selenium.common.exceptions import ElementNotInteractableException, NoSuchElementException, TimeoutException
 
 from typing import List
 
@@ -61,6 +61,7 @@ class MatchExtractor(ABC):
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument('--no-sandbox')
         options.add_argument('--remote-debugging-port=9222')
+        options.add_argument('--ignore-certificate-errors')
 
         options.binary_location = os.getenv("GOOGLE_CHROME_BIN")
 
@@ -308,15 +309,20 @@ class Bet9ja(MatchExtractor):
             except Exception as e:
                 log_error(str(e))
             
-        time.sleep(2)
-        place_the_bet = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'dx'))).click()
-        time.sleep(2)
-        driver.switch_to.frame(driver.find_element_by_tag_name("iframe"))
-        slip_code = str(driver.find_element_by_class_name("number").text).split(':')[1]
-        driver.quit()
+        # time.sleep(2)
+        try:
+            place_the_bet = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'dx'))).click()
+        except NoSuchElementException as e:
+            log_error(str(e))
+        except TimeoutException as e:
+            log_error(str(e))
+        else:
+            time.sleep(2)
+            driver.switch_to.frame(driver.find_element_by_tag_name("iframe"))
+            slip_code = str(driver.find_element_by_class_name("number").text).split(':')[1]
+            driver.quit()
 
-        return slip_code
-
+            return slip_code
 
 
 class Betway(MatchExtractor):
