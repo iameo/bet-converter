@@ -301,7 +301,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
         bet_selection = 'Last Goal'
 
     #correct score
-    elif 'correct score (17way' in bet:
+    elif 'correct score' in bet:
         bet_selection = 'Correct Score'
         bet_type = re.search('\d+-\d+', bet)
 
