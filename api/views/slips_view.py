@@ -171,7 +171,7 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                 payload = {"source": source, "destination": destination, "booking_code": str(booking_code).upper(), "new_bookingcode": str(slip_code).upper()}
                 db_slip = await crud.add_slip(**payload)
 
-                return db_slip
+                return schema.SuccessResponseModel([payload, db_slip])
 
             else:
                 return {"status":"FAILED - INVALID BOOKING CODE"}
