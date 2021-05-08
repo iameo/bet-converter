@@ -26,11 +26,8 @@ class BookingSlipBase(BaseModel):
     new_bookingcode: Optional[str] = None
 
 
-
-
 class BookingSlipCreate(BookingSlipBase):
     pass
-
 
 
 class BookingSlip(BookingSlipBase):
@@ -69,14 +66,22 @@ class BookingSlipOut(BookingSlipBase):
         }
 
 
+# class SlipMixin(BaseModel):
+#     id: int
 
+
+# class BookingSlipCreated(SlipMixin, BookingSlipBase):
+#     source: str
+#     booking_code: str
+#     destination: str
+#     new_bookingcode: str
 
 
 ##################### RESPONSE #####################################
 
-def SuccessResponseModel(data, message, code=200):
+def SuccessResponseModel(data=[resp, id], message='SUCCESS', code=200):
     return {
-        "data": [data],
+        "data": data,
         "message": message,
         "code": code
     }
