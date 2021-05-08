@@ -79,9 +79,9 @@ class BookingSlipOut(BookingSlipBase):
 
 ##################### RESPONSE #####################################
 
-def SuccessResponseModel(data=[resp, id], message='SUCCESS', code=200):
+def SuccessResponseModel(data, message='SUCCESS', code=200):
     return {
-        "data": data,
+        "data": [data],
         "message": message,
         "code": code
     }
