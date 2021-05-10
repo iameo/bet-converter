@@ -120,7 +120,7 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                 payload = {"source": source, "destination": destination, "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
                 db_slip = await crud.add_slip(**payload)
 
-                return db_slip
+                return schema.SuccessResponseModel([payload, db_slip])
             else:
                 return {"status":"FAILED - INVALID BOOKING CODE"}
                 # return schema.ErrorResponseModel("INVALID BOOKING CODE!", "CHECK YOUR BOOKING CODE AND TRY AGAIN", 400)
@@ -146,8 +146,9 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                     slip_code = __bet22.injector('bet9ja', selections)
                 
                 payload = {"source": source, "destination": destination, "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
-                return {"source": source, "destination": destination, "booking code": slip_code}
-        
+                db_slip = await crud.add_slip(**payload)
+
+                return schema.SuccessResponseModel([payload, db_slip])
         elif source == BetSources.x1bet:
             selections = X1Bet(source=source, booking_code=booking_code, site=link_1xbet).slip_extractor()
 
@@ -196,7 +197,7 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
             payload = {"source": source, "destination": destination, "booking_code": str(booking_code).upper(), "new_bookingcode": str(slip_code).upper()}
             db_slip = await crud.add_slip(**payload)
 
-            return db_slip
+            return schema.SuccessResponseModel([payload, db_slip])
 
         else:
             return schema.ErrorResponseModel("INVALID OPTION!", "CHECK YOUR SELECTED OPTIONS AND TRY AGAIN", 400)
