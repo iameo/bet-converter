@@ -41,14 +41,6 @@ load_dotenv(dotenv_path)
 slip_view = APIRouter()
 
 
-# def get_db():
-#     db = SessionLocal()
-#     try:
-#         yield db
-#     finally:
-#         db.close()
-
-
 @slip_view.post("/slips/")
 async def create_slip(
     _code: schema.BookingSlipBase
