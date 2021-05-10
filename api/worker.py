@@ -272,7 +272,6 @@ class Bet9ja(MatchExtractor):
                 bet_types = driver.find_elements_by_class_name("SEOddsTQ")
                 bet_selections = driver.find_elements_by_class_name("SECQ")
                 
-                # Southampton 1X2
                 if source == '1xbet':
                     _bet_type, bet = x1bet_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
                 elif source == 'msport':
@@ -372,7 +371,9 @@ class SportyBet(MatchExtractor):
             map_access = map(line.__getitem__, access)
             selection.append(list(map_access))
         return selection
-
+    
+    def injector(self, source, selections):
+        return super().injector(source, selections)
 
 
 class X1Bet(MatchExtractor):
@@ -510,6 +511,7 @@ class X1Bet(MatchExtractor):
                 csim_check.append([csim, game.split('~ ')[1]])
             
             max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
+            _team = max(csim_check)[1].split(' - ')
 
 
             time.sleep(1)
@@ -533,13 +535,20 @@ class X1Bet(MatchExtractor):
             bet_types = driver.find_elements_by_class_name("bet_type")
             bet_selections = driver.find_elements_by_class_name("bet-title")
 
-
-            if str(_bet_type) == '1': #Home team
-                _bet_type = max(csim_check)[1].split(' - ')[0] # Team A - Team B (split and get Team A)
-            if str(_bet_type) == '2': #Away team; Draw is Draw still on 1Xbet so no need to alter that
-                _bet_type = max(csim_check)[1].split(' - ')[1]
+            if source == '1xbet':
+                _bet_type, bet = x1bet_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
+            elif source == 'msport':
+                pass
+            elif source == '22bet':
+                _bet_type, bet = bet22_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
             else:
-                _bet_type = _bet_type
+                if str(_bet_type) == '1': #Home team
+                    _bet_type =_team[0] # Team A - Team B (split and get Team A)
+                if str(_bet_type) == '2': #Away team; Draw is Draw still on 1Xbet so no need to alter that
+                    _bet_type = _team[1]
+                else:
+                    _bet_type = _bet_type
+ 
 
             time.sleep(1)
             for bet_selection in bet_selections:
@@ -725,6 +734,7 @@ class MSport(MatchExtractor):
                     continue
 
             max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
+            _team = max(csim_check)[1].split(' - ')
             
             time.sleep(2)
 
@@ -761,6 +771,19 @@ class MSport(MatchExtractor):
             bet_types = driver.find_elements_by_class_name("")
             bet_selections = driver.find_elements_by_class_name("")
 
+            if source == '1xbet':
+                _bet_type, bet = x1bet_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
+            elif source == 'msport':
+                pass
+            elif source == '22bet':
+                _bet_type, bet = bet22_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
+            else:
+                if str(_bet_type).lower() == "1" and str(bet) == '1X2':
+                    _bet_type = _team[0]
+                elif str(_bet_type).lower() == "2" and str(bet) == '1X2':
+                    _bet_type = _team[1]
+                else:
+                    _bet_type = _bet_type   
             #place bet
             for bet_selection in bet_selections:
                 if bet_selection.text.lower() == bet.lower():
@@ -777,7 +800,6 @@ class MSport(MatchExtractor):
 
         #place bet and return slipcode
         return slip_code
-
 
 
 class Bet22(MatchExtractor):
@@ -921,17 +943,24 @@ class Bet22(MatchExtractor):
                 ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
                 # driver.switch_to.window(driver.window_handles[1])
 
-# ActionChains(driver).key_down(Keys.CONTROL).send_keys('t').key_up(Keys.CONTROL).perform(
+
                 bet_types = driver.find_elements_by_class_name("bet_type")
                 bet_selections = driver.find_elements_by_class_name("bet_group")
 
-                
-                if str(_bet_type).lower() == "1" and str(bet) == '1X2':
-                    _bet_type = _team[0]
-                elif str(_bet_type).lower() == "2" and str(bet) == '1X2':
-                    _bet_type = _team[1]
+                if source == '1xbet':
+                    _bet_type, bet = x1bet_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
+                elif source == 'msport':
+                    pass
+                elif source == '22bet':
+                    _bet_type, bet = bet22_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
                 else:
-                    _bet_type = _bet_type
+                    if str(_bet_type).lower() == "1" and str(bet) == '1X2':
+                        _bet_type = _team[0]
+                    elif str(_bet_type).lower() == "2" and str(bet) == '1X2':
+                        _bet_type = _team[1]
+                    else:
+                        _bet_type = _bet_type             
+
 
 
                 #place bet
