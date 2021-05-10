@@ -61,6 +61,15 @@ async def create_slip(
 
 @slip_view.get("/slips/{booking_code}", response_model=schema.BookingSlipOut, summary="get bet slip by booking code")
 async def get_slip_by_code(booking_code: str):
+    """
+    Get booking slip by booking code:
+
+    -**booking code**: your generated booking code e.g Y5GSHW
+
+    return:
+
+    betting slips with the requested booking code otherwise a 404 error
+    """
     slip = await crud.get_slip(booking_code=booking_code)
     if slip is None:
         raise HTTPException(status_code=404, detail="booking slip not found!")
