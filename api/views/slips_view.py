@@ -34,8 +34,6 @@ from dotenv import load_dotenv
 dotenv_path = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
 
-# models.Base.metadata.create_all(bind=engine)
-
 
 slip_view = APIRouter()
 
