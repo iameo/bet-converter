@@ -410,15 +410,6 @@ def x1bet_to_bet9ja(bet, home, away, league):
         else:
             bet_type = 'X'
 
-    # elif ('basketball' in league or 'nba' in league) and ('1x2 in regular time' in bet):
-    #     bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
-    #     if home in bet_type:
-    #         bet_type = "1"
-    #     elif away in bet_type:
-    #         bet_type = '2'
-    #     else:
-    #         bet_type = 'X'
-
     # --- end of basketball special markets ----
 
     # -- baseball market ---
