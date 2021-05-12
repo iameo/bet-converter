@@ -18,7 +18,7 @@ bookingslips = Table(
     Column('source', String(100), index=True),
     Column('booking_code', String(50)),
     Column('destination', String(100)),
-    Column('new_bookingcode', String(50)),
+    Column('new_booking_code', String(50)),
     Column('created_at', DateTime(timezone=True), server_default=sql.func.now())
 )
 
