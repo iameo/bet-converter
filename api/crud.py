@@ -8,8 +8,8 @@ from api.db import bookingslips, database
 
 ###########################BOOKING SLIP#####################################
 
-async def add_slip(source='', destination='', booking_code='', new_bookingcode=''):
-    query = bookingslips.insert().values(source=source, destination=destination, booking_code=booking_code, new_bookingcode=new_bookingcode)
+async def add_slip(source='', destination='', booking_code='', new_booking_code=''):
+    query = bookingslips.insert().values(source=source, destination=destination, booking_code=booking_code, new_booking_code=new_booking_code)
     return await database.execute(query=query)
 
 async def get_slip(booking_code):
@@ -51,8 +51,8 @@ async def update_slip(id: int, payload: schema.BookingSlipCreate): #I can't thin
 #     return db.query(models.BookingSlip).filter(models.BookingSlip.booking_code == booking_code)\
 #         .filter(models.BookingSlip.source == source).filter(models.BookingSlip.destination == destination).first()
 
-# async def create_slip(db: Session, source='', destination='', booking_code='', new_bookingcode=''):
-#     db_slip = models.BookingSlip(source=source, destination=destination, booking_code=booking_code, new_bookingcode=new_bookingcode)
+# async def create_slip(db: Session, source='', destination='', booking_code='', new_booking_code=''):
+#     db_slip = models.BookingSlip(source=source, destination=destination, booking_code=booking_code, new_booking_code=new_booking_code)
 #     db.add(db_slip)
 #     db.commit()
 #     db.refresh(db_slip)
