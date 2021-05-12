@@ -66,6 +66,13 @@ async def get_slip_by_code(booking_code: str):
 
 @slip_view.get("/slips/detail/{booking_code}", response_model=schema.BookingSlipOut, summary="get bet slip by details (booking code, source and destination)")
 async def get_slip_by_detail(booking_code: str, source: str, destination: str):
+    """
+    Get booking slip by details(booking_code, source and destination)
+
+    -**booking code**: booking slip code e.g Y5GSHW
+    -**source**: site where the booking code is generated from
+    -**destination**: site where the booking code is generated to
+    """
     slip = await crud.get_slip_detail(booking_code=booking_code, source=source, destination=destination)
     if slip is None:
         raise HTTPException(status_code=404, detail="booking slip not found!")
