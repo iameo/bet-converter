@@ -330,9 +330,33 @@ class Bet9ja(MatchExtractor):
 
 
 class Betway(MatchExtractor):
-    pass
+    def games_extractor(self, driver):
+        pass
+    
+    def slip_extractor(self):
+        driver = self.connect()
 
+        get_attention = driver.find_element_by_id('betslip-count').click()
 
+        try:
+            elem = driver.find_element_by_name('keyword')
+        
+        except NoSuchElementException as e:
+            log_error(str(e))
+
+        except ElementNotInteractableException as e:
+            log_error(str(e))
+
+        except Exception as e:
+            log_error(str(e))
+
+        elem.send_keys(self.booking_code)
+        load = driver.find_element_by_id('searchIconBetslip').click()
+        table = driver.find_element_by_id('betslip-list')
+        rows = table.find_elements(By.CLASS_NAME, "theOuterFont.outcomeRow") #SelectedOutcomeForBetslip.ms-divider
+        #...
+
+        
 class NairaBet(MatchExtractor):
     pass
 
