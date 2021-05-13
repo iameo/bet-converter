@@ -23,7 +23,7 @@ class BookingSlipBase(BaseModel):
     booking_code: str
     source: str
     destination: str
-    new_bookingcode: Optional[str] = None
+    new_booking_code: Optional[str] = None
 
 
 class BookingSlipCreate(BookingSlipBase):
@@ -42,7 +42,7 @@ class BookingSlip(BookingSlipBase):
                 "source": "bet9ja",
                 "booking_code": "3XVU9BA",
                 "destination": "x1bet",
-                "new_bookingcode": "CJXPY",
+                "new_booking_code": "CJXPY",
                 "created_at": "2021-04-27T04:44:11",
             }
         }
@@ -61,7 +61,7 @@ class BookingSlipOut(BookingSlipBase):
                 "created_at": "2021-05-06T23:37:10",
                 "destination": "x1bet",
                 "source": "bet9ja",
-                "new_bookingcode": "ABYPY",
+                "new_booking_code": "ABYPY",
             }
         }
 
@@ -74,7 +74,7 @@ class BookingSlipOut(BookingSlipBase):
 #     source: str
 #     booking_code: str
 #     destination: str
-#     new_bookingcode: str
+#     new_booking_code: str
 
 
 ##################### RESPONSE #####################################
