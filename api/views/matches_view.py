@@ -16,7 +16,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import ElementNotInteractableException, NoSuchElementException
 
 from .. import crud, models, schema
-from ..database import engine, SessionLocal
+
 from ..betsource import BetSources, link_bet9ja, link_sportybet, link_1xbet, link_msport
 from ..worker import Bet9ja, SportyBet, X1Bet, MSport
 
