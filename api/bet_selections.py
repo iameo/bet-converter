@@ -13,12 +13,12 @@ def bet9ja_to_1xbet(bet, home, away, league):
         bet_selection = bet.rsplit(' - ')[1]
 
     #total over x.x
-    elif 'o/u over' in bet:
+    elif 'over' in bet and 'o/u' in bet:
         o_u = re.search('\d.\d', bet)
         bet_type = f'Total Over {float(o_u.group())}'
         bet_selection = 'Total'
     #total under x.x
-    elif 'o/u under' in bet:
+    elif 'under' in bet and 'o/u' in bet:
         o_u = re.search('\d.\d', bet)
         bet_type = f'Total Under {float(o_u.group())}'
         bet_selection = 'Total'
@@ -37,10 +37,10 @@ def bet9ja_to_1xbet(bet, home, away, league):
     elif 'double chance' in bet:
         if "12" in bet:
             bet_type = f'{home} Or {away}'
-        elif "1X" in bet:
-            bet_type = f'{home} Or x'
-        elif "X2" in bet:
-            bet_type = f'{away} Or x'
+        elif "1x" in bet:
+            bet_type = f'{home} Or X'
+        elif "x2" in bet:
+            bet_type = f'{away} Or X'
         else:
             bet_type = ''
 
@@ -184,7 +184,7 @@ def bet9ja_to_1xbet(bet, home, away, league):
     # --- end of basketball special markets ----
 
     # -- baseball market ---
-    elif '1x2' in bet.split(" ")[-1] and  ('baseball' in league or 'tennis' in league):
+    elif '1x2' in bet.split(" ")[-1] and ('baseball' in league or 'tennis' in league):
         bet_type = bet.split(" ", 1)[-1]
         bet_selection = '1 - 2'
         # ##print("PPPPPPPJ: ", bet_type,'c', home,'d', bet, 'e', bet_selection)
@@ -195,8 +195,8 @@ def bet9ja_to_1xbet(bet, home, away, league):
     # -- end of baseball marker ---
 
 
-    elif '1X2' in bet:
-        bet_type = bet.split(" ")[-1]
+    elif '1x2' in bet:
+        bet_type = bet.split(" ")[0]
         bet_selection = '1x2'
         ##print("PPPPPPP: ", bet_type,'c', home,'d', away,'f', bet, 'e', bet_selection, league)
         if str(bet_type).lower() == '1':
