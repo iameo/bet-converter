@@ -58,18 +58,18 @@ class MatchExtractor(ABC):
     def connect(self, wait_time=1):
         options = webdriver.ChromeOptions()
 
-        options.add_argument("--headless")
-        options.add_argument("--window-size=1500,1000")
-        options.add_argument('--disable-gpu')
-        options.add_argument("--disable-dev-shm-usage")
-        options.add_argument('--no-sandbox')
+        # options.add_argument("--headless")
+        # options.add_argument("--window-size=1500,1000")
+        # options.add_argument('--disable-gpu')
+        # options.add_argument("--disable-dev-shm-usage")
+        # options.add_argument('--no-sandbox')
         options.add_argument('--remote-debugging-port=9222')
         options.add_argument('--ignore-certificate-errors')
 
-        options.binary_location = os.getenv("GOOGLE_CHROME_BIN")
+        # options.binary_location = os.getenv("GOOGLE_CHROME_BIN")
 
         options.add_experimental_option('excludeSwitches', ['enable-logging'])
-        driver = webdriver.Chrome(chrome_options=options, executable_path=os.getenv('CHROMEDRIVER_PATH'))
+        driver = webdriver.Chrome(chrome_options=options, executable_path=os.getenv('CHROMEDRIVER_PATH_LOCAL'))
         try:
             driver.get(self.site)
             driver.implicitly_wait(wait_time)
@@ -454,7 +454,6 @@ class X1Bet(MatchExtractor):
         driver = self.connect()
 
         notification = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a'))).click()
- 
         for __match in selections:
             driver.refresh()
             match = __match[1]
@@ -535,12 +534,12 @@ class X1Bet(MatchExtractor):
             bet_types = driver.find_elements_by_class_name("bet_type")
             bet_selections = driver.find_elements_by_class_name("bet-title")
 
-            if source == '1xbet':
-                _bet_type, bet = x1bet_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
+            if source == 'bet9ja':
+                _bet_type, bet = bet9ja_to_1xbet(__match[2].lower(), _team[0], _team[1], league.lower())
             elif source == 'msport':
                 pass
             elif source == '22bet':
-                _bet_type, bet = bet22_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
+                _bet_type, bet = bet22_to_1xbet(__match[2].lower(), _team[0], _team[1], league.lower())
             else:
                 if str(_bet_type) == '1': #Home team
                     _bet_type =_team[0] # Team A - Team B (split and get Team A)
@@ -548,6 +547,7 @@ class X1Bet(MatchExtractor):
                     _bet_type = _team[1]
                 else:
                     _bet_type = _bet_type
+            # print(_bet_type, bet, _team[0], _team[1], "RRRRRRR")
  
 
             time.sleep(1)
@@ -557,8 +557,10 @@ class X1Bet(MatchExtractor):
                         # print("YY: ", bet_type.text, _bet_type, bet_selection.text, bet )
                         if str(bet_type.text).lower() == str(_bet_type).lower():
                             fo = bet_type.find_element_by_xpath('following-sibling::*')
-                            fo.click()
-                            break
+                            if fo:
+                                fo.click()
+                                break
+                            continue
                         continue
             
             driver.close()
