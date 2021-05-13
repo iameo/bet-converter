@@ -6,6 +6,12 @@ import sqlalchemy
 from databases import Database
 from datetime import datetime
 
+from os.path import join, dirname
+from dotenv import load_dotenv
+
+dotenv_path = join(dirname(__file__), ".env")
+load_dotenv(dotenv_path)
+
 DATABASE_URI = os.getenv('SQLAlCHEMY_DATABASE_URL')
 
 metadata = sqlalchemy.MetaData()
