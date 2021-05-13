@@ -293,8 +293,10 @@ class Bet9ja(MatchExtractor):
                             # print("YY: ", bet_type.text, _bet_type, bet_selection.text, bet )
                             if str(bet_type.text).lower() == str(_bet_type).lower():
                                 fo = bet_type.find_element_by_xpath('following-sibling::*')
-                                fo.click()
-                                break
+                                if fo:
+                                    fo.click()
+                                    break
+                                continue
                             continue
                 
                 driver.close()
