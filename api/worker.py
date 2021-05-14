@@ -63,7 +63,7 @@ class MatchExtractor(ABC):
         # options.add_argument('--disable-gpu')
         # options.add_argument("--disable-dev-shm-usage")
         # options.add_argument('--no-sandbox')
-        options.add_argument('--remote-debugging-port=9222')
+        options.add_argument('--remote-debugging-port=9230')
         options.add_argument('--ignore-certificate-errors')
 
         # options.binary_location = os.getenv("GOOGLE_CHROME_BIN")
@@ -479,6 +479,8 @@ class X1Bet(MatchExtractor):
 
         driver = self.connect()
 
+        print(selections, "XXXX")
+
         notification = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a'))).click()
         for __match in selections:
             driver.refresh()
@@ -529,7 +531,7 @@ class X1Bet(MatchExtractor):
                 relations = [self.clean_string(game), self.clean_string(league + ' ' + match)]
                 if "simulated" not in relations[0] and "-zoom" not in relations[0] \
                             and "alternative" not in relations[0] and "first goal" not in relations[0] and "match stats" not in relations[0] \
-                                and "team to score " not in relations[0] and "lottery" not in relations[0] and "dream" not in relations[0]:
+                                and "team to score " not in relations[0] and "lottery" not in relations[0] and "dream" not in relations[0] and "specials bet" not in relations[0]:
                     csim = self.check_similarity(relations)
                 else:
                     csim = 0
@@ -558,7 +560,7 @@ class X1Bet(MatchExtractor):
 
 
             bet_types = driver.find_elements_by_class_name("bet_type")
-            bet_selections = driver.find_elements_by_class_name("bet-title")
+            bet_selections = driver.find_elements_by_class_name("bet-title.bet-title_justify")
 
             if source == 'bet9ja':
                 _bet_type, bet = bet9ja_to_1xbet(__match[2].lower(), _team[0], _team[1], league.lower())
