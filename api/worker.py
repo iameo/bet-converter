@@ -29,7 +29,7 @@ from . import models
 from .helpers import log_error
 from .bet_selections import (
     x1bet_to_msport, x1bet_to_bet22, x1bet_to_bet9ja, bet9ja_to_1xbet,\
-    msport_to_bet9ja, bet9ja_to_msport, bet22_to_bet9ja, bet22_to_1xbet
+    msport_to_bet9ja, bet9ja_to_msport, bet22_to_bet9ja, bet22_to_1xbet, bet9ja_to_bet22
     )
 
 import pyperclip
@@ -802,11 +802,11 @@ class MSport(MatchExtractor):
             bet_selections = driver.find_elements_by_class_name("")
 
             if source == '1xbet':
-                _bet_type, bet = x1bet_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
-            elif source == 'msport':
-                pass
+                _bet_type, bet = x1bet_to_msport(__match[2].lower(), _team[0], _team[1], league.lower())
+            elif source == 'bet9ja':
+                _bet_type, bet = bet9ja_to_msport(__match[2].lower(), _team[0], _team[1], league.lower())
             elif source == '22bet':
-                _bet_type, bet = bet22_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
+                _bet_type, bet = bet22_to_msport(__match[2].lower(), _team[0], _team[1], league.lower())
             else:
                 if str(_bet_type).lower() == "1" and str(bet) == '1X2':
                     _bet_type = _team[0]
@@ -978,15 +978,15 @@ class Bet22(MatchExtractor):
                 bet_selections = driver.find_elements_by_class_name("bet_group")
 
                 if source == '1xbet':
-                    _bet_type, bet = x1bet_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
+                    _bet_type, bet = x1bet_to_bet22(__match[2].lower(), _team[0], _team[1], league.lower())
                 elif source == 'msport':
                     pass
-                elif source == '22bet':
-                    _bet_type, bet = bet22_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
+                elif source == 'bet9ja':
+                    _bet_type, bet = bet9ja_to_22bet(__match[2].lower(), _team[0], _team[1], league.lower())
                 else:
-                    if str(_bet_type).lower() == "1" and str(bet) == '1X2':
+                    if ((str(_bet_type).lower() == _team[0].lower()) or (str(_bet_type) == '1')) and str(bet) == '1X2':
                         _bet_type = _team[0]
-                    elif str(_bet_type).lower() == "2" and str(bet) == '1X2':
+                    elif ((str(_bet_type).lower() == _team[1].lower()) or (str(_bet_type) == '2')) and str(bet) == '1X2':
                         _bet_type = _team[1]
                     else:
                         _bet_type = _bet_type             
