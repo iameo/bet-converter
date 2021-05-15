@@ -29,7 +29,7 @@ from . import models
 from .helpers import log_error
 from .bet_selections import (
     x1bet_to_msport, x1bet_to_bet22, x1bet_to_bet9ja, bet9ja_to_1xbet,\
-    msport_to_bet9ja, bet9ja_to_msport, bet22_to_bet9ja, bet22_to_1xbet, bet9ja_to_bet22
+    msport_to_bet9ja, bet9ja_to_msport, bet22_to_bet9ja, bet22_to_1xbet, bet9ja_to_22bet
     )
 
 import pyperclip
