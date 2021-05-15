@@ -246,6 +246,10 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
             if destination == BetSources.sportybet:
                 pass
 
+            if destination == BetSources.bet22:
+                __bet22 = Bet22(source=source, site=link_1xbet)
+                slip_code = __bet22.injector('1xbet', selections)
+        
             
             payload = {"source": source, "destination": destination, "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
             db_slip = await crud.add_slip(**payload)
