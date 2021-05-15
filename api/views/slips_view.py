@@ -199,33 +199,36 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                 return {"status":"FAILED - INVALID BOOKING CODE"}
         
         elif source == BetSources.betway:
-            if destination == BetSources.x1bet:
-                __x1bet = X1Bet(source=source, site=link_1xbet)
-                slip_code = __x1bet.injector('betway', selections)
-        
-            if destination == BetSources.bet9ja:
-                __bet9ja = Bet9ja(source=source, site=link_bet9ja)
-                slip_code = __bet9ja.injector('betway', selections)
-            
-            if destination == BetSources.msport:
-                __msport = MSport(source=source, site=link_msport)
-                slip_code = __msport.injector('betway', selections)
-            
-            if destination == BetSources.bet22:
-                __bet22 = Bet22(source=source, site=link_22bet)
-                slip_code = __bet22.injector('betway', selections)
-            
-            if destination == BetSources.sportybet:
-                pass
+            # selections = BetWay(source=source, booking_code=booking_code, site=link_1xbet).slip_extractor()
+            selections = 'faux'
 
+            if selections is not None:
+                if destination == BetSources.x1bet:
+                    __x1bet = X1Bet(source=source, site=link_1xbet)
+                    slip_code = __x1bet.injector('betway', selections)
             
-            payload = {"source": source, "destination": destination, "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
-            db_slip = await crud.add_slip(**payload)
+                if destination == BetSources.bet9ja:
+                    __bet9ja = Bet9ja(source=source, site=link_bet9ja)
+                    slip_code = __bet9ja.injector('betway', selections)
+                
+                if destination == BetSources.msport:
+                    __msport = MSport(source=source, site=link_msport)
+                    slip_code = __msport.injector('betway', selections)
+                
+                if destination == BetSources.bet22:
+                    __bet22 = Bet22(source=source, site=link_22bet)
+                    slip_code = __bet22.injector('betway', selections)
+                
+                if destination == BetSources.sportybet:
+                    pass
 
-            return schema.SuccessResponseModel([payload, db_slip])
+                
+                payload = {"source": source, "destination": destination, "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
+                db_slip = await crud.add_slip(**payload)
 
-        else:
-            return schema.ErrorResponseModel("INVALID OPTION!", "CHECK YOUR SELECTED OPTIONS AND TRY AGAIN", 400)
+                return schema.SuccessResponseModel([payload, db_slip])
+            else:
+                return {"status":"FAILED - INVALID BOOKING CODE"}
 
         elif source == BetSources.bet22:
             selections = Bet22(source=source, booking_code=booking_code, site=link_22bet).slip_extractor()
