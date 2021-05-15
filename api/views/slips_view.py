@@ -250,7 +250,7 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                     pass
 
                 if destination == BetSources.bet22:
-                    __bet22 = Bet22(source=source, site=link_1xbet)
+                    __bet22 = Bet22(source=source, site=link_22bet)
                     slip_code = __bet22.injector('1xbet', selections)
             
                 
