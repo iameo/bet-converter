@@ -878,20 +878,323 @@ def x1bet_to_bet22(bet):
     bet_type = ''
     bet_selection = ''
 
-    if 'qualify' in bet:
-        bet_type = bet.rsplit(' - ')[1]
-        bet_selection = bet.rsplit(' - ')[0]
+    #to qualify
+    # if 'to qualify' in bet:
+    #     bet_type = bet.rsplit(' - ')[1]
+    #     bet_selection = bet.rsplit(' - ')[1]
+
+    #total over x.x
     elif 'total over' in bet:
-        bet_type = bet.split(' ', 1)[1]
-        bet_selection = bet.split(' ', 1)[0]
-    elif 'to win by (3way)' in bet:
-        bet_type = bet.split('.')[1]
-        bet_selection = bet.split('.')[0]
+        r = re.compile("[0-9]*[.]?[0-9]*\Z")
+        o_u = r.search(bet)
+        bet_type = f'Total Over {float(o_u.group())}'
+        bet_selection = 'Total'
+
+    #total under x.x
+    elif 'total under' in bet:
+        r = re.compile("[0-9]*[.]?[0-9]*\Z")
+        o_u = r.search(bet)
+        bet_type = f'Total Under {float(o_u.group())}'
+        bet_selection = 'Total'
+
+    #handicap market
+    # elif 'handicap' in bet:
+    #     bet_selection = bet.split(' ', 1)[0]
+    #     bet_type = bet.split(' ', 1)[1]
+    
+    #3way win
+    # elif 'to win by (3way)' in bet:
+    #     bet_type = bet.split('.')[0]
+    #     bet_selection = bet.split('.')[1]
+    
+    #DOUBLE CHANCE SELECTIONS#
+
+    #Double Chance Halftime
+    elif 'ht double chance' in bet:
+        if "12" in bet:
+            bet_type = f'{home} Or {away}'
+        elif "1x" in bet:
+            bet_type = f'{home} Or X'
+        elif "x2" in bet:
+            bet_type = f'{away} Or X'
+        else:
+            bet_type = ''
+
+        bet_selection = 'Double Chance HT'
+
+    #Double Chance 2HT (Second Half)
+    elif '2ht double chance' in bet:
+        if "12" in bet:
+            bet_type = f'{home} Or {away}'
+        elif "1x" in bet:
+            bet_type = f'{home} Or X'
+        elif "x2" in bet:
+            bet_type = f'{away} Or X'
+        else:
+            bet_type = ''
+
+        bet_selection = 'Double Chance 2HT'
+
+    #Double Chance - 60mins
+    elif 'double chance' in bet:
+        if "12" in bet:
+            bet_type = f'{home} Or {away}'
+        elif "1x" in bet:
+            bet_type = f'{home} Or X'
+        elif "x2" in bet:
+            bet_type = f'{away} Or X'
+        else:
+            bet_type = ''
+
+        bet_selection = 'Double Chance'
+
+
+    #first goal
+    elif 'next goal' in bet:
+        if home in bet:
+            bet_type = 1
+        elif away in bet:
+            bet_type = 2
+        elif 'neither' in bet:
+            bet_type = 'No Goal'
+        else:
+            bet_type = ''
+        bet_selection = 'First Goal'
+    #last goal
+    elif 'next goal 1' in bet:
+        if home in bet:
+            bet_type = 1
+        elif away in bet:
+            bet_type = 2
+        else:
+            #'no one' in bet:
+            bet_type = 'No Goal'
+        bet_selection = 'Last Goal'
+
+    #correct score
+    elif 'correct score' in bet and '17way' in bet:
+        bet_selection = 'Correct Score (17Way)'
+        score = re.search('\d+-\d+', bet)
+        bet_type = f'Correct Score {score.group()}'
+
+    elif 'correct score' in bet:
+        bet_selection = 'Correct Score'
+        score = re.search('\d+-\d+', bet)
+        bet_type = f'Correct Score {score.group()}'
+
+    #both teams to score - 2 goals+ yes
+    elif 'both teams to score' in bet and '2 or more - yes':
+        bet_selection = 'Both Teams To Score'
+        bet_type = 'Each Team To Score 2 Or More - Yes'
+    #both teams to score - 2 goals+ no
+    elif 'both teams to score' in bet and '2 or more - no':
+        bet_selection = 'Both Teams To Score'
+        bet_type = 'Each Team To Score 2 Or More - No'
+
+    #both teams to score - yes 
+    elif 'both teams to score' in bet and 'yes' in bet:
+        bet_selection = 'Both Teams To Score'
+        bet_type = 'Both Teams To Score - Yes'
+    #both teams to score - no
+    elif 'both teams to score' in bet and 'no' in bet:
+        bet_selection = 'Both Teams To Score'
+        bet_type = 'Both Teams To Score - No'
+
+    
+    #--- Result and Both Teams to Score -- #
+    elif '1x & gg dc & gg/ng' in bet:
+        bet_selection = 'Result And Both Teams To Score'
+        bet_type = f'{home} X And Both Teams To Score - Yes'
+    elif '2x & gg dc & gg/ng' in bet:
+        bet_selection = 'Result And Both Teams To Score'
+        bet_type = f'{away} X And Both Teams To Score - Yes'
+    elif '12 & gg dc & gg/ng' in bet:
+        bet_selection = 'Result And Both Teams To Score'
+        bet_type = f'{home} {away} And Both Teams To Score - Yes'
+    elif '1x & ng dc & gg/ng' in bet:
+        bet_selection = 'Result And Both Teams To Score'
+        bet_type = f'{home} X And Both Teams To Score - No'
+    elif '2x & ng dc & gg/ng' in bet:
+        bet_selection = 'Result And Both Teams To Score'
+        bet_type = f'{away} X And Both Teams To Score - No'
+    elif '12 & ng dc & gg/ng' in bet:
+        bet_selection = 'Result And Both Teams To Score'
+        bet_type = f'{home} {away} And Both Teams To Score - No'
+    elif '1 & gg dc & gg/ng' in bet:
+        bet_selection = 'Result And Both Teams To Score'
+        bet_type = f'W {home} And Both Teams To Score - Yes'
+    elif '2 & gg dc & gg/ng' in bet:
+        bet_selection = 'Result And Both Teams To Score'
+        bet_type = f'W {away} And Both Teams To Score - Yes'
+    elif 'x & gg dc & gg/ng' in bet:
+        bet_selection = 'Result And Both Teams To Score'
+        bet_type = 'X And Both Teams To Score - Yes'
+    elif '1 & ng dc & gg/ng' in bet:
+        bet_selection = 'Result And Both Teams To Score'
+        bet_type = f'W {home} And Both Teams To Score - No'
+    elif '2 & ng dc & gg/ng' in bet:
+        bet_selection = 'Result And Both Teams To Score'
+        bet_type = f'W {away} And Both Teams To Score - No'
+    elif 'x & ng dc & gg/ng' in bet:
+        bet_selection = 'Result And Both Teams To Score'
+        bet_type = 'X And Both Teams To Score - No'
+    
+        #!--- end of result and btts ---#
+
+    # -- Result and in minutes --#
+    elif 'result in minute' in bet:
+        get_time = re.match('\d+', bet.split(' - ')[-1])
+
+        if f'{home}'.lower() in bet:
+            bet_type = f'{home} To Win In {get_time.group()} Minute'
+        elif f'{away}'.lower() in bet::
+            bet_type = f'{away} To Win In {get_time.group()} Minute'
+        else:
+            bet_type = f'Draw In {get_time.group()} Minute'
+    
+        bet_selection = 'Result In Minute'
+
+    elif 'win or draw in minute' in bet or 'dc -' in bet: #double chance
+        get_time = re.match('\d+', bet.split(' - ')[-2:])
+        if f'{home} x'.lower() in bet:
+            bet_type = f'{home} X In {get_time.group()} Minute'
+        elif f'{away} x'.lower() in bet:
+            bet_type = f'{away} X In {get_time.group()} Minute'
+        elif f'{home} {away}'.lower() in bet:
+            bet_type = f'{home} {away} In {get_time.group()} Minute'
+        else:
+            bet_type = ''
+
+        bet_selection = 'Win or Draw In Minute'
+
+
+    #HT-FT 1x2
+    elif 'ht-ft' in bet:
+        bet_selection = "HT-FT"
+
+        if f'HT-FT W {home} W {home}'.lower() in bet:
+            bet_type = f'HT-FT W {home} W {home}'
+        elif f'HT-FT W {home} X'.lower() in bet:#ht-ft HT-FT W UDINESE CALCIO X
+            bet_type = f'HT-FT W {home} X'
+        elif f'HT-FT W {home} W {away}'.lower() in bet: 
+            bet_type = f'HT-FT W {home} W {away}'
+        elif f'HT-FT XW {home}'.lower() in bet: #ht-ft ht-ft XW UDINESE CALCIO
+            bet_type = f'HT-FT XW {home}'
+        elif f'HT-FT XX'.lower() in bet:
+            bet_type = f'HT-FT XX'
+        elif f'HT-FT XW {away}'.lower() in bet:
+            bet_type = f'HT-FT XW {away}'
+        elif f'HT-FT W {away} W {home}'.lower() in bet: 
+            bet_type = f'HT-FT W {away} W {home}'
+        elif f'HT-FT W {away} X'.lower() in bet: 
+            bet_type = f'HT-FT W {away} X'
+        elif f'HT-FT W {away} W {away}'.lower() in bet: 
+            bet_type = f'HT-FT W {away} W {away}'
+        else:
+            bet_type = ''
+        
+    # SCORES IN EACH HALF 1ST HALF > 2ND HALF
+    elif 'scores in each half' in bet:
+        bet_selection = 'Scores In Each Half'
+        if '1st half > 2nd half' in bet:
+            bet_type = '1st Half > 2nd Half'
+        elif '1st half < 2nd half' in bet:
+            bet_type = '1st Half < 2nd Half'
+        elif '1st half = 2nd half' in bet:
+            bet_type = '1st Half = 2nd Half'
+        else:
+            bet_type = ''
+
+    # #yellow card - team
+    # elif 'yellow card yellow card' in bet:
+    #     if 'yellow card - yes' in bet:
+    #         bet_type = 'yes yellow card'
+    #     elif 'yellow card - no' in bet:
+    #         bet_type = 'no yellow card'
+    #     else:
+    #         bet_type = ''
+    #     bet_selection = 'Yellow Card'
+
+    # #red card - team
+    # elif 'red card' in bet:
+    #     if 'yes red card' in bet:
+    #         bet_type = 'red card - yes'
+    #     elif 'no red card' in bet:
+    #         bet_type = 'red card - no'
+    #     else:
+    #         bet_type = ''
+    #     bet_selection = 'Red Card'
+
+
+    #basketball specials######
+    elif ('basketball' in league or 'nba' in league) and '1x2' in bet:
+        bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
+        if f'{home}' in bet.title():
+            bet_type = home
+        elif f'{away}' in bet.title():
+            bet_type = away
+        else:
+            bet_type = ''
+
+    
+    # elif ('basketball' in league or 'nba' in league) and ('1x2 rt' in bet or '1x2' in bet or '1x2 (5.5)' in bet):
+    #     bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
+    #     if 1 == bet:
+    #         bet_type = home
+    #     elif 2 == bet:
+    #         bet_type = away
+    #     else:
+    #         bet_type = 'X'
+
+    # elif ('basketball' in league or 'nba' in league) and ('1x2 in regular time' in bet):
+    #     bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
+    #     if home in bet_type:
+    #         bet_type = "1"
+    #     elif away in bet_type:
+    #         bet_type = '2'
+    #     else:
+    #         bet_type = 'X'
+
+    # --- end of basketball special markets ----
+
+    # -- baseball market ---
+    # elif '1x2' in bet.split(" ")[-1] and ('baseball' in league or 'tennis' in league):
+    #     bet_type = bet.split(" ", 1)[-1]
+    #     bet_selection = '1 - 2'
+    #     # ##print("PPPPPPPJ: ", bet_type,'c', home,'d', bet, 'e', bet_selection)
+    #     if str(bet_type).lower() in str(home).lower():
+    #         bet_type = '1HH'
+    #     else:
+    #         bet_type = '2HH'
+    # # -- end of baseball marker ---
+
+
+    elif '1x2' in bet:
+        bet_selection = '1x2'
+        ##print("PPPPPPP: ", bet_type,'c', home,'d', away,'f', bet, 'e', bet_selection, league)
+        if f'{home}' in bet:
+            bet_type = f'{home}'
+        elif f'{away}' in bet:
+            bet_type = f'{away}'
+        else:
+            bet_type = "Draw"
+
+ 
     else:
-        bet_type = bet.split(' ')[1]
-        bet_selection = bet.split(' ')[0]
+        bet_selection = ''
+        bet_type = ''
+        # bet_type = bet.split(" ")[-1]
+        # bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
+        # #print("PPPPPPPX: ", bet_type,'c', home,'d', bet, 'e', bet_selection, league)
+        # if str(bet_type).lower() in str(home).lower():
+        #     bet_type = f'{home}'
+        # elif str(bet_type).lower() in str(away).lower():
+        #     bet_type = f'{away}'
+        # else:
+        #     bet_type = "Draw"
 
     return bet_type, bet_selection
+
     
 
 def x1bet_to_msport(bet):
