@@ -884,7 +884,7 @@ def x1bet_to_bet22(bet):
     #     bet_selection = bet.rsplit(' - ')[1]
 
     #total over x.x
-    elif 'total over' in bet:
+    if 'total over' in bet:
         r = re.compile("[0-9]*[.]?[0-9]*\Z")
         o_u = r.search(bet)
         bet_type = f'Total Over {float(o_u.group())}'
@@ -1047,7 +1047,7 @@ def x1bet_to_bet22(bet):
 
         if f'{home}'.lower() in bet:
             bet_type = f'{home} To Win In {get_time.group()} Minute'
-        elif f'{away}'.lower() in bet::
+        elif f'{away}'.lower() in bet:
             bet_type = f'{away} To Win In {get_time.group()} Minute'
         else:
             bet_type = f'Draw In {get_time.group()} Minute'
