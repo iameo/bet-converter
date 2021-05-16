@@ -5,7 +5,7 @@ class BetSources(str, Enum):
     bet9ja = 'bet9ja'
     sportybet = 'sportybet'
     bet365 = 'bet365'
-    x1bet = 'x1bet' #1xbet
+    x1bet = '1xbet' #1xbet
     msport = 'msport'
     bet22 = '22bet'
 
