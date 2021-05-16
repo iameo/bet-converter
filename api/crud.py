@@ -20,8 +20,8 @@ async def get_slip_detail(source, destination, booking_code):
     query = bookingslips.select().where(bookingslips.c.source==source).where(bookingslips.c.destination==destination).where(bookingslips.c.booking_code==booking_code)
     return await database.fetch_one(query=query)
 
-async def get_slips():
-    query = bookingslips.select()
+async def get_slips(skip: int = 0, limit: int = 10):
+    query = bookingslips.select().offset(skip).limit(limit)
     return await database.fetch_all(query=query)
 
 async def delete_slip(id: int):
