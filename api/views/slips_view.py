@@ -273,8 +273,8 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
 
 
 @slip_view.get("/slips/", response_model=List[schema.BookingSlipOut])
-async def get_slips():
-    slips = await crud.get_slips()
+async def get_slips(skip: int = 0, limit: int = 10):
+    slips = await crud.get_slips(skip=skip, limit=limit)
     if slips is None:
         raise HTTPException(status_code=404, detail="No slip at this time!")
     return slips
