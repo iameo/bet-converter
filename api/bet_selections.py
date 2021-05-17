@@ -747,6 +747,20 @@ def x1bet_to_bet9ja(bet, home, away, league):
             bet_type = 'Other'
         else:
             bet_type = score
+
+    elif 'result in minute' in bet:
+        tr = bet.split(' ')[-2:]
+        get_time = re.search('\d+', str(tr)).group()
+
+        if f'{home}'.lower() in bet:
+            bet_type = '1'
+        elif f'{away}'.lower() in bet:
+            bet_type = '2'
+        else:
+            bet_type = 'X'
+    
+        bet_selection = f'1X2 - {get_time}min'
+
 # CORRECT SCORE CORRECT SCORE 8-6
     #both teams to score - yes
     elif bet == 'both teams to score both teams to score - yes':
