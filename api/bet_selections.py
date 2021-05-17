@@ -668,14 +668,31 @@ def x1bet_to_bet9ja(bet, home, away, league):
             
     #total over x.x
     elif 'total over' in bet:
-        o_u = re.search('\d.\d', bet)
-        bet_type = 'Over'
-        bet_selection = f'O/U {float(o_u.group())}'
+        o_u = re.search('\d+.\d+', bet)
+        if o_u:
+            o_u = o_u.group()
+            bet_type = 'Over'
+            if int(o_u.split('.')[0]) < 5:
+                bet_selection = f'O/U {o_u}'
+            else:
+                bet_selection = f'O / U {o_u}'
+        else:
+            bet_type = ''
+            bet_selection = ''
+
     #total under x.x
     elif 'total under' in bet:
-        o_u = re.search('\d.\d', bet)
-        bet_type = 'Under'
-        bet_selection = f'O/U {float(o_u.group())}'
+        o_u = re.search('\d+.\d+', bet)
+        if o_u:
+            o_u = o_u.group()
+            bet_type = 'Under'
+            if int(o_u.split('.')[0]) < 5:
+                bet_selection = f'O/U {o_u}'
+            else:
+                bet_selection = f'O / U {o_u}'
+        else:
+            bet_type = ''
+            bet_selection = ''
 
     #handicap market
     elif 'handicap' in bet:
@@ -725,8 +742,12 @@ def x1bet_to_bet9ja(bet, home, away, league):
     #correct score
     elif 'correct score' in bet:
         bet_selection = 'Correct Score'
-        bet_type = re.search('\d+-\d+', bet)
-
+        score = re.search('\d+-\d+', bet).group()
+        if int(score.split('-')[0]) > 4: #bet9ja max correct score is 4-4
+            bet_type = 'Other'
+        else:
+            bet_type = score
+# CORRECT SCORE CORRECT SCORE 8-6
     #both teams to score - yes
     elif bet == 'both teams to score both teams to score - yes':
         bet_selection = 'GG/NG'
