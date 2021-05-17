@@ -761,6 +761,25 @@ def x1bet_to_bet9ja(bet, home, away, league):
     
         bet_selection = f'1X2 - {get_time}min'
 
+    # elif 'goal in time interval' in bet:
+    #     bet_selection = 'Minute'
+    #     if f'w {home} w {home} and total over {o_u} - yes' in bet.lower():
+    #         bet_type = '0-15 M'
+    #     elif f'w {home} w {home} and total over {o_u} - yes' in bet.lower():
+    #         bet_type = '16-30 M'
+    #     elif f'w {home} w {home} and total over {o_u} - yes' in bet.lower():
+    #         bet_type = '31-45+ M'
+    #     elif f'w {home} w {home} and total over {o_u} - yes' in bet.lower():
+    #         bet_type = '46-60 M'
+    #     elif f'w {home} w {home} and total over {o_u} - yes' in bet.lower():
+    #         bet_type = '61-75 M'
+    #     elif f'w {home} w {home} and total over {o_u} - yes' in bet.lower():
+    #         bet_type = '76-90+ M'
+    #     elif f'w {home} w {home} and total over {o_u} - yes' in bet.lower():
+    #         bet_type = '0-15 M'
+    #     else:
+    #         bet_type = 'No Goal'
+
 # CORRECT SCORE CORRECT SCORE 8-6
     #both teams to score - yes
     elif bet == 'both teams to score both teams to score - yes':
