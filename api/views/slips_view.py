@@ -236,15 +236,15 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
             if selections is not None:
                 if destination == BetSources.x1bet:
                     __x1bet = X1Bet(source=source, site=link_1xbet)
-                    slip_code = __x1bet.injector('1xbet', selections)
+                    slip_code = __x1bet.injector(source, selections)
             
                 if destination == BetSources.bet9ja:
                     __bet9ja = Bet9ja(source=source, site=link_bet9ja)
-                    slip_code = __bet9ja.injector('1xbet', selections)
+                    slip_code = __bet9ja.injector(source, selections)
                 
                 if destination == BetSources.msport:
                     __msport = MSport(source=source, site=link_msport)
-                    slip_code = __msport.injector('1xbet', selections)
+                    slip_code = __msport.injector(source, selections)
                 
                 if destination == BetSources.betway:
                     pass
@@ -254,7 +254,7 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
 
                 if destination == BetSources.bet22:
                     __bet22 = Bet22(source=source, site=link_22bet)
-                    slip_code = __bet22.injector('1xbet', selections)
+                    slip_code = __bet22.injector(source, selections)
             
                 
                 payload = {"source": source, "destination": destination, "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
