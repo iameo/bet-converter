@@ -868,7 +868,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
 
 
     elif ('basketball' in league or 'nba' in league) and (('double chance' in bet) and ('quarter' in bet)):
-        _bet = bet.rsplit(' ',5)[]
+        _bet = bet.rsplit(' ',5)[0]
         qtr = re.search('\d+', _bet).group()
         if '1' == qtr:
             bet_selection = 'DC 1stQ'
@@ -916,7 +916,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
 
 
     elif ('basketball' in league or 'nba' in league) and (('double chance' in bet) and ('half' in bet)):
-        _bet = bet.rsplit(' ',5)[]
+        _bet = bet.rsplit(' ',5)[0]
         half = re.search('\d+', _bet).group()
         if '1' == half:
             bet_selection = 'DC 1st H'
@@ -936,6 +936,34 @@ def x1bet_to_bet9ja(bet, home, away, league):
                 bet_type = 'X2 2nd H'
             elif home.lower() in bet.split(' ', 4)[4] and away.lower() in bet.split(' ',4)[4]:
                 bet_type = '12 2nd H'
+            else:
+                bet_type = ''
+        else:
+            bet_selection = ''
+            bet_type = ''
+
+
+    elif ('basketball' in league or 'nba' in league) and (('1x2' in bet) and ('half' in bet)):
+        _bet = bet.rsplit(' ',7)[1]
+        half = re.search('\d+', _bet).group()
+        if '1' == half:
+            bet_selection = '1X2 HT'
+            if home.lower() in bet:
+            bet_type = '1 HT'
+            elif away.lower() in bet:
+                bet_type = '2 HT'
+            elif home.lower() in bet and away.lower() in bet:
+                bet_type = 'X HT'
+            else:
+                bet_type = ''
+        elif '2' == half:
+            bet_selection = '1X2 2nd H'
+            if home.lower() in bet:
+            bet_type = '1 2nd H'
+            elif away.lower() in bet:
+                bet_type = '2 2nd H'
+            elif home.lower() in bet and away.lower() in bet:
+                bet_type = 'X 2nd H'
             else:
                 bet_type = ''
         else:
