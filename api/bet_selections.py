@@ -706,16 +706,16 @@ def x1bet_to_bet9ja(bet, home, away, league):
     
     #double chance
     elif 'double chance' in bet:
-        if f'{home} or {away}' in bet:
+        if f'{home.lower()} or {away.lower()}' in bet:
             bet_type = "12"
-        elif f'{home} or x':
+        elif f'{home.lower()} or x' in bet:
             bet_type = "1X"
-        elif f'{away} or x' in bet_type:
+        elif f'{away.lower()} or x' in bet:
             bet_type = 'X2'
         else:
             bet_type = ''
 
-        bet_selection = ' '.join([a for a in bet.split(" ",2)[:-1]])
+        bet_selection = 'DC'
 
     #first goal
     elif 'next goal 1' in bet:
@@ -803,23 +803,23 @@ def x1bet_to_bet9ja(bet, home, away, league):
     elif 'ht-ft ht-ft' in bet:
         bet_selection = "HT/FT"
         _bet_type = bet.split(' ', 1)[-1]
-        if f'ht-ft w {home} w {home}' == _bet_type:
+        if f'ht-ft w {home.lower()} w {home.lower()}' == _bet_type:
             bet_type = '1/1'
-        elif f'ht-ft w {home} x' == _bet_type:#ht-ft ht-ft W UDINESE CALCIO X
+        elif f'ht-ft w {home.lower()} x' == _bet_type:#ht-ft ht-ft W UDINESE CALCIO X
             bet_type = '1/X'
-        elif f'ht-ft w {home} w {away}'  == _bet_type: 
+        elif f'ht-ft w {home.lower()} w {away.lower()}'  == _bet_type: 
             bet_type = '1/2'
-        elif f'ht-ft xw {home}' == _bet_type: #ht-ft ht-ft XW UDINESE CALCIO
+        elif f'ht-ft xw {home.lower()}' == _bet_type: #ht-ft ht-ft XW UDINESE CALCIO
             bet_type = 'X/1'
         elif f'ht-ft xx' == _bet_type:
             bet_type = 'X/X'
-        elif f'ht-ft xw {away}' == _bet_type:
+        elif f'ht-ft xw {away.lower()}' == _bet_type:
             bet_type = 'X/2'
-        elif f'ht-ft w {away} w {home}' == _bet_type: 
+        elif f'ht-ft w {away.lower()} w {home.lower()}' == _bet_type: 
             bet_type = '2/1'
-        elif f'ht-ft w {away} x' == _bet_type: 
+        elif f'ht-ft w {away.lower()} x' == _bet_type: 
             bet_type = '2/X'
-        elif f'ht-ft w {away} w {away}' == _bet_type: 
+        elif f'ht-ft w {away.lower()} w {away.lower()}' == _bet_type: 
             bet_type = '2/2'
         else:
             bet_type = ''
@@ -1418,11 +1418,11 @@ def bet22_to_bet9ja(bet, home, away, league):
     
     #double chance
     elif 'double chance' in bet:
-        if f'{home} or {away}' in bet:
+        if f'{home.lower()} or {away.lower()}' in bet:
             bet_type = "12"
-        elif f'{home} or x':
+        elif f'{home.lower()} or x':
             bet_type = "1X"
-        elif f'{away} or x' in bet_type:
+        elif f'{away.lower()} or x' in bet_type:
             bet_type = 'X2'
         else:
             bet_type = ''
@@ -1478,23 +1478,23 @@ def bet22_to_bet9ja(bet, home, away, league):
     elif 'ht-ft ht-ft' in bet:
         bet_selection = "HT/FT"
         _bet_type = bet.split(' ', 1)[-1]
-        if f'ht-ft w {home} w {home}' == _bet_type:
+        if f'ht-ft w {home.lower()} w {home.lower()}' == _bet_type:
             bet_type = '1/1'
-        elif f'ht-ft w {home} x' == _bet_type:#ht-ft ht-ft W UDINESE CALCIO X
+        elif f'ht-ft w {home.lower()} x' == _bet_type:#ht-ft ht-ft W UDINESE CALCIO X
             bet_type = '1/X'
-        elif f'ht-ft w {home} w {away}'  == _bet_type: 
+        elif f'ht-ft w {home.lower()} w {away.lower()}'  == _bet_type: 
             bet_type = '1/2'
-        elif f'ht-ft xw {home}' == _bet_type: #ht-ft ht-ft XW UDINESE CALCIO
+        elif f'ht-ft xw {home.lower()}' == _bet_type: #ht-ft ht-ft XW UDINESE CALCIO
             bet_type = 'X/1'
         elif f'ht-ft xx' == _bet_type:
             bet_type = 'X/X'
-        elif f'ht-ft xw {away}' == _bet_type:
+        elif f'ht-ft xw {away.lower()}' == _bet_type:
             bet_type = 'X/2'
-        elif f'ht-ft w {away} w {home}' == _bet_type: 
+        elif f'ht-ft w {away.lower()} w {home.lower()}' == _bet_type: 
             bet_type = '2/1'
-        elif f'ht-ft w {away} x' == _bet_type: 
+        elif f'ht-ft w {away.lower()} x' == _bet_type: 
             bet_type = '2/X'
-        elif f'ht-ft w {away} w {away}' == _bet_type: 
+        elif f'ht-ft w {away.lower()} w {away.lower()}' == _bet_type: 
             bet_type = '2/2'
         else:
             bet_type = ''
@@ -1534,9 +1534,9 @@ def bet22_to_bet9ja(bet, home, away, league):
     #basketball specials######
     elif ('basketball' in league or 'nba' in league) and '1x2' in bet:
         bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
-        if home in bet_type:
+        if home.lower() in bet:
             bet_type = "1HH"
-        elif away in bet_type:
+        elif away.lower() in bet:
             bet_type = '2HH'
         else:
             bet_type = ''
@@ -1544,18 +1544,18 @@ def bet22_to_bet9ja(bet, home, away, league):
     
     elif ('basketball' in league or 'nba' in league) and ('1x2 rt' in bet or '1x2' in bet or '1x2 (5.5)' in bet):
         bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
-        if home in bet_type:
+        if home.lower() in bet:
             bet_type = "1"
-        elif away in bet_type:
+        elif away.lower() in bet:
             bet_type = '2'
         else:
             bet_type = 'X'
 
     elif ('basketball' in league or 'nba' in league) and ('1x2 in regular time' in bet):
         bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
-        if home in bet_type:
+        if home.lower() in bet:
             bet_type = "1"
-        elif away in bet_type:
+        elif away.lower() in bet:
             bet_type = '2'
         else:
             bet_type = 'X'
