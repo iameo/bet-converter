@@ -719,9 +719,9 @@ def x1bet_to_bet9ja(bet, home, away, league):
 
     #first goal
     elif 'next goal 1' in bet:
-        if home in bet:
+        if home.lower() in bet:
             bet_type = 1
-        elif away in bet:
+        elif away.lower() in bet:
             bet_type = 2
         elif 'neither' in bet:
             bet_type = 'No Goal'
