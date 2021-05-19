@@ -335,7 +335,7 @@ def bet9ja_to_22bet(bet):
     if 'odd/even' in bet:
         bet_selection = 'Even/odd'
         odd_even = bet.split(' ')[0]
-        if odd_even is 'odd':
+        if odd_even == 'odd':
             bet_type = 'Total Even - No' 
         bet_type = 'Total Even - Yes'
         
@@ -873,7 +873,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
         if '1' == qtr:
             bet_selection = 'DC 1stQ'
             if home.lower() in bet.split(' ', 4)[4] and 'or x' in bet.split(' ',4)[4]:
-            bet_type = '1X 1stQ'
+                bet_type = '1X 1stQ'
             elif away.lower() in bet.split(' ', 4)[4] and 'or x' in bet.split(' ',4)[4]:
                 bet_type = 'X2 1stQ'
             elif home.lower() in bet.split(' ', 4)[4] and away.lower() in bet.split(' ',4)[4]:
@@ -883,7 +883,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
         elif '2' == qtr:
             bet_selection = 'DC 2ndQ'
             if home.lower() in bet.split(' ', 4)[4] and 'or x' in bet.split(' ',4)[4]:
-            bet_type = '1X 2ndQ'
+                bet_type = '1X 2ndQ'
             elif away.lower() in bet.split(' ', 4)[4] and 'or x' in bet.split(' ',4)[4]:
                 bet_type = 'X2 2ndQ'
             elif home.lower() in bet.split(' ', 4)[4] and away.lower() in bet.split(' ',4)[4]:
@@ -893,7 +893,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
         elif '3' == qtr:
             bet_selection = 'DC 3rdQ'
             if home.lower() in bet.split(' ', 4)[4] and 'or x' in bet.split(' ',4)[4]:
-            bet_type = '1X 3rdQ'
+                bet_type = '1X 3rdQ'
             elif away.lower() in bet.split(' ', 4)[4] and 'or x' in bet.split(' ',4)[4]:
                 bet_type = 'X2 3rdQ'
             elif home.lower() in bet.split(' ', 4)[4] and away.lower() in bet.split(' ',4)[4]:
@@ -903,7 +903,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
         elif '4' == qtr:
             bet_selection = 'DC 4thQ'
             if home.lower() in bet.split(' ', 4)[4] and 'or x' in bet.split(' ',4)[4]:
-            bet_type = '1X 4thQ'
+                bet_type = '1X 4thQ'
             elif away.lower() in bet.split(' ', 4)[4] and 'or x' in bet.split(' ',4)[4]:
                 bet_type = 'X2 4thQ'
             elif home.lower() in bet.split(' ', 4)[4] and away.lower() in bet.split(' ',4)[4]:
@@ -921,7 +921,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
         if '1' == half:
             bet_selection = 'DC 1st H'
             if home.lower() in bet.split(' ', 4)[4] and 'or x' in bet.split(' ',4)[4]:
-            bet_type = '1X 1st H'
+                bet_type = '1X 1st H'
             elif away.lower() in bet.split(' ', 4)[4] and 'or x' in bet.split(' ',4)[4]:
                 bet_type = 'X2 1st H'
             elif home.lower() in bet.split(' ', 4)[4] and away.lower() in bet.split(' ',4)[4]:
@@ -931,7 +931,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
         elif '2' == half:
             bet_selection = 'DC 2nd H'
             if home.lower() in bet.split(' ', 4)[4] and 'or x' in bet.split(' ',4)[4]:
-            bet_type = '1X 2nd H'
+                bet_type = '1X 2nd H'
             elif away.lower() in bet.split(' ', 4)[4] and 'or x' in bet.split(' ',4)[4]:
                 bet_type = 'X2 2nd H'
             elif home.lower() in bet.split(' ', 4)[4] and away.lower() in bet.split(' ',4)[4]:
@@ -949,7 +949,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
         if '1' == half:
             bet_selection = '1X2 HT'
             if home.lower() in bet:
-            bet_type = '1 HT'
+                bet_type = '1 HT'
             elif away.lower() in bet:
                 bet_type = '2 HT'
             elif home.lower() in bet and away.lower() in bet:
@@ -959,7 +959,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
         elif '2' == half:
             bet_selection = '1X2 2nd H'
             if home.lower() in bet:
-            bet_type = '1 2nd H'
+                bet_type = '1 2nd H'
             elif away.lower() in bet:
                 bet_type = '2 2nd H'
             elif home.lower() in bet and away.lower() in bet:
@@ -994,11 +994,11 @@ def x1bet_to_bet9ja(bet, home, away, league):
             bet_type = ''
 
 
-    elif 'will there be overtime' ib bet:
+    elif 'will there be overtime' in bet:
         bet_selection = 'Overtime Yes/No'
         if 'yes' in bet.split(' ')[-2:]:
             bet_type = "OT Yes"
-        elif 'no' in bet.split(' ')[-2:]
+        elif 'no' in bet.split(' ')[-2:]:
             bet_type = 'OT No'
         else:
             bet_type = ''
