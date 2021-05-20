@@ -715,7 +715,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
         else:
             bet_type = ''
 
-        bet_selection = 'DC'
+        bet_selection = 'Double Chance'
 
     #first goal
     elif 'next goal 1' in bet:
