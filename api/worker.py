@@ -579,6 +579,7 @@ class X1Bet(MatchExtractor):
  
 
             time.sleep(1)
+            #for this scrren frame, do two for loops then move to the next screen frame
             for bet_selection in bet_selections:
                 if bet_selection.text.lower() == bet.lower():
                     for bet_type in bet_types:
@@ -590,6 +591,8 @@ class X1Bet(MatchExtractor):
                                 break
                             continue
                         continue
+                else:
+                    continue #go to next screen frame code here
             
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
@@ -1029,6 +1032,5 @@ class Bet22(MatchExtractor):
 
 
 
-        
-        
-
+class BetKing(MatchExtractor):
+    pass
