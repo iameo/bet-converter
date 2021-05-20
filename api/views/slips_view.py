@@ -127,10 +127,11 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                 payload = {"source": source, "destination": destination, "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
                 db_slip = await crud.add_slip(**payload)
 
-                return schema.SuccessResponseModel([payload, db_slip])
+                return schema.ResponseModel([payload, db_slip], status='SUCCESS', code='200')
+
             else:
-                return {"status":"FAILED - INVALID BOOKING CODE"}
-                # return schema.ErrorResponseModel("INVALID BOOKING CODE!", "CHECK YOUR BOOKING CODE AND TRY AGAIN", 400)
+                return schema.ResponseModel(None, status='FAILED', code='500')
+
 
         elif source == BetSources.sportybet:
             selections = SportyBet(source=source, booking_code=booking_code, site=link_sportybet).slip_extractor()
@@ -161,7 +162,10 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                 payload = {"source": source, "destination": destination, "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
                 db_slip = await crud.add_slip(**payload)
 
-                return schema.SuccessResponseModel([payload, db_slip])
+                return schema.ResponseModel([payload, db_slip], status='SUCCESS', code='200')
+
+            else:
+                return schema.ResponseModel(None, status='FAILED', code='500')
 
         elif source == BetSources.x1bet:
             selections = X1Bet(source=source, booking_code=booking_code, site=link_1xbet).slip_extractor()
@@ -193,11 +197,11 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                 payload = {"source": source, "destination": destination, "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
                 db_slip = await crud.add_slip(**payload)
 
-                return schema.SuccessResponseModel([payload, db_slip])
+                return schema.ResponseModel([payload, db_slip], status='SUCCESS', code='200')
 
             else:
-                return {"status":"FAILED - INVALID BOOKING CODE"}
-        
+                return schema.ResponseModel(None, status='FAILED', code='500')
+
         elif source == BetSources.betway:
             # selections = BetWay(source=source, booking_code=booking_code, site=link_1xbet).slip_extractor()
             selections = 'faux'
@@ -226,9 +230,10 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                 payload = {"source": source, "destination": destination, "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
                 db_slip = await crud.add_slip(**payload)
 
-                return schema.SuccessResponseModel([payload, db_slip])
+                return schema.ResponseModel([payload, db_slip], status='SUCCESS', code='200')
+
             else:
-                return {"status":"FAILED - INVALID BOOKING CODE"}
+                return schema.ResponseModel(None, status='FAILED', code='500')
 
         elif source == BetSources.bet22:
             selections = Bet22(source=source, booking_code=booking_code, site=link_22bet).slip_extractor()
@@ -260,10 +265,10 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                 payload = {"source": source, "destination": destination, "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
                 db_slip = await crud.add_slip(**payload)
 
-                return schema.SuccessResponseModel([payload, db_slip])
+                return schema.ResponseModel([payload, db_slip], status='SUCCESS', code='200')
 
             else:
-                return {"status": "FAILED - INVALID BOOKING CODE"}
+                return schema.ResponseModel(None, status='FAILED', code='500')
 
         else:
             return schema.ErrorResponseModel("INVALID OPTION!", "CHECK YOUR SELECTED OPTIONS AND TRY AGAIN", 400)
