@@ -761,25 +761,30 @@ def x1bet_to_bet9ja(bet, home, away, league):
     
         bet_selection = f'1X2 - {get_time}min'
 
-    # elif 'goal in time interval' in bet:
-    #     bet_selection = 'Minute'
-    #     if f'w {home} w {home} and total over {o_u} - yes' in bet.lower():
-    #         bet_type = '0-15 M'
-    #     elif f'w {home} w {home} and total over {o_u} - yes' in bet.lower():
-    #         bet_type = '16-30 M'
-    #     elif f'w {home} w {home} and total over {o_u} - yes' in bet.lower():
-    #         bet_type = '31-45+ M'
-    #     elif f'w {home} w {home} and total over {o_u} - yes' in bet.lower():
-    #         bet_type = '46-60 M'
-    #     elif f'w {home} w {home} and total over {o_u} - yes' in bet.lower():
-    #         bet_type = '61-75 M'
-    #     elif f'w {home} w {home} and total over {o_u} - yes' in bet.lower():
-    #         bet_type = '76-90+ M'
-    #     elif f'w {home} w {home} and total over {o_u} - yes' in bet.lower():
-    #         bet_type = '0-15 M'
-    #     else:
-    #         bet_type = 'No Goal'
-
+# GOAL IN TIME INTERVAL FIRST GOAL IN THE INTERVAL FROM 1 TO 10 MINUTES
+    elif 'goal in time interval first' in bet:
+        bet_selection = 'Minute First Goal'
+        time_frame = re.search('\d+ to \d+', bet).group()
+        if time_frame:
+            if '1 to 15' == time_frame:
+                bet_type = '0-15 M'
+            elif '16 to 30' == time_frame:
+                bet_type = '16-30 M'
+            elif '31 to 45' == time_frame:
+                bet_type = '21-45+ M'
+            elif '46 to 60' == time_frame:
+                bet_type = '46-60 M'
+            elif '1 to 15' == time_frame:
+                bet_type = '61-75 M'
+            elif '1 to 15' == time_frame:
+                bet_type = '76-90+ M'
+            else:
+                bet_type = ''
+        elif 'no first goal' in bet:
+            bet_type = 'No Goal'
+        else:
+            bet_type = ''
+        
 # CORRECT SCORE CORRECT SCORE 8-6
     #both teams to score - yes
     elif bet == 'both teams to score both teams to score - yes':
