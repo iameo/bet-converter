@@ -762,8 +762,12 @@ def x1bet_to_bet9ja(bet, home, away, league):
         bet_selection = f'1X2 - {get_time}min'
 
 # GOAL IN TIME INTERVAL FIRST GOAL IN THE INTERVAL FROM 1 TO 10 MINUTES
-    elif 'goal in time interval first' in bet:
-        bet_selection = 'Minute First Goal'
+    elif 'goal in time interval' in bet:
+        if 'first' in bet:
+            bet_selection = 'Minute First Goal'
+        else:
+            bet_selection = 'Minute Last Goal'
+
         time_frame = re.search('\d+ to \d+', bet).group()
         if time_frame:
             if '1 to 15' == time_frame:
@@ -774,13 +778,13 @@ def x1bet_to_bet9ja(bet, home, away, league):
                 bet_type = '21-45+ M'
             elif '46 to 60' == time_frame:
                 bet_type = '46-60 M'
-            elif '1 to 15' == time_frame:
+            elif '61 to 75' == time_frame:
                 bet_type = '61-75 M'
-            elif '1 to 15' == time_frame:
+            elif '76 to 90' == time_frame:
                 bet_type = '76-90+ M'
             else:
                 bet_type = ''
-        elif 'no first goal' in bet:
+        elif 'no first goal' in bet or 'no last goal':
             bet_type = 'No Goal'
         else:
             bet_type = ''
