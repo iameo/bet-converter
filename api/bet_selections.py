@@ -1063,7 +1063,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
 
 
 ############## X1bet -> 22BET ###############
-def x1bet_to_bet22(bet):
+def x1bet_to_bet22(bet, home, away, league):
     bet_type = ''
     bet_selection = ''
 
@@ -1386,13 +1386,13 @@ def x1bet_to_bet22(bet):
 
     
 
-def x1bet_to_msport(bet):
+def x1bet_to_msport(bet, home, away, league):
     pass
 
 
 ###### SOURCE: 22BET#######
 
-def bet22_to_1xbet(bet):
+def bet22_to_1xbet(bet, home, away, league):
     pass
 
 def bet22_to_bet9ja(bet, home, away, league):
@@ -1608,16 +1608,16 @@ def bet22_to_bet9ja(bet, home, away, league):
 
     return bet_type, bet_selection
     
-def bet22_to_msport(bet):
+def bet22_to_msport(bet, home, away, league):
     pass
 
 
 ###### SOURCE: MSPORT#######
 
-def msport_to_1xbet(bet):
+def msport_to_1xbet(bet, home, away, leagueet):
     pass
 
-def msport_to_22bet(bet):
+def msport_to_22bet(bet, home, away, leagueet):
     pass
 
 def msport_to_bet9ja(bet):
