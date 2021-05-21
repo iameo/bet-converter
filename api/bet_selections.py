@@ -980,29 +980,6 @@ def x1bet_to_bet9ja(bet, home, away, league):
             bet_type = ''
 
 
-    elif ('basketball' in league or 'nba' in league) and 'double chance 1 quarter' in bet:
-        bet_selection = 'DC 1stQ'
-        if home.lower() in bet.split(' ', 4)[4] and 'or x' in bet.split(' ',4)[4]:
-            bet_type = '1X 1stQ'
-        elif away.lower() in bet.split(' ', 4)[4] and 'or x' in bet.split(' ',4)[4]:
-            bet_type = 'X2 1stQ'
-        elif home.lower() in bet.split(' ', 4)[4] and away.lower() in bet.split(' ',4)[4]:
-            bet_type = '12 1stQ'
-        else:
-            bet_type = ''
-
-    elif ('basketball' in league or 'nba' in league) and 'double chance 1 quarter' in bet:
-        bet_selection = 'DC 1stQ'
-        if home.lower() in bet.split(' ', 4)[4] and 'or x' in bet.split(' ',4)[4]:
-            bet_type = '1X 1stQ'
-        elif away.lower() in bet.split(' ', 4)[4] and 'or x' in bet.split(' ',4)[4]:
-            bet_type = 'X2 1stQ'
-        elif home.lower() in bet.split(' ', 4)[4] and away.lower() in bet.split(' ',4)[4]:
-            bet_type = '12 1stQ'
-        else:
-            bet_type = ''
-
-
     elif 'will there be overtime' in bet:
         bet_selection = 'Overtime Yes/No'
         if 'yes' in bet.split(' ')[-2:]:
@@ -1361,10 +1338,10 @@ def x1bet_to_bet22(bet, home, away, league):
     elif '1x2' in bet:
         bet_selection = '1x2'
         ##print("PPPPPPP: ", bet_type,'c', home,'d', away,'f', bet, 'e', bet_selection, league)
-        if f'{home}' in bet:
-            bet_type = f'{home}'
-        elif f'{away}' in bet:
-            bet_type = f'{away}'
+        if f'{home.lower()}' in bet:
+            bet_type = home
+        elif f'{away.lower()}' in bet:
+            bet_type = away
         else:
             bet_type = "Draw"
 
