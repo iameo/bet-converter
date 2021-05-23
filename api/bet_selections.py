@@ -665,6 +665,15 @@ def x1bet_to_bet9ja(bet, home, away, league):
             bet_type = '2 to qualify'
         else:
             bet_type = ''
+
+    elif '1x2' in bet.split(' ')[0]:
+        bet_selection = '1x2'
+        if f'{home.lower()}' in bet:
+            bet_type = '1'
+        elif f'{away.lower()}' in bet:
+            bet_type = '2'
+        else:
+            bet_type = 'X'
             
     #total over x.x
     elif 'total over' in bet:
@@ -1010,6 +1019,8 @@ def x1bet_to_bet9ja(bet, home, away, league):
         else:
             bet_type = '2HH'
     # -- end of baseball marker ---
+
+
 
 
     elif '1x2' in bet.split(" ")[-1]:
