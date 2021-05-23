@@ -1067,6 +1067,16 @@ def x1bet_to_bet22(bet, home, away, league):
         bet_type = f'Total Over {float(o_u.group())}'
         bet_selection = 'Total'
 
+    elif '1x2' in bet.split(' ')[0]:
+        print("1x2....", home, away, league, bet)
+        bet_selection = '1x2'
+        if f'{home.lower()}' in bet:
+            bet_type = home
+        elif f'{away.lower()}' in bet:
+            bet_type = away
+        else:
+            bet_type = 'Draw'
+
     #total under x.x
     elif 'total under' in bet:
         r = re.compile("[0-9]*[.]?[0-9]*\Z")
