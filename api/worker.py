@@ -29,7 +29,7 @@ from . import models
 from .helpers import log_error
 from .bet_selections import (
     x1bet_to_msport, x1bet_to_bet22, x1bet_to_bet9ja, bet9ja_to_1xbet,\
-    msport_to_bet9ja, bet9ja_to_msport, bet22_to_bet9ja, bet22_to_1xbet, bet9ja_to_22bet
+    msport_to_bet9ja, bet9ja_to_msport, bet22_to_bet9ja, bet22_to_1xbet, bet9ja_to_22bet, bet22_to_msport
     )
 
 import pyperclip
@@ -58,11 +58,11 @@ class MatchExtractor(ABC):
     def connect(self, wait_time=1):
         options = webdriver.ChromeOptions()
 
-        # options.add_argument("--headless")
-        # options.add_argument("--window-size=1500,1000")
-        # options.add_argument('--disable-gpu')
-        # options.add_argument("--disable-dev-shm-usage")
-        # options.add_argument('--no-sandbox')
+        options.add_argument("--headless")
+        options.add_argument("--window-size=1500,1000")
+        options.add_argument('--disable-gpu')
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument('--no-sandbox')
         options.add_argument('--remote-debugging-port=9230')
         options.add_argument('--ignore-certificate-errors')
 
@@ -131,11 +131,9 @@ class MatchExtractor(ABC):
 class Bet9ja(MatchExtractor):
     def games_extractor(self, driver):
 
-        wait = WebDriverWait(driver, 10)
+        submit = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@id="h_w_PC_oddsSearch_btnCerca"]'))).click()
 
-        submit = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="h_w_PC_oddsSearch_btnCerca"]'))).click()
-
-        rows =  wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'dgStyle'))).find_elements(By.TAG_NAME, "tr")[1:]
+        rows =  WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'dgStyle'))).find_elements(By.TAG_NAME, "tr")[1:]
 
         if not rows:
             driver.back()
@@ -160,14 +158,12 @@ class Bet9ja(MatchExtractor):
 
         selections = None
 
-        wait = WebDriverWait(driver, 10)
-
-        elem = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'TextBox')))
+        elem = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'TextBox')))
         elem.send_keys(self.booking_code)
 
         load = driver.find_element_by_class_name('lnk.Load').click()
  
-        stat = wait.until(EC.presence_of_element_located((By.ID, 'h_w_PC_cCoupon_mexPrenotazione')))
+        stat = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'h_w_PC_cCoupon_mexPrenotazione')))
 
         if 'not found' in stat.text:
             selections = None
@@ -207,7 +203,6 @@ class Bet9ja(MatchExtractor):
         n_rows = ''
 
         driver = self.connect()
-        wait = WebDriverWait(driver, 10)
 
         for __match in selections:
             try:
@@ -248,8 +243,8 @@ class Bet9ja(MatchExtractor):
                 max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
                 _team = max(csim_check)[1].split(' - ')
                 
-                rows = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'dgStyle'))).find_elements(By.TAG_NAME, "a")[2:] #['descr', 'date','....']
-                n_rows = len(wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'dgStyle'))).find_elements(By.TAG_NAME, "a")[2:])
+                rows = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'dgStyle'))).find_elements(By.TAG_NAME, "a")[2:] #['descr', 'date','....']
+                n_rows = len(WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'dgStyle'))).find_elements(By.TAG_NAME, "a")[2:])
 
                 if not rows or n_rows < 1:
                     driver.back()
@@ -271,7 +266,14 @@ class Bet9ja(MatchExtractor):
 
                 bet_types = driver.find_elements_by_class_name("SEOddsTQ")
                 bet_selections = driver.find_elements_by_class_name("SECQ")
-                
+
+                bs = []
+                if bet_selections:
+                    bs = [bs_.text.lower() for bs_ in bet_selections]
+                else:
+                    #no bet selections; no need to proceed
+                    driver.switch_to.window(driver.window_handles[0])
+
                 if source == '1xbet':
                     _bet_type, bet = x1bet_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
                 elif source == 'msport':
@@ -287,17 +289,16 @@ class Bet9ja(MatchExtractor):
                         _bet_type = _bet_type
 
 
-                for bet_selection in bet_selections:
-                    if bet_selection.text.lower() == bet.lower():
-                        for bet_type in bet_types:
+                if bet.lower() in bs:
+                    for bet_type in bet_types:
                             # print("YY: ", bet_type.text, _bet_type, bet_selection.text, bet )
-                            if str(bet_type.text).lower() == str(_bet_type).lower():
-                                fo = bet_type.find_element_by_xpath('following-sibling::*')
-                                if fo:
-                                    fo.click()
-                                    break
-                                continue
+                        if str(bet_type.text).lower() == str(_bet_type).lower():
+                            fo = bet_type.find_element_by_xpath('following-sibling::*')
+                            if fo:
+                                fo.click()
+                                break
                             continue
+                        continue
                 
                 driver.close()
                 driver.switch_to.window(driver.window_handles[0])
@@ -315,7 +316,7 @@ class Bet9ja(MatchExtractor):
             
         # time.sleep(2)
         try:
-            place_the_bet = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'dx'))).click()
+            place_the_bet = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'dx'))).click()
         except NoSuchElementException as e:
             log_error(str(e))
         except TimeoutException as e:
@@ -331,7 +332,10 @@ class Bet9ja(MatchExtractor):
 
 class Betway(MatchExtractor):
     def games_extractor(self, driver):
-        pass
+        driver.find_element_by_class_name('keywordSearch').click()
+
+        rows = driver.find_element_by_class_name('widget-flyout-content')
+        ##
     
     def slip_extractor(self):
         driver = self.connect()
@@ -431,7 +435,7 @@ class X1Bet(MatchExtractor):
 
         driver = self.connect()
 
-        wait = WebDriverWait(driver, 10)
+
         time.sleep(3)
         notification = driver.find_element(By.XPATH, '//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a').click()
 
@@ -478,8 +482,6 @@ class X1Bet(MatchExtractor):
         slip_code = ''
 
         driver = self.connect()
-
-        print(selections, "XXXX")
 
         notification = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a'))).click()
         for __match in selections:
@@ -562,12 +564,20 @@ class X1Bet(MatchExtractor):
             bet_types = driver.find_elements_by_class_name("bet_type")
             bet_selections = driver.find_elements_by_class_name("bet-title.bet-title_justify")
 
+            bs = []
+            if bet_selections:
+                bs = [bs_.text for bs_ in bet_selections]
+            else:
+                #no bet selections; no need to proceed
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
+
             if source == 'bet9ja':
                 _bet_type, bet = bet9ja_to_1xbet(__match[2].lower(), _team[0], _team[1], league.lower())
             elif source == 'msport':
                 pass
-            elif source == '22bet':
-                _bet_type, bet = bet22_to_1xbet(__match[2].lower(), _team[0], _team[1], league.lower())
+            elif source == '22bet' or source == '1xbet': #same implementation
+                _bet_type, bet = x1bet_to_bet22(__match[2].lower(), _team[0], _team[1], league.lower())
             else:
                 if str(_bet_type) == '1': #Home team
                     _bet_type =_team[0] # Team A - Team B (split and get Team A)
@@ -580,19 +590,16 @@ class X1Bet(MatchExtractor):
 
             time.sleep(1)
             #for this scrren frame, do two for loops then move to the next screen frame
-            for bet_selection in bet_selections:
-                if bet_selection.text.lower() == bet.lower():
-                    for bet_type in bet_types:
+            if bet.lower() in bs:
+                for bet_type in bet_types:
                         # print("YY: ", bet_type.text, _bet_type, bet_selection.text, bet )
-                        if str(bet_type.text).lower() == str(_bet_type).lower():
-                            fo = bet_type.find_element_by_xpath('following-sibling::*')
-                            if fo:
-                                fo.click()
-                                break
-                            continue
+                    if str(bet_type.text).lower() == str(_bet_type).lower():
+                        fo = bet_type.find_element_by_xpath('following-sibling::*')
+                        if fo:
+                            fo.click()
+                            break
                         continue
-                else:
-                    continue #go to next screen frame code here
+                    continue
             
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
@@ -779,7 +786,7 @@ class MSport(MatchExtractor):
 
             time.sleep(3)
             sections = driver.find_elements_by_class_name("m-result-section")
-            print("SEC: ", sections)
+
             rows = ''
             for section in sections:
                 # if section.text.split("\n")[0].lower() == "not start":
@@ -804,6 +811,14 @@ class MSport(MatchExtractor):
             bet_types = driver.find_elements_by_class_name("")
             bet_selections = driver.find_elements_by_class_name("")
 
+            bs = []
+            if bet_selections:
+                bs = [bs_.text for bs_ in bet_selections]
+            else:
+                #no bet selections; no need to proceed
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
+
             if source == '1xbet':
                 _bet_type, bet = x1bet_to_msport(__match[2].lower(), _team[0], _team[1], league.lower())
             elif source == 'bet9ja':
@@ -818,15 +833,16 @@ class MSport(MatchExtractor):
                 else:
                     _bet_type = _bet_type   
             #place bet
-            for bet_selection in bet_selections:
-                if bet_selection.text.lower() == bet.lower():
-                    for bet_type in bet_types:
+            if bet.lower() in bs:
+                for bet_type in bet_types:
                         # print("YY: ", bet_type.text, _bet_type, bet_selection.text, bet )
-                        if str(bet_type.text).lower() == str(_bet_type).lower():
-                            fo = bet_type.find_element_by_xpath('following-sibling::*')
+                    if str(bet_type.text).lower() == str(_bet_type).lower():
+                        fo = bet_type.find_element_by_xpath('following-sibling::*')
+                        if fo:
                             fo.click()
                             break
                         continue
+                    continue
             
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
@@ -871,6 +887,9 @@ class Bet22(MatchExtractor):
     def slip_extractor(self):
         driver = self.connect()
 
+        selections = None
+        games = None
+
         try:
             coupon = driver.find_element_by_class_name('cc-controls__input_text.keyboardInput')
 
@@ -879,8 +898,12 @@ class Bet22(MatchExtractor):
 
             load = driver.find_element_by_class_name('cc-controls__btn-main_upload').click()
 
+            selections = driver.find_element_by_id('all_bets')
+
         except NoSuchElementException as e:
-            log_error(str(e))
+            #button retuns this error when the code is invalid
+            driver.quit()
+            return games
 
         except ElementNotInteractableException as e:
             log_error(str(e))
@@ -888,9 +911,10 @@ class Bet22(MatchExtractor):
         except Exception as e:
             log_error(str(e))
 
-        selections = driver.find_element_by_id('all_bets')
+
         _selections = re.split("\n", selections.text)
         _selections = [_selections[x:x+3] for x in range(0, len(_selections), 4)] #first 3 elements per selection
+
 
         games = []      
         for game in _selections:
@@ -910,7 +934,7 @@ class Bet22(MatchExtractor):
 
         driver = self.connect()
         
-        wait = WebDriverWait(driver, 10)
+
         
         for __match in selections:
             try:
@@ -946,8 +970,10 @@ class Bet22(MatchExtractor):
                 for game in p_match:
                     if len(game) >= 4:
                         relations = [self.clean_string(game), self.clean_string(league + ' ' + match)]
-                        if "simulated" not in relations[0] and "pes" not in relations[0] \
-                                and "cyber" not in relations[0] and "fifa" not in relations[0] and "4x4" not in relations[0] and "team to score " not in relations[0]:
+                        if "simulated" not in relations[0] and "pes" not in relations[0] and "cyber" not in relations[0]\
+                            and "fifa" not in relations[0] and "4x4" not in relations[0] and "team to score " not in relations[0]\
+                            and "alternative" not in relations[0] and "first goal" not in relations[0] and "match stats" not in relations[0] \
+                            and "lottery" not in relations[0] and "dream" not in relations[0] and "specials bet" not in relations[0]:
                             csim = self.check_similarity(relations)
                         else:
                             csim = 0
@@ -958,7 +984,7 @@ class Bet22(MatchExtractor):
                 max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
                 _team = max(csim_check)[1].split(' - ')
                 
-                rows = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'search-results-list'))).find_elements(By.TAG_NAME, "a")
+                rows = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'search-results-list'))).find_elements(By.TAG_NAME, "a")
 
                 if not rows:
                     continue
@@ -977,10 +1003,17 @@ class Bet22(MatchExtractor):
                 # driver.switch_to.window(driver.window_handles[1])
 
 
-                bet_types = driver.find_elements_by_class_name("bet_type")
-                bet_selections = driver.find_elements_by_class_name("bet_group")
+                bet_selections = driver.find_elements_by_class_name("bet-title")
 
-                if source == '1xbet':
+                bs = []
+                if bet_selections:
+                    bs = [bs_.text for bs_ in bet_selections]
+                else:
+                    #no bet selections; no need to proceed
+                    # driver.back()
+                    driver.refresh()
+
+                if source == '1xbet' or source == 'bet22':
                     _bet_type, bet = x1bet_to_bet22(__match[2].lower(), _team[0], _team[1], league.lower())
                 elif source == 'msport':
                     pass
@@ -997,15 +1030,16 @@ class Bet22(MatchExtractor):
 
 
                 #place bet
-                for bet_selection in bet_selections:
-                    if bet_selection.text.lower() == bet.lower():
-                        for bet_type in bet_types:
-                            # print("YY: ", bet_type.text, _bet_type, bet_selection.text, bet )
-                            if str(bet_type.text).lower() == str(_bet_type).lower():
-                                fo = bet_type.find_element_by_xpath('following-sibling::*')
+                if bet.lower() in bs:
+                    bet_types = driver.find_elements_by_class_name("bet_type")
+                    for bet_type in bet_types:
+                        if str(bet_type.text).lower() == str(_bet_type).lower():
+                            fo = bet_type.find_element_by_xpath('following-sibling::*')
+                            if fo:
                                 fo.click()
                                 break
                             continue
+                        continue
                 # driver.close()
                 # driver.switch_to.window(driver.window_handles[0])
                 driver.back()
@@ -1021,7 +1055,7 @@ class Bet22(MatchExtractor):
                 log_error(str(e))
             
         time.sleep(2)
-        save_btn = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'cc-controls__btn-main_get'))).click()
+        save_btn = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'cc-controls__btn-main_get'))).click()
         time.sleep(2)
         slip = driver.find_element_by_class_name('cc-controls__input_text.keyboardInput')
         slip_code = slip.get_attribute('value')
