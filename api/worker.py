@@ -202,6 +202,9 @@ class Bet9ja(MatchExtractor):
         rows = None
         n_rows = ''
 
+        slip_code = None
+        bet_selected = 0
+
         driver = self.connect()
 
         for __match in selections:
@@ -272,7 +275,9 @@ class Bet9ja(MatchExtractor):
                     bs = [bs_.text.lower() for bs_ in bet_selections]
                 else:
                     #no bet selections; no need to proceed
+                    driver.close()
                     driver.switch_to.window(driver.window_handles[0])
+                    continue
 
                 if source == '1xbet':
                     _bet_type, bet = x1bet_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
@@ -295,9 +300,9 @@ class Bet9ja(MatchExtractor):
                         if str(bet_type.text).lower() == str(_bet_type).lower():
                             fo = bet_type.find_element_by_xpath('following-sibling::*')
                             if fo:
+                                bet_selected += 1
                                 fo.click()
                                 break
-                            continue
                         continue
                 
                 driver.close()
@@ -315,6 +320,12 @@ class Bet9ja(MatchExtractor):
                 log_error(str(e))
             
         # time.sleep(2)
+        bs = None
+        if bet_selected < 1: #no games selected; quit
+            driver.quit()
+            bet_selected = None
+            return slip_code
+
         try:
             place_the_bet = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'dx'))).click()
         except NoSuchElementException as e:
@@ -479,7 +490,8 @@ class X1Bet(MatchExtractor):
         league = ''
         bet = '' #e.g Double Chance
         _bet_type = '' #1X or 12 or 2X
-        slip_code = ''
+        slip_code = None
+        bet_selected = 0
 
         driver = self.connect()
 
@@ -596,6 +608,7 @@ class X1Bet(MatchExtractor):
                     if str(bet_type.text).lower() == str(_bet_type).lower():
                         fo = bet_type.find_element_by_xpath('following-sibling::*')
                         if fo:
+                            bet_selected += 1
                             fo.click()
                             break
                         continue
@@ -605,6 +618,11 @@ class X1Bet(MatchExtractor):
             driver.switch_to.window(driver.window_handles[0])
             driver.refresh()
 
+        bs = None
+        if bet_selected < 1: #no games selected; quit
+            driver.quit()
+            bet_selected = None
+            return slip_code
 
         element = driver.find_element_by_class_name('right-banners-block')
 
@@ -729,7 +747,9 @@ class MSport(MatchExtractor):
         league = ''
         bet = ''
         _bet_type = ''
-        slip_code = ''
+        slip_code = None
+        bet_selected = 0
+
 
         driver = self.connect()
 
@@ -839,6 +859,7 @@ class MSport(MatchExtractor):
                     if str(bet_type.text).lower() == str(_bet_type).lower():
                         fo = bet_type.find_element_by_xpath('following-sibling::*')
                         if fo:
+                            bet_selected += 1
                             fo.click()
                             break
                         continue
@@ -930,7 +951,8 @@ class Bet22(MatchExtractor):
         league = ''
         bet = ''
         _bet_type = ''
-        slip_code = ''
+        slip_code = None
+        bet_selected = 0
 
         driver = self.connect()
         
@@ -1033,9 +1055,11 @@ class Bet22(MatchExtractor):
                 if bet.lower() in bs:
                     bet_types = driver.find_elements_by_class_name("bet_type")
                     for bet_type in bet_types:
+                        print("..")
                         if str(bet_type.text).lower() == str(_bet_type).lower():
                             fo = bet_type.find_element_by_xpath('following-sibling::*')
                             if fo:
+                                bet_selected += 1
                                 fo.click()
                                 break
                             continue
@@ -1053,7 +1077,13 @@ class Bet22(MatchExtractor):
 
             except Exception as e:
                 log_error(str(e))
-            
+        
+        bs = None
+        if bet_selected < 1: #no games selected; quit
+            driver.quit()
+            bet_selected = None
+            return slip_code
+
         time.sleep(2)
         save_btn = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'cc-controls__btn-main_get'))).click()
         time.sleep(2)
