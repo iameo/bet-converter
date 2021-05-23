@@ -138,8 +138,8 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
             
             if selections is not None:
                 if destination == BetSources.bet9ja:
-                    _bet9ja = Bet9ja(source=source, site=link_bet9ja)
-                    slip_code = _bet9ja.injector(source, selections)
+                    __bet9ja = Bet9ja(source=source, site=link_bet9ja)
+                    slip_code = __bet9ja.injector(source, selections)
                 
                 if destination == BetSources.x1bet:
                     __x1bet = X1Bet(source=source, site=link_1xbet)
