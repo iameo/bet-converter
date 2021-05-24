@@ -58,11 +58,11 @@ class MatchExtractor(ABC):
     def connect(self, wait_time=1):
         options = webdriver.ChromeOptions()
 
-        options.add_argument("--headless")
-        options.add_argument("--window-size=1500,1000")
-        options.add_argument('--disable-gpu')
-        options.add_argument("--disable-dev-shm-usage")
-        options.add_argument('--no-sandbox')
+        # options.add_argument("--headless")
+        # options.add_argument("--window-size=1500,1000")
+        # options.add_argument('--disable-gpu')
+        # options.add_argument("--disable-dev-shm-usage")
+        # options.add_argument('--no-sandbox')
         options.add_argument('--remote-debugging-port=9930')
         options.add_argument('--ignore-certificate-errors')
 
@@ -663,7 +663,7 @@ class MSport(MatchExtractor):
 
         try:
             driver.find_element_by_class_name('m-search-btn').click()
-            driver.find_element_by_xpath('/html/body/div[1]/header/div[4]/div[2]/div[2]/div[1]/a').click()
+            # driver.find_element_by_xpath('/html/body/div[1]/header/div[4]/div[2]/div[2]/div[1]/a').click()
 
         except NoSuchElementException as e:
             log_error(str(e))
@@ -673,42 +673,30 @@ class MSport(MatchExtractor):
 
         except Exception as e:
             log_error(str(e))
-        # time.sleep(1)
 
-
-        # try:
-        #     driver.find_element_by_xpath('/html/body/div/div[1]/div[2]').click()
-        # except NoSuchElementException:
-        #     pass
-
-        show_more = driver.find_element_by_xpath('/html/body/div/div[2]/div/div/div[2]/div[2]/div/div[7]')
-        if show_more:
-            show_more.click()
-        else:
-            pass
-
-        # try:
-        #     tb = driver.find_element_by_class_name('m-search-main')
-        # except Exception:
-        #     pass
-        time.sleep(3)
-
+        time.sleep(2)
 
         sections = driver.find_elements_by_class_name("m-result-section")
 
         matches = []
         for section in sections:
             if section.text.split("\n")[0].lower() == "not start":
+                if section.find_element_by_class_name('m-result-more'):
+                    show_more = section.find_element_by_class_name('m-result-more').click()
+                else:
+                    pass
+
                 games = section.find_elements_by_class_name("m-resultItem")
-                for game in games:
-                    if "simulated" not in game.text.lower() and "esports" not in game.text.lower() and "cyber live" not in game.text.lower() and "electronic league" not in game.text.lower():
-                        _game = game.text.split("\n")
-                        matches.append({
-                            "source": 'msport',
-                            "datetime": _game[0],
-                            "league": _game[1],
-                            "team": ' '.join([a_ for a_ in _game[2:5]]).replace('vs','-')}
-                            )    
+            continue
+        
+        for game in games:      
+            _game = game.text.split("\n")
+            matches.append({
+                "source": 'msport',
+                "datetime": _game[0],
+                "league": _game[1],
+                "team": ' '.join([a_ for a_ in _game[2:]]).replace(' vs ',' - ')}
+                )
         return matches
 
 
@@ -727,7 +715,7 @@ class MSport(MatchExtractor):
             coupon = driver.find_element_by_class_name('v-input--inner')
             coupon.send_keys(self.booking_code)
             time.sleep(1)
-            coupon.send_keys(Keys.ENTER)
+            load_btn = driver.find_element_by_class_name('v-button.m-load-btn.tc').click()
             selections = ''
         
         except NoSuchElementException as e:
@@ -755,6 +743,7 @@ class MSport(MatchExtractor):
 
         for __match in selections:
             match = __match[1]
+            league = __match[0]
 
             match = MatchExtractor.match_cleanser(match)
             time.sleep(1)
@@ -765,7 +754,7 @@ class MSport(MatchExtractor):
             elem.click()
             elem.send_keys(" ") #faux to allow input in next loop otherwise buggy
             elem.clear()
-            elem.send_keys(match.replace(' - ', 'vs') + ' ' + league)
+            elem.send_keys(match.replace(' - ', ' vs ') + ' ' + league)
             time.sleep(1)
 
             games = self.games_extractor(driver)
@@ -773,15 +762,9 @@ class MSport(MatchExtractor):
             if not games:
                 continue
 
-            league = __match[0]
-
-            bet = __match[2].split(" ")[-1]
-            _bet_type= ' '.join([a for a in __match[2].split(" ")[:-1]])
-
             n_games = [game['league'] + ' ~ ' + game['team'] for game in games]
 
             p_match = [_match for _match in n_games if _match != [''] if _match != [' ~ ']]
-
 
             csim_check = []
 
@@ -795,40 +778,47 @@ class MSport(MatchExtractor):
                     csim_check.append([csim, game.split('~ ')[1]])
                 else:
                     continue
-
+                    
+            # print("SCIM/; ", csim_check)       
             max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
             _team = max(csim_check)[1].split(' - ')
             
             time.sleep(2)
 
-            show_more = driver.find_element_by_xpath('/html/body/div/div[2]/div/div/div[2]/div[2]/div/div[7]')
-            if show_more:
-                show_more.click()
-            else:
-                pass
-
-            time.sleep(3)
             sections = driver.find_elements_by_class_name("m-result-section")
 
-            rows = ''
+
             for section in sections:
-                # if section.text.split("\n")[0].lower() == "not start":
-                rows = section.find_elements_by_class_name("m-resultItem")
-                # if rows:
-                #     break
-            # rows = driver.find_elements(By.CLASS_NAME, "m-resultItem")
+                if section.text.split("\n")[0].lower() == "not start":
+                    if driver.find_element_by_class_name('m-result-more'):
+                        driver.find_element_by_class_name('m-result-more')
+                    else:
+                        pass
+
+                    rows = section.find_elements_by_class_name("m-resultItem")
+
 
             select_game = rows[max_index] #get the link of the max csim score
 
+            # print(select_game.text, ",...")
+            if not select_game or 'Alternative' in select_game.text.title():
+                continue
+
             if select_game:
-                if 'Alternative' in select_game.text.title():
+                if 'srl' in select_game.text.lower(): #"Barcelona Srl"; simulated game; break
+                    #move to next match since selected game is simulated
+                    driver.back()
                     driver.refresh()
                     continue
             else:
-                continue
+                continue #move to next match since no match
+                
+            # if 'Alternative' in select_game.text.title():
+            #     driver.refresh()
+            #     continue
 
             ActionChains(driver).move_to_element(select_game).key_down(Keys.CONTROL).click(select_game).key_up(Keys.COMMAND).perform()
-            driver.switch_to.window(driver.window_handles[1])
+            # driver.switch_to.window(driver.window_handles[1])
 
 
             bet_types = driver.find_elements_by_class_name("has-desc")
@@ -846,7 +836,6 @@ class MSport(MatchExtractor):
                 _bet_type, bet = x1bet_to_msport(__match[2].lower(), _team[0], _team[1], league.lower())
             elif source == 'bet9ja':
                 _bet_type, bet = bet9ja_to_msport(__match[2].lower(), _team[0], _team[1], league.lower())
-                print(_bet_type, bet, "XX")
             elif source == '22bet':
                 _bet_type, bet = bet22_to_msport(__match[2].lower(), _team[0], _team[1], league.lower())
             else:
@@ -871,8 +860,8 @@ class MSport(MatchExtractor):
                         continue
                     continue
             
-            driver.close()
-            driver.switch_to.window(driver.window_handles[0])
+            driver.back()
+            driver.refresh()
 
         #place bet and return slipcode
         return slip_code
