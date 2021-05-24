@@ -828,8 +828,8 @@ class MSport(MatchExtractor):
             driver.switch_to.window(driver.window_handles[1])
 
 
-            bet_types = driver.find_elements_by_class_name("")
-            bet_selections = driver.find_elements_by_class_name("")
+            bet_types = driver.find_elements_by_class_name("has-desc")
+            bet_selections = driver.find_elements_by_class_name("m-market-item--name")
 
             bs = []
             if bet_selections:
@@ -846,17 +846,19 @@ class MSport(MatchExtractor):
             elif source == '22bet':
                 _bet_type, bet = bet22_to_msport(__match[2].lower(), _team[0], _team[1], league.lower())
             else:
-                if str(_bet_type).lower() == "1" and str(bet) == '1X2':
-                    _bet_type = _team[0]
-                elif str(_bet_type).lower() == "2" and str(bet) == '1X2':
-                    _bet_type = _team[1]
+                if (str(_bet_type).lower() == "1" or str(_bet_type.lower() == _team[0].lower())) and str(bet) == '1X2':
+                    _bet_type = 'Home'
+                elif (str(_bet_type).lower() == "X" or str(_bet_type.lower() == 'draw')) and str(bet) == '1X2':
+                    _bet_type = 'Draw'
+                elif (str(_bet_type).lower() == "2" or str(_bet_type.lower() == _team[1].lower())) and str(bet) == '1X2':
+                    _bet_type = 'Away'
                 else:
                     _bet_type = _bet_type   
             #place bet
             if bet.lower() in bs:
                 for bet_type in bet_types:
                         # print("YY: ", bet_type.text, _bet_type, bet_selection.text, bet )
-                    if str(bet_type.text).lower() == str(_bet_type).lower():
+                    if str(bet_type.text.split('\n')[0]).lower() == str(_bet_type).lower():
                         fo = bet_type.find_element_by_xpath('following-sibling::*')
                         if fo:
                             bet_selected += 1
