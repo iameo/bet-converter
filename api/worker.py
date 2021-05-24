@@ -63,7 +63,7 @@ class MatchExtractor(ABC):
         options.add_argument('--disable-gpu')
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument('--no-sandbox')
-        options.add_argument('--remote-debugging-port=9230')
+        options.add_argument('--remote-debugging-port=9930')
         options.add_argument('--ignore-certificate-errors')
 
         # options.binary_location = os.getenv("GOOGLE_CHROME_BIN")
@@ -659,10 +659,10 @@ class X1Bet(MatchExtractor):
 class MSport(MatchExtractor):
     def games_extractor(self, driver):
 
-        driver.find_element_by_xpath('/html/body/div[2]/div[2]/div/div/a[2]').click() or driver.find_element_by_class_name('m-pop-close-btn').click()
+        # driver.find_element_by_xpath('/html/body/div[2]/div[2]/div/div/a[2]').click() or driver.find_element_by_class_name('m-pop-close-btn').click()
 
         try:
-            driver.find_element_by_class_name('m-az-btn').click()
+            driver.find_element_by_class_name('m-search-btn').click()
             driver.find_element_by_xpath('/html/body/div[1]/header/div[4]/div[2]/div[2]/div[1]/a').click()
 
         except NoSuchElementException as e:
@@ -759,11 +759,14 @@ class MSport(MatchExtractor):
             match = MatchExtractor.match_cleanser(match)
             time.sleep(1)
 
-            elem = driver.find_element_by_xpath('/html/body/div/div[1]/form/div/input')
+            elem = driver.find_element_by_class_name('m-az-btn.tc').click()
+            get_search = driver.find_element_by_class_name('m-search.tc').click()
+            elem = driver.find_element_by_xpath("//div[@class='m-search-input']/input[@type='search']")
             elem.click()
             elem.send_keys(" ") #faux to allow input in next loop otherwise buggy
             elem.clear()
             elem.send_keys(match)
+            time.sleep(1)
 
             games = self.games_extractor(driver)
            
@@ -843,6 +846,7 @@ class MSport(MatchExtractor):
                 _bet_type, bet = x1bet_to_msport(__match[2].lower(), _team[0], _team[1], league.lower())
             elif source == 'bet9ja':
                 _bet_type, bet = bet9ja_to_msport(__match[2].lower(), _team[0], _team[1], league.lower())
+                print(_bet_type, bet, "XX")
             elif source == '22bet':
                 _bet_type, bet = bet22_to_msport(__match[2].lower(), _team[0], _team[1], league.lower())
             else:
@@ -858,7 +862,7 @@ class MSport(MatchExtractor):
             if bet.lower() in bs:
                 for bet_type in bet_types:
                         # print("YY: ", bet_type.text, _bet_type, bet_selection.text, bet )
-                    if str(bet_type.text.split('\n')[0]).lower() == str(_bet_type).lower():
+                    if str(bet_type.text.lower()) == str(_bet_type).lower():
                         fo = bet_type.find_element_by_xpath('following-sibling::*')
                         if fo:
                             bet_selected += 1
@@ -1057,7 +1061,6 @@ class Bet22(MatchExtractor):
                 if bet.lower() in bs:
                     bet_types = driver.find_elements_by_class_name("bet_type")
                     for bet_type in bet_types:
-                        print("..")
                         if str(bet_type.text).lower() == str(_bet_type).lower():
                             fo = bet_type.find_element_by_xpath('following-sibling::*')
                             if fo:
