@@ -765,7 +765,7 @@ class MSport(MatchExtractor):
             elem.click()
             elem.send_keys(" ") #faux to allow input in next loop otherwise buggy
             elem.clear()
-            elem.send_keys(match)
+            elem.send_keys(match.replace(' - ', 'vs') + ' ' + league)
             time.sleep(1)
 
             games = self.games_extractor(driver)
