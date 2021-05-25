@@ -700,7 +700,7 @@ class MSport(MatchExtractor):
 
         matches = []
         for section in sections:
-            if section.text.split("\n")[0].lower() == "not start":
+            if section.text.split("\n")[0].lower() == "not start": #bypass the live and 'finished in a month' sections
                 if section.find_element_by_class_name('m-result-more'):
                     show_more = section.find_element_by_class_name('m-result-more').click()
                 else:
