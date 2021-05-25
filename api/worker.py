@@ -343,10 +343,24 @@ class Bet9ja(MatchExtractor):
 
 class Betway(MatchExtractor):
     def games_extractor(self, driver):
-        driver.find_element_by_class_name('keywordSearch').click()
 
-        rows = driver.find_element_by_class_name('widget-flyout-content')
-        ##
+        driver.find_element_by_id('submitMixedSearch').click()
+
+        rows = driver.find_elements_by_class_name('widget-flyout-content')
+
+        if not rows:
+            driver.refresh()
+
+        matches = []
+
+        for row in rows:
+            col = row.text.split('\n')
+            match_team = str(col[0].text)
+            match_time = re.split(' \d+:\d+ ', str(col[1].text))[0]
+            league = re.split(' \d+:\d+ ', str(col[1].text))[1]
+
+            matches.append({"source": "bet9ja", "league": str(league), "team": match_team, "datetime": str(match_time)})
+        return matches
     
     def slip_extractor(self):
         driver = self.connect()
@@ -401,17 +415,21 @@ class SportyBet(MatchExtractor):
 
         elem.send_keys(self.booking_code)
         load = driver.find_element_by_xpath('//*[@id="j_betslip"]/div[2]/div[1]/div/button').click()
-        table = driver.find_element_by_class_name("m-list")
-        rows = table.find_elements(By.CLASS_NAME, "m-lay-mid")
+        rows = driver.find_elements(By.CLASS_NAME, "m-lay-mid")
 
-        selection = []
+        selections = []
         for row in rows[::2]: #duplicated in twos so get all even index([0,1,2,3] -> [1,3])
             line = row.text.split("\n")
             line[1] = line[1].split("|")[1].lstrip().replace(' v ',' - ')
-            access = [0,1,2] #['Home', 'Team A - Team B', '1x2']
+            access = [0,1,2] #['Home', 'Team A - Team B', '1x2'] 
             map_access = map(line.__getitem__, access)
-            selection.append(list(map_access))
-        return selection
+            _map_access = list(map_access)
+            _map_access[2] = _map_access[0] + ' ' + _map_access[2] #-> ['Premier League', 'Team A - Team B', '1 1X2']
+            _map_access[0] = '' #no league available on sportybet
+            selections.append(_map_access)
+        
+        driver.quit()
+        return selections
     
     def injector(self, source, selections):
         return super().injector(source, selections)
