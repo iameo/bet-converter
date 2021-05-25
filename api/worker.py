@@ -29,7 +29,7 @@ from . import models
 from .helpers import log_error
 from .bet_selections import (
     x1bet_to_msport, x1bet_to_bet22, x1bet_to_bet9ja, bet9ja_to_1xbet,\
-    msport_to_bet9ja, bet9ja_to_msport, bet22_to_bet9ja, bet22_to_1xbet, bet9ja_to_22bet, bet22_to_msport
+    msport_to_bet9ja, bet9ja_to_msport, bet22_to_bet9ja, bet22_to_1xbet, bet9ja_to_22bet, bet22_to_msport, sporty_to_bet9ja
     )
 
 import pyperclip
@@ -281,6 +281,8 @@ class Bet9ja(MatchExtractor):
 
                 if source == '1xbet':
                     _bet_type, bet = x1bet_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
+                elif source == 'sportybet':
+                    _bet_type, bet = sporty_to_bet9ja(__match[2].lower(), _team[0], _team[1], league.lower())
                 elif source == 'msport':
                     pass
                 elif source == '22bet':
