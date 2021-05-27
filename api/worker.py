@@ -593,7 +593,7 @@ class X1Bet(MatchExtractor):
             driver.switch_to.window(driver.window_handles[1])
 
 
-            bet_types = driver.find_elements_by_class_name("bet_type")
+
             bet_selections = driver.find_elements_by_class_name("bet-title.bet-title_justify")
 
             bs = []
@@ -623,6 +623,7 @@ class X1Bet(MatchExtractor):
             time.sleep(1)
             #for this scrren frame, do two for loops then move to the next screen frame
             if bet.lower() in bs:
+                bet_types = driver.find_elements_by_class_name("bet_type")
                 for bet_type in bet_types:
                         # print("YY: ", bet_type.text, _bet_type, bet_selection.text, bet )
                     if str(bet_type.text).lower() == str(_bet_type).lower():
@@ -841,7 +842,7 @@ class MSport(MatchExtractor):
             # driver.switch_to.window(driver.window_handles[1])
 
 
-            bet_types = driver.find_elements_by_class_name("has-desc")
+
             bet_selections = driver.find_elements_by_class_name("m-market-item--name")
 
             bs = []
@@ -869,6 +870,7 @@ class MSport(MatchExtractor):
                     _bet_type = _bet_type   
             #place bet
             if bet.lower() in bs:
+                bet_types = driver.find_elements_by_class_name("has-desc")
                 for bet_type in bet_types:
                         # print("YY: ", bet_type.text, _bet_type, bet_selection.text, bet )
                     if str(bet_type.text.lower()) == str(_bet_type).lower():
