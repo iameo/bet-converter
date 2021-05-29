@@ -441,11 +441,11 @@ class X1Bet(MatchExtractor):
     def games_extractor(self, driver):
 
         driver.find_element_by_class_name('sport-search__btn').click()
-        time.sleep(3)
-        driver.find_element_by_xpath('//*[@id="modals-container"]/div/div/div[2]/div/div[2]/div[1]/div[2]/div[1]/div').click()
+        time.sleep(1)
+        live_btn = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="modals-container"]/div/div/div[2]/div/div[2]/div[1]/div[2]/div[1]/div'))).click()
 
-        time.sleep(2)
-        rows = driver.find_elements(By.CLASS_NAME, "search-popup-events__item")
+        # time.sleep(2)
+        rows = WebDriverWait(driver, 10).until(EC.text_to_be_present_in_element((By.CLASS_NAME, "search-popup-events__item")))
         
         if not rows:
             driver.refresh()
@@ -467,8 +467,8 @@ class X1Bet(MatchExtractor):
         driver = self.connect()
 
 
-        time.sleep(3)
-        notification = driver.find_element(By.XPATH, '//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a').click()
+        # time.sleep(3)
+        notification = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a'))).click()
 
         try:
             driver.find_element_by_class_name('c-dropdown__trigger').click()
@@ -476,8 +476,8 @@ class X1Bet(MatchExtractor):
             coupon.send_keys(self.booking_code)
             time.sleep(1)
             driver.find_element_by_xpath('//*[@id="sports_right"]/div/div[2]/div/div[2]/div[1]/div/div[3]/div[3]/div/div/div/div[2]/div/div/div[3]/div/button').click()
-            time.sleep(2)
-            selections = driver.find_element_by_class_name('coupon__bets').text
+            # time.sleep(2)
+            selections = WebDriverWait(driver, 10).until(EC.text_to_be_present_in_element((By.XPATH, 'coupon__bets'))).text
         
         except NoSuchElementException as e:
             log_error(str(e))
@@ -804,9 +804,9 @@ class MSport(MatchExtractor):
             max_index = max(range(len(csim_check)), key=csim_check.__getitem__)
             _team = max(csim_check)[1].split(' - ')
             
-            time.sleep(2)
+            # time.sleep(2)
 
-            sections = driver.find_elements_by_class_name("m-result-section")
+            sections = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "m-result-section")))
 
 
             for section in sections:
@@ -1100,10 +1100,10 @@ class Bet22(MatchExtractor):
             bet_selected = None
             return slip_code
 
-        time.sleep(2)
+        # time.sleep(2)
         save_btn = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'cc-controls__btn-main_get'))).click()
         time.sleep(2)
-        slip = driver.find_element_by_class_name('cc-controls__input_text.keyboardInput')
+        slip = WebDriverWait(driver, 10).until(EC.text_to_be_present_in_element((By.XPATH, 'cc-controls__input_text.keyboardInput')))
         slip_code = slip.get_attribute('value')
 
         driver.quit()
