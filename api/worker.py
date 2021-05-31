@@ -489,6 +489,7 @@ class X1Bet(MatchExtractor):
             log_error(str(e))
 
         if selections is None:
+            driver.quit()
             return selections
 
         _selections = re.split("\n", selections)
