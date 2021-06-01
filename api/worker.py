@@ -886,7 +886,7 @@ class MSport(MatchExtractor):
             driver.back()
             driver.refresh()
 
-        #place bet and return slipcode
+        driver.quit()
         return slip_code
 
 
