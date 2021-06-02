@@ -55,7 +55,7 @@ class MatchExtractor(ABC):
         self.site = site
         self.booking_code = booking_code
 
-    def connect(self, wait_time=1):
+    def connect(self, wait_time=.5):
         options = webdriver.ChromeOptions()
 
         # options.add_argument("--headless")
@@ -399,10 +399,7 @@ class SportyBet(MatchExtractor):
     def slip_extractor(self):
         driver = self.connect()
         
-        # try: #select country
-        #     elem = driver.find_element_by_xpath('//*[@id="j_betslip"]/div[2]/div[1]/div/div[1]/div[1]/span[1]')
-        # except NoSuchElementException:
-        #     print(">>>")
+
         try:
             elem = driver.find_element_by_xpath('//*[@id="j_betslip"]/div[2]/div[1]/div/div[2]/span/input')
         
@@ -466,7 +463,7 @@ class X1Bet(MatchExtractor):
 
         driver = self.connect()
 
-
+        selections = None
         # time.sleep(3)
         notification = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a'))).click()
 
@@ -477,8 +474,9 @@ class X1Bet(MatchExtractor):
             time.sleep(1)
             driver.find_element_by_xpath('//*[@id="sports_right"]/div/div[2]/div/div[2]/div[1]/div/div[3]/div[3]/div/div/div/div[2]/div/div/div[3]/div/button').click()
             # time.sleep(2)
-            selections = WebDriverWait(driver, 10).until(EC.text_to_be_present_in_element((By.XPATH, 'coupon__bets'))).text
-        
+            WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.CLASS_NAME, 'o-bet-box-list')))
+            selections = driver.find_element(By.CLASS_NAME, 'o-bet-box-list').text
+
         except NoSuchElementException as e:
             log_error(str(e))
 
@@ -665,9 +663,9 @@ class X1Bet(MatchExtractor):
         
         coupon = trigger_dropdowns.find_element_by_class_name("coupon__input")
         coupon.click()
-        a = ActionChains(driver)
-        # perform the ctrl+c pressing action
-        a.key_down(Keys.CONTROL).click(coupon).send_keys('C').key_up(Keys.CONTROL).perform()
+        # a = ActionChains(driver)
+        # # perform the ctrl+c pressing action
+        # a.key_down(Keys.CONTROL).click(coupon).send_keys('C').key_up(Keys.CONTROL).perform()
 
         # slip_code = pyperclip.paste() #paste copied object in environment
         time.sleep(1)
@@ -763,6 +761,8 @@ class MSport(MatchExtractor):
 
         driver = self.connect()
 
+        # notification = driver.find_element_by_class_name('svg-icon.icon-close-round').click()
+
         for __match in selections:
             match = __match[1]
             league = __match[0]
@@ -807,7 +807,7 @@ class MSport(MatchExtractor):
             
             # time.sleep(2)
 
-            sections = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "m-result-section")))
+            sections = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "m-result-section")))
 
 
             for section in sections:
@@ -851,8 +851,9 @@ class MSport(MatchExtractor):
                 bs = [bs_.text for bs_ in bet_selections]
             else:
                 #no bet selections; no need to proceed
-                driver.close()
-                driver.switch_to.window(driver.window_handles[0])
+                driver.back()
+                driver.refresh()
+                # driver.switch_to.window(driver.window_handles[0])
 
             if source == '1xbet':
                 _bet_type, bet = x1bet_to_msport(__match[2].lower(), _team[0], _team[1], league.lower())
@@ -930,7 +931,8 @@ class Bet22(MatchExtractor):
         games = None
 
         try:
-            coupon = driver.find_element_by_class_name('cc-controls__input_text.keyboardInput')
+            coupon = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'cc-controls__input_text.keyboardInput')))
+            # driver.find_element_by_class_name('cc-controls__input_text.keyboardInput')
 
             coupon.clear()
             coupon.send_keys(self.booking_code)
@@ -1104,7 +1106,7 @@ class Bet22(MatchExtractor):
         # time.sleep(2)
         save_btn = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'cc-controls__btn-main_get'))).click()
         time.sleep(2)
-        slip = WebDriverWait(driver, 10).until(EC.text_to_be_present_in_element((By.XPATH, 'cc-controls__input_text.keyboardInput')))
+        slip = driver.find_element(By.CLASS_NAME, 'cc-controls__input_text.keyboardInput')
         slip_code = slip.get_attribute('value')
 
         driver.quit()
