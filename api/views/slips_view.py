@@ -90,7 +90,7 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
     """
 
     if len(booking_code) >= 4:
-        slip = await crud.get_slip_detail(source, destination, booking_code)
+        slip = await crud.get_slip_detail(source, destination, booking_code.upper())
 
         if slip:
             return slip
@@ -124,7 +124,7 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                 if destination == BetSources.betway:
                     pass
                 
-                payload = {"source": source.title(), "destination": destination.title(), "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
+                payload = {"source": source, "destination": destination, "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
                 db_slip = await crud.add_slip(**payload)
 
                 return schema.ResponseModel([payload, db_slip], status='SUCCESS', code='200')
@@ -158,7 +158,7 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                 if destination == BetSources.betway:
                     pass
 
-                payload = {"source": source.title(), "destination": destination.title(), "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
+                payload = {"source": source, "destination": destination, "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
                 db_slip = await crud.add_slip(**payload)
 
                 return schema.ResponseModel([payload, db_slip], status='SUCCESS', code='200')
@@ -193,7 +193,7 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                     pass
 
                 
-                payload = {"source": source.title(), "destination": destination.title(), "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
+                payload = {"source": source, "destination": destination, "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
                 db_slip = await crud.add_slip(**payload)
 
                 return schema.ResponseModel([payload, db_slip], status='SUCCESS', code='200')
@@ -224,9 +224,12 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                 
                 if destination == BetSources.sportybet:
                     pass
+            
+                if destination == BetSources.betway:
+                    pass
 
                 
-                payload = {"source": source.title(), "destination": destination.title(), "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
+                payload = {"source": source, "destination": destination, "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
                 db_slip = await crud.add_slip(**payload)
 
                 return schema.ResponseModel([payload, db_slip], status='SUCCESS', code='200')
@@ -261,7 +264,7 @@ async def get_converted_slip(booking_code: str, source: BetSources, destination:
                     slip_code = __bet22.injector(source, selections)
             
                 
-                payload = {"source": source.title(), "destination": destination.title(), "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
+                payload = {"source": source, "destination": destination, "booking_code": str(booking_code).upper(), "new_booking_code": str(slip_code).upper()}
                 db_slip = await crud.add_slip(**payload)
 
                 return schema.ResponseModel([payload, db_slip], status='SUCCESS', code='200')
