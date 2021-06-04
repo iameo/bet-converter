@@ -994,9 +994,9 @@ def x1bet_to_bet9ja(bet, home, away, league):
 
     elif '1x2' in bet.split(' ')[0]:
         bet_selection = '1x2'
-        if f'{home.lower()}' in bet:
+        if home.lower() in bet:
             bet_type = '1'
-        elif f'{away.lower()}' in bet:
+        elif away.lower() in bet:
             bet_type = '2'
         else:
             bet_type = 'X'
@@ -1030,10 +1030,22 @@ def x1bet_to_bet9ja(bet, home, away, league):
             bet_selection = ''
 
     #handicap market
+    # elif 'handicap' in bet:
+    #     bet_selection = bet.split(' ', 1)[0]
+    #     bet_type = bet.split(' ', 1)[1]    #-- TENNIS & more?--#
     elif 'handicap' in bet:
-        bet_selection = bet.split(' ', 1)[0]
-        bet_type = bet.split(' ', 1)[1]
-    
+        handi = re.search('[-+]\d+.\d+', bet).group()
+        if handi[0] == '(':
+            bet_selection = f'Handicap Games (+{handi})'
+        bet_selection = f'Handicap Games ({handi})'
+        if 'away' in bet:
+            bet_type = '2Hand Games'
+        elif 'home' in bet:
+            bet_type = '1Hand Games' 
+        else:
+            bet_type = ''
+
+
     #3way win
     elif 'to win by (3way)' in bet:
         bet_type = bet.split('.')[0]
@@ -1064,7 +1076,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
             bet_type = ''
         bet_selection = 'First Goal'
     #last goal
-    elif 'next goal 1' in bet:
+    elif 'last goal' in bet:
         if home in bet:
             bet_type = 1
         elif away in bet:
