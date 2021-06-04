@@ -327,7 +327,7 @@ def bet9ja_to_1xbet(bet, home, away, league):
 
     
 #almost same market structure as 1xbet
-def bet9ja_to_22bet(bet):
+def bet9ja_to_22bet(bet, home, away, league):
     bet_type = ''
     bet_selection = ''
 
