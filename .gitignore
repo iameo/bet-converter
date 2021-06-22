@@ -11,7 +11,7 @@ env/*
 .env
 
 api/workerpool.py
-api/wwworker.py
+api/wworker.py
 
 .vscode/
 vscode/*
