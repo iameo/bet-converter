@@ -206,6 +206,8 @@ class Bet9ja(MatchExtractor):
         bet_selected = 0
 
         driver = self.connect()
+        euro_popup =  WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'novasdk-inbox-app-widget__close'))).click()
+
 
         for __match in selections:
             try:
@@ -338,9 +340,10 @@ class Bet9ja(MatchExtractor):
             time.sleep(2)
             driver.switch_to.frame(driver.find_element_by_tag_name("iframe"))
             slip_code = str(driver.find_element_by_class_name("number").text).split(':')[1]
-            driver.quit()
+        
+        driver.quit()
 
-            return slip_code
+        return slip_code
 
 
 class Betway(MatchExtractor):
