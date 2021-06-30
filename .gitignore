@@ -16,6 +16,8 @@ api/wworker.py
 .vscode/
 vscode/*
 
+driver/user_data/*
+
 errorlog/
 
 api/views/__pycache__/*.pyc
