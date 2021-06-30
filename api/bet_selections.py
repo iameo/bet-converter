@@ -993,7 +993,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
             bet_type = ''
 
     elif '1x2' in bet.split(' ')[0]:
-        bet_selection = '1x2'
+        bet_selection = '1X2'
         if home.lower() in bet:
             bet_type = '1'
         elif away.lower() in bet:
@@ -1364,7 +1364,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
     elif '1x2' in bet.split(" ")[-1]:
         bet_type = bet.split(" ")[-1]
         bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
-        #print("PPPPPPP: ", bet_type,'c', home,'d', away,'f', bet, 'e', bet_selection, league)
+        # print("PPPPPPP: ", bet_type,'c', home,'d', away,'f', bet, 'e', bet_selection, league)
         if str(bet_type).lower() == str(home).lower():
             bet_type = 1
         elif str(bet_type).lower() == str(away).lower():
@@ -1376,7 +1376,7 @@ def x1bet_to_bet9ja(bet, home, away, league):
     else:
         bet_type = bet.split(" ")[-1]
         bet_selection = ' '.join([a for a in bet.split(" ")[:-1]])
-        #print("PPPPPPPX: ", bet_type,'c', home,'d', bet, 'e', bet_selection, league)
+        # print("PPPPPPPX: ", bet_type,'c', home,'d', bet, 'e', bet_selection, league)
         if str(bet_type).lower() in str(home).lower():
             bet_type = 1
         elif str(bet_type).lower() in str(away).lower():
