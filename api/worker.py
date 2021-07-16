@@ -521,7 +521,7 @@ class X1Bet(MatchExtractor):
 
         notification = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="pushfree"]/div/div/div/div/div[2]/div[1]/a'))).click()
         for __match in selections:
-            driver.refresh()
+            # driver.refresh()
             match = __match[1]
             league = __match[0]
 
